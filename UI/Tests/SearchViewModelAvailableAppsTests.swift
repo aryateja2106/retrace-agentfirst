@@ -145,7 +145,7 @@ final class SearchViewModelAvailableAppsTests: XCTestCase {
     }
 
     func testLoadAvailableAppsForFilterShowsRewindRefreshStateWhileLiveQueryRuns() async {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let previousUseRewindData = defaults.object(forKey: "useRewindData")
         let viewModel = SimpleTimelineViewModel(coordinator: AppCoordinator())
         let installedApps = [AppInfo(bundleID: "com.apple.Safari", name: "Safari")]

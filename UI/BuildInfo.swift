@@ -1,7 +1,7 @@
 import Foundation
 
 private enum EmbeddedBuildMetadata {
-    static let version = "dev"
+    static let version = "0.0.1"
     static let buildNumber = "unknown"
     static let gitCommit = "unknown"
     static let gitCommitFull = "unknown"

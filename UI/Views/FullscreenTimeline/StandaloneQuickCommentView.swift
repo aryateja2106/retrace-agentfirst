@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 import Shared
 
-private let quickCommentSettingsStore: UserDefaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+private let quickCommentSettingsStore: UserDefaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
 struct StandaloneQuickCommentView: View {
     @ObservedObject var viewModel: QuickCommentComposerViewModel

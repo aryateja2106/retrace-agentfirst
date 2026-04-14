@@ -12,7 +12,7 @@ _get_retrace_storage_root() {
     else
         # Try to read from UserDefaults (where app stores custom location)
         local custom_path
-        custom_path=$(defaults read io.retrace.app customRetraceDBLocation 2>/dev/null || echo "")
+        custom_path=$(defaults read dev.arya.arya-retrace customRetraceDBLocation 2>/dev/null || echo "")
         if [ -n "$custom_path" ]; then
             # Expand tilde if present
             echo "${custom_path/#\~/$HOME}"

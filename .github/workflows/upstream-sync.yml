@@ -1,0 +1,28 @@
+# Attempts a fast-forward merge from upstream weekly. On conflict, the job fails
+# so you can resolve manually (see scripts/UPSTREAM.md).
+
+name: upstream-sync
+
+on:
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+
+jobs:
+  merge-upstream:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure upstream and merge
+        env:
+          UPSTREAM_URL: https://github.com/haseab/retrace.git
+        run: |
+          set -euo pipefail
+          git remote remove upstream 2>/dev/null || true
+          git remote add upstream "$UPSTREAM_URL"
+          git fetch upstream
+          git checkout "${GITHUB_REF_NAME:-main}"
+          git merge --no-edit upstream/main

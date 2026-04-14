@@ -17,6 +17,7 @@ extension SettingsView {
             cacheCard
             timelineCard
             developerCard
+            terminalMemoryCard
             dangerZoneCard
         }
     }
@@ -155,6 +156,57 @@ extension SettingsView {
     }
 
     @ViewBuilder
+    var terminalMemoryCard: some View {
+        ModernSettingsCard(title: "Terminal Memory", icon: "terminal") {
+            ModernToggleRow(
+                title: "Enable CLI access",
+                subtitle: "Allow the local retrace CLI to read terminal-task memory through the app-hosted socket or fallback database access.",
+                isOn: $terminalCLIAccessEnabled
+            )
+            .onChange(of: terminalCLIAccessEnabled) { enabled in
+                Task {
+                    await coordinatorWrapper.coordinator.refreshTerminalCLIAccess()
+                    try? await coordinatorWrapper.coordinator.recordMetricEvent(
+                        metricType: .terminalCLIQuery,
+                        metadata: terminalMemoryMetricMetadata([
+                            "kind": enabled ? "settings_enable_cli" : "settings_disable_cli"
+                        ])
+                    )
+                }
+            }
+
+            ModernToggleRow(
+                title: "Allow agent frame search",
+                subtitle: "Let the CLI search linked frame history in addition to terminal task summaries.",
+                isOn: $terminalAllowAgentFrameSearch
+            )
+            .onChange(of: terminalAllowAgentFrameSearch) { enabled in
+                Task {
+                    try? await coordinatorWrapper.coordinator.recordMetricEvent(
+                        metricType: .terminalCLIQuery,
+                        metadata: terminalMemoryMetricMetadata([
+                            "kind": enabled ? "settings_enable_frame_search" : "settings_disable_frame_search"
+                        ])
+                    )
+                }
+            }
+
+            Divider()
+                .padding(.vertical, 8)
+
+            HStack(spacing: 12) {
+                ModernButton(title: "Install CLI Symlink", icon: "link.badge.plus", style: .secondary) {
+                    installCLISymlink()
+                }
+
+                ModernButton(title: "Copy Shell Hook", icon: "doc.on.doc", style: .secondary) {
+                    copyShellHookSnippet()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
     func buildInfoRow(label: String, value: String, fullValue: String? = nil, url: URL? = nil) -> some View {
         HStack(spacing: 8) {
             Text(label)
@@ -212,4 +264,94 @@ extension SettingsView {
     }
 
     // MARK: - Settings Search Card Resolution
+
+    private func copyShellHookSnippet() {
+        let shellName = URL(
+            fileURLWithPath: ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh"
+        ).lastPathComponent
+        let snippet = TerminalShellHookBuilder.snippet(for: shellName)
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(snippet, forType: .string)
+
+        Task {
+            try? await coordinatorWrapper.coordinator.recordMetricEvent(
+                metricType: .terminalCLIQuery,
+                metadata: terminalMemoryMetricMetadata([
+                    "kind": "settings_copy_hook",
+                    "shell": shellName
+                ])
+            )
+        }
+
+        showSettingsToast("Copied \(shellName) hook snippet")
+    }
+
+    private func installCLISymlink() {
+        Task { @MainActor in
+            do {
+                let sourceURL = try resolveCLIExecutableURL()
+                let binDirectory = FileManager.default.homeDirectoryForCurrentUser
+                    .appendingPathComponent("bin", isDirectory: true)
+                let destinationURL = binDirectory.appendingPathComponent("retrace")
+                let fileManager = FileManager.default
+
+                try fileManager.createDirectory(at: binDirectory, withIntermediateDirectories: true)
+
+                if fileManager.fileExists(atPath: destinationURL.path) {
+                    let attributes = try fileManager.attributesOfItem(atPath: destinationURL.path)
+                    let fileType = attributes[.type] as? FileAttributeType
+                    guard fileType == .typeSymbolicLink else {
+                        throw NSError(
+                            domain: "SettingsView",
+                            code: 1,
+                            userInfo: [NSLocalizedDescriptionKey: "\(destinationURL.path) already exists and is not a symlink."]
+                        )
+                    }
+                    try fileManager.removeItem(at: destinationURL)
+                }
+
+                try fileManager.createSymbolicLink(at: destinationURL, withDestinationURL: sourceURL)
+
+                try? await coordinatorWrapper.coordinator.recordMetricEvent(
+                    metricType: .terminalCLIQuery,
+                    metadata: terminalMemoryMetricMetadata([
+                        "kind": "settings_install_symlink",
+                        "path": destinationURL.path
+                    ])
+                )
+
+                showSettingsToast("Installed ~/bin/retrace")
+            } catch {
+                showSettingsToast("CLI install failed: \(error.localizedDescription)", isError: true)
+            }
+        }
+    }
+
+    private func resolveCLIExecutableURL() throws -> URL {
+        let executableURL = URL(fileURLWithPath: Bundle.main.executablePath ?? CommandLine.arguments[0])
+            .resolvingSymlinksInPath()
+        let executableDirectory = executableURL.deletingLastPathComponent()
+        let currentDirectory = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
+
+        let candidates = [
+            executableDirectory.appendingPathComponent("RetraceCLI"),
+            currentDirectory.appendingPathComponent(".build/debug/RetraceCLI"),
+            currentDirectory.appendingPathComponent(".build/release/RetraceCLI")
+        ]
+
+        if let match = candidates.first(where: { FileManager.default.isExecutableFile(atPath: $0.path) }) {
+            return match
+        }
+
+        throw NSError(
+            domain: "SettingsView",
+            code: 2,
+            userInfo: [NSLocalizedDescriptionKey: "Couldn't find RetraceCLI. Build it first with `swift build`."]
+        )
+    }
+
+    private func terminalMemoryMetricMetadata(_ payload: [String: Any]) -> String? {
+        DashboardViewModel.metricMetadataJSON(payload)
+    }
 }

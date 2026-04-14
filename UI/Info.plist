@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Retrace</string>
+    <string>arya-retrace</string>
     <key>CFBundleDisplayName</key>
-    <string>Retrace</string>
+    <string>arya-retrace</string>
     <key>CFBundleIdentifier</key>
-    <string>io.retrace.app</string>
+    <string>dev.arya.arya-retrace</string>
     <key>CFBundleVersion</key>
     <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>CFBundleShortVersionString</key>
@@ -21,15 +21,16 @@
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
 
-    <!-- URL Scheme for deeplinks -->
+    <!-- URL schemes: legacy `retrace` + fork canonical `arya-retrace` -->
     <key>CFBundleURLTypes</key>
     <array>
         <dict>
             <key>CFBundleURLName</key>
-            <string>Retrace Deeplink</string>
+            <string>arya-retrace Deeplink</string>
             <key>CFBundleURLSchemes</key>
             <array>
                 <string>retrace</string>
+                <string>arya-retrace</string>
             </array>
         </dict>
     </array>
@@ -48,11 +49,11 @@
 
     <!-- Privacy - Screen Recording Usage Description -->
     <key>NSScreenCaptureUsageDescription</key>
-    <string>Retrace needs screen recording permission to capture your screen history. All data stays local and encrypted on your Mac.</string>
+    <string>arya-retrace needs screen recording permission to capture your screen history. All data stays local and encrypted on your Mac.</string>
 
     <!-- Privacy - Accessibility Usage Description -->
     <key>NSAppleEventsUsageDescription</key>
-    <string>Retrace needs Automation permission to extract the browser url. If you're getting this notice, you're likely using an application that doesn't support url extraction via accessibility APIs, so URL Extraction needs to be done via Apple Script. All data stays local and encrypted on your Mac.</string>
+    <string>arya-retrace needs Automation permission to extract the browser url. If you are seeing this notice, you are likely using an application that does not support url extraction via accessibility APIs, so URL extraction needs to be done via Apple Script. All data stays local and encrypted on your Mac.</string>
 
     <!-- Required Entitlements -->
     <key>com.apple.security.device.screen-recording</key>
@@ -60,48 +61,32 @@
     <key>com.apple.security.automation.apple-events</key>
     <true/>
 
-    <!-- Default to regular app so Dock icon is discoverable -->
-    <!-- Users can hide Dock presence at runtime via Settings (activation policy) -->
     <key>LSUIElement</key>
     <false/>
 
-    <!-- Support for Dark Mode -->
     <key>NSRequiresAquaSystemAppearance</key>
     <false/>
 
-    <!-- Prevent multiple instances -->
     <key>LSMultipleInstancesProhibited</key>
     <true/>
 
-    <!-- Sparkle Auto-Update Configuration -->
-    <!-- IMPORTANT: Replace SUFeedURL with your actual appcast URL before release -->
-    <key>SUFeedURL</key>
-    <string>https://retrace.to/appcast.xml</string>
-
-    <!-- Enable automatic update checks -->
-    <key>SUEnableAutomaticChecks</key>
+    <!-- Private fork: do not contact upstream Retrace appcast. Sparkle init is skipped when true. -->
+    <key>AryaRetraceDisableSparkleUpdates</key>
     <true/>
 
-    <!-- Check for updates every 24 hours (86400 seconds) -->
+    <!-- Sparkle keys kept for future public releases; feed unused while AryaRetraceDisableSparkleUpdates is YES -->
+    <key>SUFeedURL</key>
+    <string></string>
+    <key>SUEnableAutomaticChecks</key>
+    <false/>
     <key>SUScheduledCheckInterval</key>
     <integer>86400</integer>
-
-    <!-- Allow users to opt into automatic updates -->
     <key>SUAllowsAutomaticUpdates</key>
-    <true/>
-
-    <!-- Default to not automatically downloading/installing updates -->
+    <false/>
     <key>SUAutomaticallyUpdate</key>
     <false/>
-
-    <!-- Show release notes in update dialog -->
     <key>SUShowReleaseNotes</key>
     <true/>
-
-    <!-- EdDSA public key for update signature verification -->
-    <!-- IMPORTANT: Generate your own key pair using Sparkle's generate_keys tool -->
-    <!-- Run: ./Sparkle.framework/bin/generate_keys and save the private key securely -->
-    <!-- Then replace this placeholder with your actual public key -->
     <key>SUPublicEDKey</key>
     <string>pM8r2LSHH+MAg7cpZDAle5ZjRB4Kfd4aOaUnud2ePA8=</string>
 </dict>

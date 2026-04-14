@@ -42,7 +42,7 @@ public struct OCRPowerSettingsSnapshot: Sendable {
     }
 
     public static func fromDefaults(
-        _ defaults: UserDefaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        _ defaults: UserDefaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
     ) -> OCRPowerSettingsSnapshot {
         OCRPowerSettingsSnapshot(
             ocrEnabled: defaults.object(forKey: "ocrEnabled") as? Bool ?? true,
@@ -491,6 +491,10 @@ public actor AppCoordinator {
         services.modelManager
     }
 
+    public func projectTaskService() async -> ProjectTaskService {
+        await services.projectTasks
+    }
+
     /// Get current capture configuration
     public func getCaptureConfig() async -> CaptureConfig {
         await services.capture.getConfig()
@@ -594,6 +598,7 @@ public actor AppCoordinator {
     public func initialize() async throws {
         Log.info("Initializing AppCoordinator...", category: .app)
         try await services.initialize()
+        await services.terminalMemory.refreshAccess()
 
         if await services.storage.isWALReady() {
             _ = scheduleCrashRecoveryIfNeeded(
@@ -863,7 +868,7 @@ public actor AppCoordinator {
     private static let phraseLevelRedactionEnabledKey = "phraseLevelRedactionEnabled"
     private static let abandonedMissingMasterKeyRewritePurpose = "redaction_missing_master_key_abandoned"
     /// Use a fixed suite name so it works regardless of how the app is launched (swift build vs .app bundle)
-    private static let userDefaultsSuite = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+    private static let userDefaultsSuite = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
     /// Save recording state to UserDefaults for persistence across app restarts
     private nonisolated func saveRecordingState(_ isRecording: Bool) {
@@ -1540,6 +1545,7 @@ public actor AppCoordinator {
                     source: .native
                 )
                 let frameID = try await services.database.insertFrame(frameRef)
+                let persistedFrameID = FrameID(value: frameID)
                 await persistGlobalMousePositionIfNeeded(
                     frameID: frameID,
                     capturedFrame: frame
@@ -1552,6 +1558,18 @@ public actor AppCoordinator {
                     frameID: frameID,
                     frameMetadata: frame.metadata
                 )
+                do {
+                    _ = try await services.terminalMemory.linkCapturedFrameIfNeeded(
+                        frameID: persistedFrameID,
+                        timestamp: frame.timestamp,
+                        metadata: frame.metadata
+                    )
+                } catch {
+                    Log.warning(
+                        "[TerminalMemory] Failed to correlate frame \(persistedFrameID.value) with terminal task: \(error.localizedDescription)",
+                        category: .app
+                    )
+                }
 
                 // Persist WAL mapping for exact frameID -> raw frame lookup while segment is unfinalized.
                 if let storageManager = services.storage as? StorageManager {
@@ -1864,7 +1882,7 @@ public actor AppCoordinator {
         let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         return cachesDirectory
-            .appendingPathComponent("io.retrace.app", isDirectory: true)
+            .appendingPathComponent(AryaRetraceIdentity.bundleIdentifier, isDirectory: true)
             .appendingPathComponent("TimelineFrameBuffer", isDirectory: true)
     }
 
@@ -2655,10 +2673,13 @@ public actor AppCoordinator {
     /// Advanced search with filters
     /// Routes to DataAdapter which prioritizes Rewind data source
     public nonisolated func search(query: SearchQuery) async throws -> SearchResults {
+        let normalizedQuery = normalizedSearchQuery(query)
+
         // Try DataAdapter first (routes to Rewind if available)
         if let adapter = await services.dataAdapter {
             do {
-                return try await adapter.search(query: query)
+                let results = try await adapter.search(query: normalizedQuery)
+                return try await enrichSearchResultsWithTerminalTasks(results)
             } catch {
                 Log.warning(
                     "[AppCoordinator] DataAdapter search failed, falling back to FTS: \(error)",
@@ -2668,7 +2689,94 @@ public actor AppCoordinator {
         }
 
         // Fallback to native FTS search
-        return try await services.search.search(query: query)
+        let results = try await services.search.search(query: normalizedQuery)
+        return try await enrichSearchResultsWithTerminalTasks(results)
+    }
+
+    private nonisolated func normalizedSearchQuery(_ query: SearchQuery) -> SearchQuery {
+        let parser = QueryParser()
+        guard let parsed = try? parser.parse(rawQuery: query.text) else {
+            return query
+        }
+
+        let normalizedText = rebuiltSearchText(from: parsed)
+
+        let mergedFilters = SearchFilters(
+            startDate: query.filters.startDate ?? parsed.dateRange.start,
+            endDate: query.filters.endDate ?? parsed.dateRange.end,
+            dateRanges: query.filters.dateRanges,
+            appBundleIDs: parsed.appFilter.map { [$0] } ?? query.filters.appBundleIDs,
+            excludedAppBundleIDs: query.filters.excludedAppBundleIDs,
+            selectedTagIds: query.filters.selectedTagIds,
+            excludedTagIds: query.filters.excludedTagIds,
+            hiddenFilter: query.filters.hiddenFilter,
+            commentFilter: query.filters.commentFilter,
+            windowNameFilter: query.filters.windowNameFilter,
+            browserUrlFilter: query.filters.browserUrlFilter,
+            taskTitleFilter: parsed.taskFilter ?? query.filters.taskTitleFilter,
+            workingDirectoryFilter: parsed.workingDirectoryFilter ?? query.filters.workingDirectoryFilter
+        )
+
+        return SearchQuery(
+            text: normalizedText.isEmpty ? query.text : normalizedText,
+            filters: mergedFilters,
+            limit: query.limit,
+            offset: query.offset,
+            cursor: query.cursor,
+            mode: query.mode,
+            sortOrder: query.sortOrder
+        )
+    }
+
+    private nonisolated func rebuiltSearchText(from parsed: ParsedQuery) -> String {
+        let includedTerms = parsed.searchTerms
+        let phrases = parsed.phrases.map { "\"\($0)\"" }
+        let excludedTerms = parsed.excludedTerms.map { term in
+            if term.contains(where: \.isWhitespace) {
+                return "-\"\(term)\""
+            }
+            return "-\(term)"
+        }
+        return (includedTerms + phrases + excludedTerms)
+            .joined(separator: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func enrichSearchResultsWithTerminalTasks(_ results: SearchResults) async throws -> SearchResults {
+        guard !results.results.isEmpty else {
+            return results
+        }
+
+        var enrichedResults: [SearchResult] = []
+        enrichedResults.reserveCapacity(results.results.count)
+
+        for result in results.results {
+            let terminalTask = try await services.database.getTerminalTaskForFrame(frameID: result.id)
+            let enriched = SearchResult(
+                id: result.id,
+                timestamp: result.timestamp,
+                snippet: result.snippet,
+                matchedText: result.matchedText,
+                relevanceScore: result.relevanceScore,
+                metadata: result.metadata,
+                segmentID: result.segmentID,
+                videoID: result.videoID,
+                frameIndex: result.frameIndex,
+                videoPath: result.videoPath,
+                videoFrameRate: result.videoFrameRate,
+                source: result.source,
+                highlightNode: result.highlightNode,
+                terminalTask: terminalTask ?? result.terminalTask
+            )
+            enrichedResults.append(enriched)
+        }
+
+        return SearchResults(
+            query: results.query,
+            results: enrichedResults,
+            searchTimeMs: results.searchTimeMs,
+            nextCursor: results.nextCursor
+        )
     }
 
     // MARK: - Frame Retrieval
@@ -2947,6 +3055,32 @@ public actor AppCoordinator {
         limit: Int? = nil
     ) async throws -> [(windowName: String?, isWebsite: Bool, duration: TimeInterval, tabCount: Int?, totalCount: Int, totalDuration: TimeInterval)] {
         try await services.database.getWindowUsageForApp(bundleID: bundleID, from: startDate, to: endDate, limit: limit)
+    }
+
+    public func getTerminalTaskUsageForApp(
+        bundleID: String,
+        from startDate: Date,
+        to endDate: Date,
+        limit: Int? = nil
+    ) async throws -> [TerminalTaskUsage] {
+        try await services.database.getTerminalTaskUsageForApp(
+            bundleID: bundleID,
+            from: startDate,
+            to: endDate,
+            limit: limit
+        )
+    }
+
+    public func getTerminalTask(id: TerminalTaskID) async throws -> TerminalTaskSession? {
+        try await services.database.getTerminalTask(id: id)
+    }
+
+    public func getTerminalEvents(taskID: TerminalTaskID, limit: Int = 200) async throws -> [TerminalTaskEvent] {
+        try await services.database.getTerminalEvents(taskID: taskID, limit: limit)
+    }
+
+    public func refreshTerminalCLIAccess() async {
+        await services.terminalMemory.refreshAccess()
     }
 
     /// Get browser tab usage aggregated by windowName (tab title) with full URL
@@ -4282,7 +4416,7 @@ public actor AppCoordinator {
     }
 
     private static func isInPageURLCollectionEnabled() -> Bool {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         guard defaults.object(forKey: inPageURLCollectionExperimentalKey) != nil else {
             return false
         }
@@ -4290,7 +4424,7 @@ public actor AppCoordinator {
     }
 
     private static func isMousePositionCollectionEnabled() -> Bool {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         guard defaults.object(forKey: captureMousePositionKey) != nil else {
             return true
         }

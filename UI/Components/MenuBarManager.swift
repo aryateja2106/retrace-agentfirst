@@ -572,7 +572,7 @@ public class MenuBarManager: ObservableObject {
         let toggleView = RecordingToggleSwitch(
             frame: NSRect(x: containerWidth - toggleWidth - rightPadding, y: 5, width: toggleWidth, height: 20),
             isOn: isRecording,
-            onColor: NSColor(red: 11/255.0, green: 51/255.0, blue: 108/255.0, alpha: 1.0)
+            onColor: NSColor(calibratedWhite: 0.52, alpha: 1.0)
         )
         toggleView.target = self
         toggleView.action = #selector(recordingToggleChanged(_:))
@@ -1004,7 +1004,7 @@ public class MenuBarManager: ObservableObject {
 
         // Version — clickable to open commit on GitHub (if available)
         let versionItem = NSMenuItem(
-            title: "Retrace \(BuildInfo.displayVersion)",
+            title: "\(AryaRetraceIdentity.displayName) \(BuildInfo.displayVersion)",
             action: BuildInfo.commitURL != nil ? #selector(openCommitURL) : nil,
             keyEquivalent: ""
         )
@@ -1027,7 +1027,7 @@ public class MenuBarManager: ObservableObject {
 
         // Quit
         let quitItem = NSMenuItem(
-            title: "Quit Retrace",
+            title: "Quit \(AryaRetraceIdentity.displayName)",
             action: #selector(quit),
             keyEquivalent: "q"
         )

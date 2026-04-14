@@ -7,7 +7,10 @@ public enum AppPaths {
     // MARK: - Base Paths
 
     /// Default root storage path for all app data (tilde expanded)
-    public static let defaultStorageRoot = NSString(string: "~/Library/Application Support/Retrace").expandingTildeInPath
+    public static let defaultStorageRoot = NSString(string: "~/Library/Application Support/\(AryaRetraceIdentity.defaultStorageFolderName)").expandingTildeInPath
+
+    /// App-owned support root used for local helper IPC and CLI spooling.
+    public static let defaultAppSupportRoot = NSString(string: "~/Library/Application Support/\(AryaRetraceIdentity.bundleIdentifier)").expandingTildeInPath
 
     /// Default Rewind/MemoryVault storage root path (tilde expanded)
     public static let defaultRewindStorageRoot = NSString(string: "~/Library/Application Support/com.memoryvault.MemoryVault").expandingTildeInPath
@@ -17,7 +20,7 @@ public enum AppPaths {
 
     /// Root storage path for all app data (respects custom location if set)
     public static var storageRoot: String {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         return defaults.string(forKey: "customRetraceDBLocation") ?? defaultStorageRoot
     }
 
@@ -36,7 +39,7 @@ public enum AppPaths {
     /// Rewind/MemoryVault storage root (respects custom location if set)
     /// `customRewindDBLocation` stores a folder path. Legacy file-path values are normalized.
     public static var rewindStorageRoot: String {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         if let customLocation = defaults.string(forKey: "customRewindDBLocation") {
             let normalized = NSString(string: customLocation).expandingTildeInPath
             let fileManager = FileManager.default
@@ -87,10 +90,19 @@ public enum AppPaths {
     /// Models directory path
     public static let modelsPath = "\(storageRoot)/models"
 
+    /// Shared runtime directory for local helper IPC.
+    public static let runPath = "\(defaultAppSupportRoot)/run"
+
+    /// Unix-domain socket used by the local CLI when app-hosted terminal memory access is enabled.
+    public static let terminalMemorySocketPath = "\(runPath)/terminal-memory.sock"
+
+    /// Hook inbox spool used when the app socket is unavailable.
+    public static let terminalHookInboxPath = "\(defaultAppSupportRoot)/terminal-hook-inbox.jsonl"
+
     // MARK: - Keychain
 
     /// Keychain service identifier for database encryption
-    public static let keychainService = "com.retrace.database"
+    public static let keychainService = AryaRetraceIdentity.databaseKeychainService
 
     /// Keychain account for SQLCipher key
     public static let keychainAccount = "sqlcipher-key"
@@ -98,5 +110,5 @@ public enum AppPaths {
     // MARK: - Logging
 
     /// Log subsystem identifier
-    public static let logSubsystem = "io.retrace.app"
+    public static let logSubsystem = AryaRetraceIdentity.logSubsystem
 }

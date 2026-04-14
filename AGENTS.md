@@ -50,6 +50,8 @@ retrace/
 ├── .github/                     # GitHub configuration
 │   ├── CODEOWNERS
 │   ├── FUNDING.yml
+│   ├── workflows/
+│   │   └── upstream-sync.yml    # Weekly fetch + merge attempt from upstream Retrace (see scripts/UPSTREAM.md)
 │   └── ISSUE_TEMPLATE/
 │       └── bug_report.yml       # GitHub bug report form aligned with AI issue template
 ├── AI_ISSUE_TEMPLATE.md         # Canonical markdown template for AI-authored bug reports
@@ -61,10 +63,12 @@ retrace/
 │   ├── create-release.sh        # Release build + packaging helper
 │   ├── check_no_nanoseconds_sleep.sh # Guardrail for Task.sleep(nanoseconds:)
 │   ├── validate_sleep_wake_stability.sh # Sleep/wake soak validation workflow
-│   └── validate_darkwake_watchdog.sh # Automated darkwake watchdog regression validation
+│   ├── validate_darkwake_watchdog.sh # Automated darkwake watchdog regression validation
+│   └── UPSTREAM.md              # How to add `upstream` remote and merge from canonical Retrace
 │
 ├── Shared/                      # CRITICAL: Shared types and protocols
 │   ├── Logging.swift            # Central log utility (Log.debug/info/warning/error)
+│   ├── AryaRetraceIdentity.swift # Fork bundle ID, UserDefaults suite, Sparkle disable key, display name
 │   ├── AppPaths.swift           # Application path configuration
 │   ├── BGRAImageUtilities.swift # Shared BGRA conversion + patch extraction helpers
 │   ├── MasterKeyManager.swift   # Keychain-backed master key creation + recovery phrase export
@@ -81,7 +85,9 @@ retrace/
 │   │   ├── FilterCriteria.swift # Timeline/search filter criteria
 │   │   ├── Source.swift         # Data source enum (native, rewind, etc.)
 │   │   ├── Tag.swift            # Tag model types
-│   │   └── Comment.swift        # Segment comment and attachment models
+│   │   ├── Comment.swift        # Segment comment and attachment models
+│   │   ├── TerminalTask.swift   # Terminal task/session/event models for CLI + dashboard
+│   │   └── PMProjectTaskModels.swift # `.dot/` manifest + PM task/timer models (arya-retrace fork)
 │   └── Protocols/               # Module interfaces
 │       ├── DatabaseProtocol.swift
 │       ├── StorageProtocol.swift
@@ -99,7 +105,9 @@ retrace/
 │   ├── IDMappingService.swift   # ID mapping between sources
 │   ├── Schema.swift             # Current schema definition
 │   ├── Migrations/              # Schema migration scripts
+│   │   └── V20_TerminalMemory.swift # Terminal task/session/event schema
 │   ├── Queries/                 # Query implementations
+│   │   └── TerminalTaskQueries.swift # Terminal task/session/event queries
 │   └── Tests/
 │
 ├── Storage/                     # File I/O, HEVC encoding
@@ -118,7 +126,7 @@ retrace/
 │   ├── CaptureManager.swift
 │   ├── ScreenCapture/           # Screen capture implementation
 │   ├── Deduplication/           # Perceptual hash deduplication
-│   ├── Metadata/                # AppInfoProvider, BrowserURLExtractor
+│   ├── Metadata/                # AppInfoProvider, BrowserURLExtractor, TerminalBundleRegistry
 │   └── Tests/
 │
 ├── Processing/                  # OCR and text extraction
@@ -147,6 +155,7 @@ retrace/
 │
 ├── App/                         # Main application coordinator
 │   ├── AppCoordinator.swift     # Central coordinator (orchestrates all modules)
+│   ├── ProjectTaskService.swift # Per-folder `.dot/` project/tasks + timer + daily_metrics
 │   ├── DataAdapter.swift        # Data layer adapter (DB queries, transformations)
 │   ├── FeedbackRecentMetricSupport.swift # Shared feedback-export metric models and sanitization helpers
 │   ├── ServiceContainer.swift   # Dependency injection container
@@ -154,12 +163,18 @@ retrace/
 │   ├── ModelManager.swift       # Model management
 │   ├── OnboardingManager.swift  # First-run onboarding flow
 │   ├── RetentionManager.swift   # Data retention policies
+│   ├── TerminalMemoryService.swift # Local socket + shell-hook terminal memory service
 │   └── Tests/
 │       ├── FeedbackRecentMetricSupportTests.swift # Feedback-export metric sanitization coverage
 │       ├── InPageURLCaptureRoutingTests.swift
 │       ├── MasterKeyManagerTests.swift
 │       ├── TestLogger.swift
 │       └── TimelineStillDiskWriterTests.swift
+│
+├── Sources/                     # Auxiliary Swift executables
+│   ├── RetraceCLI/              # Local CLI for terminal-task hooks and scoped memory recall
+│   ├── TestMostRecentFrame/     # Database/timeline timestamp utility
+│   └── QueryRewindApps/         # Rewind inspection helper
 │
 └── UI/                          # SwiftUI interface
     ├── AGENTS.md
@@ -177,7 +192,6 @@ retrace/
     ├── Views/
     │   ├── Dashboard/           # App usage analytics views
     │   ├── FullscreenTimeline/  # Timeline scrubbing & playback (10 views)
-    │   ├── Search/              # Search UI (SearchView, ResultRow, FrameViewer)
     │   ├── Settings/            # Settings shell, support components, and extracted section/action files
     │   │   └── Sections/        # Concern-split settings sections, verification flows, and shared actions
     │   ├── Onboarding/          # Onboarding flow
@@ -484,4 +498,4 @@ Then check which path actually executes and fix the right code.
 
 ---
 
-_This file follows the AGENTS.md standard for AI agent guidance. Last updated: 2026-03-30_
+_This file follows the AGENTS.md standard for AI agent guidance. Last updated: 2026-04-05_

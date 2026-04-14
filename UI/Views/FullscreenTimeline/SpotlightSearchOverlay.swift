@@ -2105,6 +2105,22 @@ private struct GalleryResultCard: View {
                                 .font(.retraceMonoSmall)
                                 .foregroundColor(.yellow.opacity(0.7))
                         }
+
+                        if let terminalTask = result.terminalTask {
+                            HStack(spacing: 6) {
+                                terminalChip(
+                                    icon: "terminal.fill",
+                                    text: terminalTask.effectiveTitle
+                                )
+
+                                if let workingDirectory = terminalTask.workingDirectory, !workingDirectory.isEmpty {
+                                    terminalChip(
+                                        icon: "folder",
+                                        text: workingDirectory
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     Spacer()
@@ -2155,6 +2171,24 @@ private struct GalleryResultCard: View {
             }
         }
         .frame(width: thumbnailSize.width, height: thumbnailSize.height)
+    }
+
+    private func terminalChip(icon: String, text: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 8, weight: .semibold))
+            Text(text)
+                .lineLimit(1)
+                .truncationMode(.middle)
+        }
+        .font(.system(size: 9, weight: .medium))
+        .foregroundColor(.white.opacity(0.72))
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(
+            Capsule()
+                .fill(Color.white.opacity(0.08))
+        )
     }
 
     private func formatTimestamp(_ date: Date) -> String {
@@ -2421,6 +2455,24 @@ struct SpotlightSearchField: NSViewRepresentable {
             }
             return false
         }
+    }
+
+    private func terminalChip(icon: String, text: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 8, weight: .semibold))
+            Text(text)
+                .lineLimit(1)
+                .truncationMode(.middle)
+        }
+        .font(.system(size: 9, weight: .medium))
+        .foregroundColor(.white.opacity(0.72))
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(
+            Capsule()
+                .fill(Color.white.opacity(0.08))
+        )
     }
 }
 

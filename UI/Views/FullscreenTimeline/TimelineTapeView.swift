@@ -28,7 +28,7 @@ public struct TimelineTapeView: View {
     }
 
     /// Shared UserDefaults store for accessing settings
-    private static let settingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+    private static let settingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
     /// Scrubbing animation duration from settings (0 = no animation, max 0.20)
     /// Using @AppStorage so the view automatically updates when the setting changes
@@ -2746,7 +2746,7 @@ struct GapHatchPattern: View {
 // MARK: - Theme-aware Control Button Style
 
 /// Shared UserDefaults store for accessing settings
-private let timelineSettingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+private let timelineSettingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
 /// View modifier that applies theme-based border styling to circular control buttons
 struct ThemeAwareCircleButtonStyle: ViewModifier {

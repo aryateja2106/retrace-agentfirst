@@ -33,7 +33,7 @@ private final class TestCrashRecoveryHelperProxy: NSObject, CrashRecoveryHelperX
 
 final class CrashRecoverySupportTests: XCTestCase {
     private func makeTestDefaults(suffix: String = UUID().uuidString) -> UserDefaults {
-        let suiteName = "io.retrace.tests.crash-recovery.\(suffix)"
+        let suiteName = "dev.arya.arya-retrace.tests.crash-recovery.\(suffix)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defaults.removePersistentDomain(forName: suiteName)
         return defaults

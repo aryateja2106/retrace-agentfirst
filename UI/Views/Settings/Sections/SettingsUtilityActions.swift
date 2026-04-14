@@ -159,7 +159,7 @@ extension SettingsView {
 
     func restartAndResumeRecording() {
         // Set flag in UserDefaults to auto-start recording on next launch
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         defaults.set(true, forKey: "shouldAutoStartRecording")
         defaults.synchronize()
         Log.info("Set shouldAutoStartRecording flag for restart", category: .ui)
@@ -507,7 +507,7 @@ extension SettingsView {
 
         // Apply changes immediately by reconnecting Rewind source
         Task {
-            let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+            let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
             let useRewindData = defaults.bool(forKey: "useRewindData")
 
             if useRewindData {
@@ -540,7 +540,7 @@ extension SettingsView {
         // If Rewind was customized, apply the default location immediately
         if hadCustomRewind {
             Task {
-                let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+                let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
                 let useRewindData = defaults.bool(forKey: "useRewindData")
 
                 if useRewindData {
@@ -561,7 +561,7 @@ extension SettingsView {
 
     func resetAllSettings() {
         // Reset all UserDefaults to their default values
-        let domain = "io.retrace.app"
+        let domain = AryaRetraceIdentity.bundleIdentifier
         settingsStore.removePersistentDomain(forName: domain)
         settingsStore.synchronize()
 

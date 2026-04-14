@@ -2774,6 +2774,209 @@ final class DatabaseManagerTests: XCTestCase {
         XCTAssertEqual(legacyIndexCount, 0)
     }
 
+    func testMigrationRunner_V20CreatesTerminalMemoryTablesAndIndexes() async throws {
+        let dbPath = FileManager.default.temporaryDirectory
+            .appendingPathComponent("RetraceV20Migration-\(UUID().uuidString).sqlite")
+            .path
+        let db = try openRawDatabase(at: dbPath)
+
+        defer {
+            sqlite3_close(db)
+            try? FileManager.default.removeItem(atPath: dbPath)
+            try? FileManager.default.removeItem(atPath: dbPath + "-wal")
+            try? FileManager.default.removeItem(atPath: dbPath + "-shm")
+        }
+
+        try await runLegacyMigrations(throughVersion: 19, db: db)
+
+        XCTAssertEqual(try fetchInt64(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'terminal_task';",
+            db: db
+        ), 0)
+
+        let runner = MigrationRunner(db: db)
+        try await runner.runMigrations()
+
+        let currentVersion = try fetchInt64("SELECT MAX(version) FROM schema_migrations;", db: db)
+        let terminalTaskColumns = try tableColumnNames("terminal_task", db: db)
+        let terminalEventColumns = try tableColumnNames("terminal_event", db: db)
+        let linkColumns = try tableColumnNames("terminal_task_frame", db: db)
+        let lookupIndexCount = try fetchInt64(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'index' AND name = 'idx_terminal_task_lookup';",
+            db: db
+        )
+        let sessionKeyIndexCount = try fetchInt64(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'index' AND name = 'idx_terminal_task_session_key';",
+            db: db
+        )
+        let eventIndexCount = try fetchInt64(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'index' AND name = 'idx_terminal_event_task_timestamp';",
+            db: db
+        )
+
+        XCTAssertGreaterThanOrEqual(currentVersion, 20)
+        XCTAssertEqual(
+            terminalTaskColumns,
+            ["id", "bundleID", "windowName", "taskTitle", "workingDirectory", "shell", "sessionKey", "startDate", "endDate", "lastActivityAt", "source", "confidence", "commandCount", "metadataJSON"]
+        )
+        XCTAssertEqual(
+            terminalEventColumns,
+            ["id", "taskId", "timestamp", "eventType", "commandText", "exitCode", "durationMs", "workingDirectory", "metadataJSON"]
+        )
+        XCTAssertEqual(linkColumns, ["frameId", "taskId"])
+        XCTAssertEqual(lookupIndexCount, 1)
+        XCTAssertEqual(sessionKeyIndexCount, 1)
+        XCTAssertEqual(eventIndexCount, 1)
+    }
+
+    func testDeleteTerminalTasksRemovesEventsAndFrameLinks() async throws {
+        let timestamp = Date(timeIntervalSince1970: 1_700_000_000)
+        let frameID = try await insertTestFrame(
+            browserURL: nil,
+            bundleID: "dev.warp.Warp-Stable",
+            timestamp: timestamp
+        )
+        let session = try await database.upsertTerminalTaskSession(
+            TerminalTaskSession(
+                id: TerminalTaskID(value: 0),
+                bundleID: "dev.warp.Warp-Stable",
+                windowName: "~/Projects/retrace",
+                taskTitle: "Claude Code",
+                workingDirectory: "/Users/aryateja/Projects/retrace",
+                shell: "zsh",
+                sessionKey: "host:123",
+                startDate: timestamp,
+                endDate: timestamp.addingTimeInterval(30),
+                lastActivityAt: timestamp.addingTimeInterval(30),
+                source: .shellHook,
+                confidence: 0.9,
+                commandCount: 1,
+                metadataJSON: nil
+            )
+        )
+
+        _ = try await database.appendTerminalTaskEvent(
+            TerminalTaskEvent(
+                id: 0,
+                taskID: session.id,
+                timestamp: timestamp.addingTimeInterval(10),
+                eventType: .commandEnd,
+                commandText: "swift build",
+                exitCode: 0,
+                durationMs: 1234,
+                workingDirectory: "/Users/aryateja/Projects/retrace",
+                metadataJSON: nil
+            )
+        )
+        try await database.linkFrameToTerminalTask(frameID: frameID, taskID: session.id)
+
+        let initialTaskCount = try await fetchInt64("SELECT COUNT(*) FROM terminal_task;")
+        let initialEventCount = try await fetchInt64("SELECT COUNT(*) FROM terminal_event;")
+        let initialLinkCount = try await fetchInt64("SELECT COUNT(*) FROM terminal_task_frame;")
+
+        XCTAssertEqual(initialTaskCount, 1)
+        XCTAssertEqual(initialEventCount, 1)
+        XCTAssertEqual(initialLinkCount, 1)
+
+        let deletedCount = try await database.deleteTerminalTasks(olderThan: timestamp.addingTimeInterval(60))
+
+        XCTAssertEqual(deletedCount, 1)
+        let finalTaskCount = try await fetchInt64("SELECT COUNT(*) FROM terminal_task;")
+        let finalEventCount = try await fetchInt64("SELECT COUNT(*) FROM terminal_event;")
+        let finalLinkCount = try await fetchInt64("SELECT COUNT(*) FROM terminal_task_frame;")
+
+        XCTAssertEqual(finalTaskCount, 0)
+        XCTAssertEqual(finalEventCount, 0)
+        XCTAssertEqual(finalLinkCount, 0)
+    }
+
+    func testGetTerminalTaskUsageForAppPrefersLinkedFrameDurationAndOrdersByFocusedTime() async throws {
+        let start = Date(timeIntervalSince1970: 1_700_000_000)
+
+        let focusedTask = try await database.upsertTerminalTaskSession(
+            TerminalTaskSession(
+                id: TerminalTaskID(value: 0),
+                bundleID: "dev.warp.Warp-Stable",
+                windowName: "Claude Session A",
+                taskTitle: "Claude Session A",
+                workingDirectory: "/Users/aryateja/Projects/retrace",
+                shell: "zsh",
+                sessionKey: "host:focused",
+                startDate: start,
+                endDate: start.addingTimeInterval(30),
+                lastActivityAt: start.addingTimeInterval(30),
+                source: .shellHook,
+                confidence: 0.9,
+                commandCount: 2,
+                metadataJSON: nil
+            )
+        )
+
+        let recentTask = try await database.upsertTerminalTaskSession(
+            TerminalTaskSession(
+                id: TerminalTaskID(value: 0),
+                bundleID: "dev.warp.Warp-Stable",
+                windowName: "Claude Session B",
+                taskTitle: "Claude Session B",
+                workingDirectory: "/Users/aryateja/Projects/retrace",
+                shell: "zsh",
+                sessionKey: "host:recent",
+                startDate: start.addingTimeInterval(60),
+                endDate: start.addingTimeInterval(65),
+                lastActivityAt: start.addingTimeInterval(65),
+                source: .shellHook,
+                confidence: 0.9,
+                commandCount: 1,
+                metadataJSON: nil
+            )
+        )
+
+        let frameA = try await insertTestFrame(
+            browserURL: nil,
+            bundleID: "dev.warp.Warp-Stable",
+            timestamp: start
+        )
+        let frameB = try await insertTestFrame(
+            browserURL: nil,
+            bundleID: "dev.warp.Warp-Stable",
+            timestamp: start.addingTimeInterval(2)
+        )
+        let frameC = try await insertTestFrame(
+            browserURL: nil,
+            bundleID: "dev.warp.Warp-Stable",
+            timestamp: start.addingTimeInterval(4)
+        )
+        try await database.linkFrameToTerminalTask(frameID: frameA, taskID: focusedTask.id)
+        try await database.linkFrameToTerminalTask(frameID: frameB, taskID: focusedTask.id)
+        try await database.linkFrameToTerminalTask(frameID: frameC, taskID: focusedTask.id)
+
+        _ = try await database.appendTerminalTaskEvent(
+            TerminalTaskEvent(
+                id: 0,
+                taskID: recentTask.id,
+                timestamp: start.addingTimeInterval(64),
+                eventType: .commandEnd,
+                commandText: "swift test",
+                exitCode: 0,
+                durationMs: 900,
+                workingDirectory: "/Users/aryateja/Projects/retrace",
+                metadataJSON: nil
+            )
+        )
+
+        let usage = try await database.getTerminalTaskUsageForApp(
+            bundleID: "dev.warp.Warp-Stable",
+            from: start.addingTimeInterval(-10),
+            to: start.addingTimeInterval(120),
+            limit: 10
+        )
+
+        XCTAssertEqual(usage.first?.task.id, focusedTask.id)
+        XCTAssertEqual(usage.first?.linkedFrameCount, 3)
+        XCTAssertGreaterThanOrEqual(usage.first?.totalDuration ?? 0, 4)
+        XCTAssertLessThan((usage.last?.totalDuration ?? 0), (usage.first?.totalDuration ?? 0))
+    }
+
     func testGetPendingFrameIDsNotInQueueReturnsOnlyNewestOrphanedFrames() async throws {
         let oldestFrame = try await insertTestFrame(
             browserURL: "https://example.com/oldest",
@@ -3943,7 +4146,8 @@ final class DatabaseManagerTests: XCTestCase {
             V15_NodeRedactionFlag(),
             V16_ProcessingQueueFrameIDIndex(),
             V17_FrameCaptureTrigger(),
-            V18_DailyMetricsRecencyIndex()
+            V18_DailyMetricsRecencyIndex(),
+            V19_FrameEncodedAt()
         ]
 
         for migration in migrations where migration.version <= version {

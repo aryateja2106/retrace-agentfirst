@@ -328,7 +328,7 @@ public class AppIconColorCache {
 /// Persists per-tag colors selected by users in Settings.
 /// Colors are keyed by tag ID and fall back to a deterministic color when unset.
 public enum TagColorStore {
-    private static let defaults: UserDefaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+    private static let defaults: UserDefaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
     private static let storageKey = "tagColorsByID"
     private static let lock = NSLock()
     private static var cachedHexByTagID: [Int64: String] = [:]
@@ -476,53 +476,27 @@ public enum TagColorStore {
 // MARK: - Colors
 
 extension Color {
-    // MARK: Brand Colors (matching retrace-frontend design)
-    // Deep blue background: #051127
-    public static let retraceDeepBlue = Color(red: 5/255, green: 17/255, blue: 39/255)
+    // MARK: arya-retrace monochrome base (Notion / Linear–inspired neutrals)
+    public static let retraceDeepBlue = Color(red: 10/255, green: 10/255, blue: 10/255) // #0A0A0A
 
-    // Primary accent color - adapts based on user's color theme preference
-    // Blue: Retrace accent color (lighter blue for better visibility)
-    // Gold: Warm gold accent
-    // Purple: Royal purple accent
+    /// Single cool-gray accent (theme picker still exists for legacy surfaces; primary UI is neutral).
     public static var retraceAccent: Color {
-        let theme = MilestoneCelebrationManager.getCurrentTheme()
-        switch theme {
-        case .blue:
-            return Color(red: 59/255, green: 130/255, blue: 246/255)  // #3B82F6 - lighter blue
-        case .gold:
-            return Color(red: 255/255, green: 200/255, blue: 0/255)  // Gold
-        case .purple:
-            return Color(red: 160/255, green: 100/255, blue: 255/255)  // Purple
-        }
+        Color(red: 200/255, green: 202/255, blue: 208/255)
     }
 
-    // Original brand blue (for cases where we always want blue)
-    public static let retraceBrandBlue = Color(red: 11/255, green: 51/255, blue: 108/255)
+    public static let retraceBrandBlue = Color(red: 90/255, green: 90/255, blue: 94/255)
 
-    // Submit/action button accent - slightly deeper tones for filled buttons
     public static var retraceSubmitAccent: Color {
-        let theme = MilestoneCelebrationManager.getCurrentTheme()
-        switch theme {
-        case .blue:
-            return Color(red: 59/255, green: 130/255, blue: 246/255)
-        case .gold:
-            return Color(red: 245/255, green: 180/255, blue: 0/255)
-        case .purple:
-            return Color(red: 148/255, green: 84/255, blue: 242/255)
-        }
+        Color(red: 175/255, green: 176/255, blue: 182/255)
     }
 
-    // Card background: hsl(222, 47%, 7%)
-    public static let retraceCard = Color(red: 9/255, green: 18/255, blue: 38/255)
+    public static let retraceCard = Color(red: 18/255, green: 18/255, blue: 18/255)
 
-    // Secondary: hsl(217, 33%, 17%)
-    public static let retraceSecondaryColor = Color(red: 29/255, green: 41/255, blue: 58/255)
+    public static let retraceSecondaryColor = Color(red: 42/255, green: 42/255, blue: 42/255)
 
-    // Foreground: hsl(210, 40%, 98%)
-    public static let retraceForeground = Color(red: 247/255, green: 249/255, blue: 252/255)
+    public static let retraceForeground = Color(red: 237/255, green: 237/255, blue: 237/255)
 
-    // Muted foreground: hsl(215, 20%, 65%)
-    public static let retraceMutedForeground = Color(red: 150/255, green: 160/255, blue: 181/255)
+    public static let retraceMutedForeground = Color(red: 161/255, green: 161/255, blue: 161/255)
 
     // State colors
     public static let retraceDanger = Color(red: 220/255, green: 38/255, blue: 38/255)
@@ -548,7 +522,7 @@ extension Color {
     // MARK: Search Highlight
     public static let retraceMatchHighlight = Color.yellow.opacity(0.4)
     public static let retraceBoundingBox = Color.retraceAccent
-    public static let retraceBoundingBoxSecondary = Color(red: 11/255, green: 51/255, blue: 108/255)  // #0b336c
+    public static let retraceBoundingBoxSecondary = Color(red: 120/255, green: 120/255, blue: 125/255)
 }
 
 // MARK: - Typography
@@ -593,7 +567,7 @@ public enum RetraceFont {
     private static let fontStyleKey = "retraceFontStyle"
 
     /// Shared UserDefaults store (same as Settings uses)
-    private static let settingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+    private static let settingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
     /// The current font style (persisted in UserDefaults)
     public static var currentStyle: RetraceFontStyle {
@@ -1349,7 +1323,7 @@ public struct RetraceMenuButton: View {
 }
 
 /// Shared UserDefaults store for accessing settings
-private let menuContainerSettingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+private let menuContainerSettingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
 /// Standardized menu container modifier
 /// Applies consistent background, border, and shadow to any menu/popover content

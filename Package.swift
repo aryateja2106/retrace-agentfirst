@@ -29,6 +29,7 @@ let package = Package(
         .library(name: "App", targets: ["App"]),
         .library(name: "CrashRecoverySupport", targets: ["CrashRecoverySupport"]),
         .executable(name: "Retrace", targets: ["Retrace"]),
+        .executable(name: "RetraceCLI", targets: ["RetraceCLI"]),
         .executable(name: "RetraceCrashRecoveryHelper", targets: ["RetraceCrashRecoveryHelper"]),
         .executable(name: "TestMostRecentFrame", targets: ["TestMostRecentFrame"]),
         .executable(name: "QueryRewindApps", targets: ["QueryRewindApps"]),
@@ -209,7 +210,8 @@ let package = Package(
             dependencies: [
                 "App",
                 "Database",
-                "Shared"
+                "Shared",
+                "Search"
             ],
             path: "App/Tests"
             // ⚠️ RELEASE 2 ONLY - Whisper cSettings and linkerSettings removed for Release 1
@@ -218,7 +220,7 @@ let package = Package(
         // MARK: - Crash recovery support
         .target(
             name: "CrashRecoverySupport",
-            dependencies: [],
+            dependencies: ["Shared"],
             path: "UI/CrashRecoverySupport"
         ),
 
@@ -261,6 +263,18 @@ let package = Package(
             sources: [
                 "main.swift"
             ]
+        ),
+
+        .executableTarget(
+            name: "RetraceCLI",
+            dependencies: [
+                "Shared",
+                "App",
+                "Database",
+                "Search",
+                .product(name: "SQLCipher", package: "swift-sqlcipher")
+            ],
+            path: "Sources/RetraceCLI"
         ),
 
         // MARK: - Test executable for getMostRecentFrameTimestamp

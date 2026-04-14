@@ -8,7 +8,7 @@ import App
 @MainActor
 final class DateJumpFrameIDFallbackTests: XCTestCase {
     func testCompactNumericTimeFallbackDoesNotFlashFrameNotFoundError() async {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let key = "enableFrameIDSearch"
         let originalValue = defaults.object(forKey: key)
         defer {

@@ -174,7 +174,7 @@ public class TimelineWindowController: NSObject {
     private static let velocitySampleWindow: CFAbsoluteTime = 0.08
     /// Live-mode scroll suppression window (seconds) applied on open.
     private static let liveScrollSuppressDuration: CFAbsoluteTime = 0.30
-    private static let timelineSettingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+    private static let timelineSettingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
     /// Accumulated wrong-axis and right-axis scroll magnitudes for orientation mismatch detection
     private var wrongAxisScrollAccum: CGFloat = 0
@@ -1996,6 +1996,8 @@ public class TimelineWindowController: NSObject {
         let hasNoTags = criteria.selectedTags == nil || criteria.selectedTags?.isEmpty == true
         let hasNoWindowFilter = criteria.windowNameFilter?.isEmpty ?? true
         let hasNoBrowserFilter = criteria.browserUrlFilter?.isEmpty ?? true
+        let hasNoTaskFilter = criteria.taskTitleFilter?.isEmpty ?? true
+        let hasNoWorkingDirectoryFilter = criteria.workingDirectoryFilter?.isEmpty ?? true
 
         return hasNoSources &&
             criteria.hiddenFilter == .hide &&
@@ -2004,6 +2006,8 @@ public class TimelineWindowController: NSObject {
             criteria.tagFilterMode == .include &&
             hasNoWindowFilter &&
             hasNoBrowserFilter &&
+            hasNoTaskFilter &&
+            hasNoWorkingDirectoryFilter &&
             criteria.effectiveDateRanges.isEmpty
     }
 
@@ -2228,7 +2232,16 @@ public class TimelineWindowController: NSObject {
     ///   - startDate: Optional start date for filtering (e.g., week start)
     ///   - endDate: Optional end date for filtering (e.g., now)
     ///   - clickStartTime: Optional start time from when the tab was clicked (for end-to-end timing)
-    public func showWithFilter(bundleID: String, windowName: String?, browserUrl: String? = nil, startDate: Date? = nil, endDate: Date? = nil, clickStartTime: CFAbsoluteTime? = nil) {
+    public func showWithFilter(
+        bundleID: String,
+        windowName: String?,
+        browserUrl: String? = nil,
+        taskTitle: String? = nil,
+        workingDirectory: String? = nil,
+        startDate: Date? = nil,
+        endDate: Date? = nil,
+        clickStartTime: CFAbsoluteTime? = nil
+    ) {
         let startTime = clickStartTime ?? CFAbsoluteTimeGetCurrent()
 
         // Build the filter criteria upfront
@@ -2237,6 +2250,11 @@ public class TimelineWindowController: NSObject {
         criteria.appFilterMode = .include
         if let url = browserUrl, !url.isEmpty {
             criteria.browserUrlFilter = url
+        } else if let taskTitle, !taskTitle.isEmpty {
+            criteria.taskTitleFilter = taskTitle
+            if let workingDirectory, !workingDirectory.isEmpty {
+                criteria.workingDirectoryFilter = workingDirectory
+            }
         } else if let window = windowName, !window.isEmpty {
             criteria.windowNameFilter = window
         }

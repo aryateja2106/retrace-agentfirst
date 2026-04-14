@@ -1,6 +1,6 @@
 name: Retrace
 options:
-  bundleIdPrefix: io.retrace
+  bundleIdPrefix: dev.arya
   deploymentTarget:
     macOS: "13.0"
   xcodeVersion: "16.0"
@@ -37,7 +37,7 @@ targets:
           - Tests
           - README.md
           - AGENTS.md
-      - path: UI/LaunchAgents/io.retrace.app.crash-recovery.plist
+      - path: UI/LaunchAgents/dev.arya.arya-retrace.crash-recovery.plist
         buildPhase:
           copyFiles:
             destination: wrapper
@@ -64,10 +64,10 @@ targets:
       - package: SwiftyChrono
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.app
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.arya-retrace
         INFOPLIST_FILE: UI/Info.plist
-        MARKETING_VERSION: "0.8.7"
-        CURRENT_PROJECT_VERSION: "11"
+        MARKETING_VERSION: "0.0.1"
+        CURRENT_PROJECT_VERSION: "1"
         CODE_SIGN_ENTITLEMENTS: UI/Retrace.entitlements
         CODE_SIGN_STYLE: Manual
         CODE_SIGN_IDENTITY: "Developer ID Application"
@@ -88,7 +88,7 @@ targets:
       base:
         PRODUCT_NAME: RetraceCrashRecoveryHelper
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.app.crashrecoveryhelper
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.arya-retrace.crashrecoveryhelper
         SKIP_INSTALL: YES
         CODE_SIGN_STYLE: Manual
         CODE_SIGN_IDENTITY: "Developer ID Application"
@@ -101,13 +101,15 @@ targets:
     platform: macOS
     sources:
       - path: UI/CrashRecoverySupport
+    dependencies:
+      - target: Shared
     settings:
       base:
         PRODUCT_NAME: CrashRecoverySupport
         MACH_O_TYPE: staticlib
         DEFINES_MODULE: YES
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.CrashRecoverySupport
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.CrashRecoverySupport
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: NO
 
@@ -121,7 +123,7 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: NO
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.Shared
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.Shared
 
   Database:
     type: framework
@@ -142,7 +144,7 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: NO
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.Database
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.Database
 
   Storage:
     type: framework
@@ -161,7 +163,7 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: NO
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.Storage
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.Storage
 
   Capture:
     type: framework
@@ -180,7 +182,7 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: NO
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.Capture
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.Capture
 
   Processing:
     type: framework
@@ -202,7 +204,7 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: NO
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.Processing
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.Processing
 
   Search:
     type: framework
@@ -222,7 +224,7 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: NO
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.Search
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.Search
 
   Migration:
     type: framework
@@ -242,7 +244,7 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: NO
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.Migration
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.Migration
 
   App:
     type: framework
@@ -267,7 +269,7 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: NO
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: io.retrace.App
+        PRODUCT_BUNDLE_IDENTIFIER: dev.arya.App
 
 schemes:
   Retrace:

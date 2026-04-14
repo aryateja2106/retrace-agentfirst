@@ -3,18 +3,16 @@ import SwiftUI
 
 enum RetraceAboutPanel {
     struct Content {
-        static let defaultWindowSize = NSSize(width: 480, height: 560)
+        static let defaultWindowSize = NSSize(width: 480, height: 520)
         static let defaultDescriptionText =
-            "Retrace is an open source, local-first screen memory for macOS. It continuously captures what you see, extracts text with on-device OCR, and makes your screen history searchable without sending it to the cloud."
-        static let repositoryURL = URL(string: "https://github.com/haseab/retrace")!
-        static let creatorURL = URL(string: "https://dub.sh/haseab-twitter")!
+            "arya-retrace is a personal, local-first screen memory fork for macOS. It captures what you see, indexes text with on-device OCR, and keeps history searchable without sending it to the cloud. Derived from the open-source Retrace project."
+        static let upstreamRepositoryURL = URL(string: "https://github.com/haseab/retrace")!
 
         let appName: String
         let versionText: String
         let branchText: String?
         let descriptionText: String
-        let repositoryURL: URL
-        let creatorURL: URL
+        let upstreamRepositoryURL: URL
         let windowSize: NSSize
     }
 
@@ -24,8 +22,7 @@ enum RetraceAboutPanel {
             versionText: BuildInfo.displayVersion,
             branchText: BuildInfo.displayBranch,
             descriptionText: Content.defaultDescriptionText,
-            repositoryURL: Content.repositoryURL,
-            creatorURL: Content.creatorURL,
+            upstreamRepositoryURL: Content.upstreamRepositoryURL,
             windowSize: Content.defaultWindowSize
         )
     }
@@ -121,18 +118,11 @@ private struct RetraceAboutPanelView: View {
                         .lineSpacing(4)
                         .frame(maxWidth: 390)
 
-                    HStack(spacing: 12) {
-                        aboutLink(
-                            title: "Open Source Repo",
-                            systemImage: "arrow.up.right.square",
-                            url: content.repositoryURL
-                        )
-                        aboutLink(
-                            title: "@haseab on X",
-                            systemImage: "person.crop.circle",
-                            url: content.creatorURL
-                        )
-                    }
+                    aboutLink(
+                        title: "Upstream Retrace (open source)",
+                        systemImage: "arrow.up.right.square",
+                        url: content.upstreamRepositoryURL
+                    )
                     .frame(maxWidth: 390)
                 }
                 .padding(.top, 28)

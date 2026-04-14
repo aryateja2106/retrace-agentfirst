@@ -3,12 +3,12 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>io.retrace.app.crash-recovery</string>
+    <string>dev.arya.arya-retrace.crash-recovery</string>
     <key>BundleProgram</key>
     <string>Contents/Library/Helpers/RetraceCrashRecoveryHelper</string>
     <key>MachServices</key>
     <dict>
-        <key>io.retrace.app.crash-recovery</key>
+        <key>dev.arya.arya-retrace.crash-recovery</key>
         <true/>
     </dict>
     <key>ProcessType</key>

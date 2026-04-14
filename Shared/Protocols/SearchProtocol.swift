@@ -87,6 +87,8 @@ public struct ParsedQuery: Sendable {
     public let phrases: [String]          // Exact phrase matches
     public let excludedTerms: [String]    // Terms prefixed with -
     public let appFilter: String?         // app:AppName
+    public let taskFilter: String?        // task:Task title
+    public let workingDirectoryFilter: String? // cwd:/path or cwd:folder
     public let dateRange: (start: Date?, end: Date?)
 
     public init(
@@ -94,12 +96,16 @@ public struct ParsedQuery: Sendable {
         phrases: [String] = [],
         excludedTerms: [String] = [],
         appFilter: String? = nil,
+        taskFilter: String? = nil,
+        workingDirectoryFilter: String? = nil,
         dateRange: (start: Date?, end: Date?) = (nil, nil)
     ) {
         self.searchTerms = searchTerms
         self.phrases = phrases
         self.excludedTerms = excludedTerms
         self.appFilter = appFilter
+        self.taskFilter = taskFilter
+        self.workingDirectoryFilter = workingDirectoryFilter
         self.dateRange = dateRange
     }
 }

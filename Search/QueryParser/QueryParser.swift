@@ -23,6 +23,8 @@ public struct QueryParser: QueryParserProtocol {
         var phrases: [String] = []
         var excludedTerms: [String] = []
         var appFilter: String? = nil
+        var taskFilter: String? = nil
+        var workingDirectoryFilter: String? = nil
         var startDate: Date? = nil
         var endDate: Date? = nil
 
@@ -56,6 +58,16 @@ public struct QueryParser: QueryParserProtocol {
                 if !appValue.isEmpty {
                     appFilter = appValue
                 }
+            } else if token.lowercased().hasPrefix("task:") {
+                let taskValue = String(token.dropFirst(5))
+                if !taskValue.isEmpty {
+                    taskFilter = taskValue
+                }
+            } else if token.lowercased().hasPrefix("cwd:") {
+                let workingDirectoryValue = String(token.dropFirst(4))
+                if !workingDirectoryValue.isEmpty {
+                    workingDirectoryFilter = workingDirectoryValue
+                }
             } else if token.lowercased().hasPrefix("after:") {
                 // Start date
                 let dateStr = String(token.dropFirst(6))
@@ -87,6 +99,8 @@ public struct QueryParser: QueryParserProtocol {
             phrases: phrases,
             excludedTerms: excludedTerms,
             appFilter: appFilter,
+            taskFilter: taskFilter,
+            workingDirectoryFilter: workingDirectoryFilter,
             dateRange: (start: startDate, end: endDate)
         )
     }

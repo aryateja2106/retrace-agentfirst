@@ -78,6 +78,8 @@ public struct SearchFilters: Codable, Sendable {
     public let commentFilter: CommentFilter  // How to handle comment presence
     public let windowNameFilter: String?  // Partial match on segment.windowName
     public let browserUrlFilter: String?  // Partial match on segment.browserUrl
+    public let taskTitleFilter: String?  // Partial match on linked terminal task title
+    public let workingDirectoryFilter: String?  // Partial match on linked terminal task cwd
 
     public init(
         startDate: Date? = nil,
@@ -90,7 +92,9 @@ public struct SearchFilters: Codable, Sendable {
         hiddenFilter: HiddenFilter = .hide,
         commentFilter: CommentFilter = .allFrames,
         windowNameFilter: String? = nil,
-        browserUrlFilter: String? = nil
+        browserUrlFilter: String? = nil,
+        taskTitleFilter: String? = nil,
+        workingDirectoryFilter: String? = nil
     ) {
         self.startDate = startDate
         self.endDate = endDate
@@ -103,6 +107,8 @@ public struct SearchFilters: Codable, Sendable {
         self.commentFilter = commentFilter
         self.windowNameFilter = windowNameFilter
         self.browserUrlFilter = browserUrlFilter
+        self.taskTitleFilter = taskTitleFilter
+        self.workingDirectoryFilter = workingDirectoryFilter
     }
 
     /// Effective date ranges for querying. Falls back to legacy single-range fields for compatibility.
@@ -126,7 +132,9 @@ public struct SearchFilters: Codable, Sendable {
         hiddenFilter != .hide ||
         commentFilter != .allFrames ||
         (windowNameFilter?.isEmpty == false) ||
-        (browserUrlFilter?.isEmpty == false)
+        (browserUrlFilter?.isEmpty == false) ||
+        (taskTitleFilter?.isEmpty == false) ||
+        (workingDirectoryFilter?.isEmpty == false)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -141,6 +149,8 @@ public struct SearchFilters: Codable, Sendable {
         case commentFilter
         case windowNameFilter
         case browserUrlFilter
+        case taskTitleFilter
+        case workingDirectoryFilter
     }
 
     public init(from decoder: Decoder) throws {
@@ -156,6 +166,8 @@ public struct SearchFilters: Codable, Sendable {
         commentFilter = try container.decodeIfPresent(CommentFilter.self, forKey: .commentFilter) ?? .allFrames
         windowNameFilter = try container.decodeIfPresent(String.self, forKey: .windowNameFilter)
         browserUrlFilter = try container.decodeIfPresent(String.self, forKey: .browserUrlFilter)
+        taskTitleFilter = try container.decodeIfPresent(String.self, forKey: .taskTitleFilter)
+        workingDirectoryFilter = try container.decodeIfPresent(String.self, forKey: .workingDirectoryFilter)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -171,6 +183,8 @@ public struct SearchFilters: Codable, Sendable {
         try container.encode(commentFilter, forKey: .commentFilter)
         try container.encodeIfPresent(windowNameFilter, forKey: .windowNameFilter)
         try container.encodeIfPresent(browserUrlFilter, forKey: .browserUrlFilter)
+        try container.encodeIfPresent(taskTitleFilter, forKey: .taskTitleFilter)
+        try container.encodeIfPresent(workingDirectoryFilter, forKey: .workingDirectoryFilter)
     }
 
     private static func sanitizedDateRanges(_ ranges: [DateRangeCriterion]?) -> [DateRangeCriterion]? {
@@ -223,6 +237,7 @@ public struct SearchResult: Codable, Sendable, Identifiable {
     public let videoFrameRate: Double?    // Video frame rate for precise seek
     public var source: FrameSource        // Which data source this result came from
     public let highlightNode: HighlightNode?
+    public let terminalTask: TerminalTaskSession?
 
     public init(
         id: FrameID,
@@ -237,7 +252,8 @@ public struct SearchResult: Codable, Sendable, Identifiable {
         videoPath: String? = nil,
         videoFrameRate: Double? = nil,
         source: FrameSource = .native,
-        highlightNode: HighlightNode? = nil
+        highlightNode: HighlightNode? = nil,
+        terminalTask: TerminalTaskSession? = nil
     ) {
         self.id = id
         self.timestamp = timestamp
@@ -252,6 +268,7 @@ public struct SearchResult: Codable, Sendable, Identifiable {
         self.videoFrameRate = videoFrameRate
         self.source = source
         self.highlightNode = highlightNode
+        self.terminalTask = terminalTask
     }
 }
 

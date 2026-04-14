@@ -7,7 +7,7 @@ import Shared
 final class StandaloneCommentComposerWindowController: NSObject {
     static let shared = StandaloneCommentComposerWindowController()
 
-    private static let settingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+    private static let settingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
     nonisolated static let windowTitle = "Quick Comment"
     nonisolated private static let legacyCaptureExcludedWindowTitles: Set<String> = ["Add Quick Comment"]
     private static let expandedContentSize = NSSize(width: 482, height: 365)
@@ -59,8 +59,8 @@ final class StandaloneCommentComposerWindowController: NSObject {
         guard let normalizedWindowName = normalizedCaptureExcludedWindowName(windowName) else {
             return false
         }
-        let retraceBundleIdentifier = Bundle.main.bundleIdentifier ?? "io.retrace.app"
-        let isRetraceWindow = appBundleID == retraceBundleIdentifier || appBundleID == "io.retrace.app"
+        let retraceBundleIdentifier = Bundle.main.bundleIdentifier ?? AryaRetraceIdentity.bundleIdentifier
+        let isRetraceWindow = appBundleID == retraceBundleIdentifier || appBundleID == AryaRetraceIdentity.bundleIdentifier
         guard isRetraceWindow else { return false }
 
         let excludedWindowNames = Set(

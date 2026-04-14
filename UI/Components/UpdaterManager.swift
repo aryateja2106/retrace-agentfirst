@@ -105,6 +105,11 @@ public final class UpdaterManager: NSObject, ObservableObject {
     /// Initialize the Sparkle updater
     /// Call this after the app has finished launching
     public func initialize() {
+        if Bundle.main.object(forInfoDictionaryKey: AryaRetraceIdentity.disableSparkleUpdatesInfoKey) as? Bool == true {
+            Log.info("[UpdaterManager] Sparkle disabled (AryaRetrace private build)", category: .app)
+            canCheckForUpdates = false
+            return
+        }
         // Skip updater in debug builds
         #if DEBUG
         Log.info("[UpdaterManager] Skipping updater initialization in DEBUG mode", category: .app)

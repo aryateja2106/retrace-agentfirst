@@ -32,6 +32,19 @@ final class DashboardWindowTitleFormatterTests: XCTestCase {
         XCTAssertEqual(app.uniqueItemLabel, "1 website")
     }
 
+    func testSupportedTerminalBreakdownTreatsWarpAsTerminal() {
+        let app = AppUsageData(
+            appBundleID: "dev.warp.Warp-Stable",
+            appName: "Warp",
+            duration: 120,
+            uniqueItemCount: 3,
+            percentage: 0.25
+        )
+
+        XCTAssertTrue(app.isTerminal)
+        XCTAssertEqual(app.uniqueItemLabel, "3 tasks")
+    }
+
     func testStripsWebPrefixForChromePWAAppShimBundle() {
         let result = DashboardWindowTitleFormatter.displayTitle(
             for: "ChatGPT Web - New Chat",
@@ -75,5 +88,23 @@ final class DashboardWindowTitleFormatterTests: XCTestCase {
         )
 
         XCTAssertEqual(result, "Terminal - zsh")
+    }
+
+    func testWindowUsageDataMarksTerminalTaskRows() {
+        let window = WindowUsageData(
+            windowName: "Claude Code",
+            isWebsite: false,
+            duration: 300,
+            percentage: 0.6,
+            taskID: TerminalTaskID(value: 42),
+            subtitle: "~/Projects/retrace",
+            commandCount: 12,
+            lastActiveAt: Date(timeIntervalSince1970: 1_700_000_000),
+            workingDirectory: "~/Projects/retrace"
+        )
+
+        XCTAssertTrue(window.isTerminalTask)
+        XCTAssertEqual(window.displayName, "Claude Code")
+        XCTAssertEqual(window.workingDirectory, "~/Projects/retrace")
     }
 }

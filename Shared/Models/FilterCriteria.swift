@@ -112,6 +112,12 @@ public struct FilterCriteria: Codable, Equatable, Sendable {
     /// Browser URL filter (partial string match on segment.browserUrl)
     public var browserUrlFilter: String?
 
+    /// Terminal task title filter (partial string match on linked terminal_task.taskTitle)
+    public var taskTitleFilter: String?
+
+    /// Terminal working directory filter (partial string match on linked terminal_task.workingDirectory)
+    public var workingDirectoryFilter: String?
+
     /// Date range start (nil = no start limit)
     public var startDate: Date?
 
@@ -131,6 +137,8 @@ public struct FilterCriteria: Codable, Equatable, Sendable {
         tagFilterMode: TagFilterMode = .include,
         windowNameFilter: String? = nil,
         browserUrlFilter: String? = nil,
+        taskTitleFilter: String? = nil,
+        workingDirectoryFilter: String? = nil,
         startDate: Date? = nil,
         endDate: Date? = nil,
         dateRanges: [DateRangeCriterion]? = nil
@@ -144,6 +152,8 @@ public struct FilterCriteria: Codable, Equatable, Sendable {
         self.tagFilterMode = tagFilterMode
         self.windowNameFilter = windowNameFilter
         self.browserUrlFilter = browserUrlFilter
+        self.taskTitleFilter = taskTitleFilter
+        self.workingDirectoryFilter = workingDirectoryFilter
         self.startDate = startDate
         self.endDate = endDate
         self.dateRanges = Self.sanitizedDateRanges(dateRanges)
@@ -170,13 +180,17 @@ public struct FilterCriteria: Codable, Equatable, Sendable {
         (selectedTags != nil && !selectedTags!.isEmpty) ||
         (windowNameFilter != nil && !windowNameFilter!.isEmpty) ||
         (browserUrlFilter != nil && !browserUrlFilter!.isEmpty) ||
+        (taskTitleFilter != nil && !taskTitleFilter!.isEmpty) ||
+        (workingDirectoryFilter != nil && !workingDirectoryFilter!.isEmpty) ||
         !effectiveDateRanges.isEmpty
     }
 
     /// Returns true if any advanced filter is active
     public var hasAdvancedFilters: Bool {
         (windowNameFilter != nil && !windowNameFilter!.isEmpty) ||
-        (browserUrlFilter != nil && !browserUrlFilter!.isEmpty)
+        (browserUrlFilter != nil && !browserUrlFilter!.isEmpty) ||
+        (taskTitleFilter != nil && !taskTitleFilter!.isEmpty) ||
+        (workingDirectoryFilter != nil && !workingDirectoryFilter!.isEmpty)
     }
 
     /// Count of active filter categories
@@ -189,6 +203,8 @@ public struct FilterCriteria: Codable, Equatable, Sendable {
         if selectedTags != nil && !selectedTags!.isEmpty { count += 1 }
         if windowNameFilter != nil && !windowNameFilter!.isEmpty { count += 1 }
         if browserUrlFilter != nil && !browserUrlFilter!.isEmpty { count += 1 }
+        if taskTitleFilter != nil && !taskTitleFilter!.isEmpty { count += 1 }
+        if workingDirectoryFilter != nil && !workingDirectoryFilter!.isEmpty { count += 1 }
         if !effectiveDateRanges.isEmpty { count += 1 }
         return count
     }
@@ -206,6 +222,8 @@ public struct FilterCriteria: Codable, Equatable, Sendable {
         case tagFilterMode
         case windowNameFilter
         case browserUrlFilter
+        case taskTitleFilter
+        case workingDirectoryFilter
         case startDate
         case endDate
         case dateRanges
@@ -222,6 +240,8 @@ public struct FilterCriteria: Codable, Equatable, Sendable {
         tagFilterMode = try container.decodeIfPresent(TagFilterMode.self, forKey: .tagFilterMode) ?? .include
         windowNameFilter = try container.decodeIfPresent(String.self, forKey: .windowNameFilter)
         browserUrlFilter = try container.decodeIfPresent(String.self, forKey: .browserUrlFilter)
+        taskTitleFilter = try container.decodeIfPresent(String.self, forKey: .taskTitleFilter)
+        workingDirectoryFilter = try container.decodeIfPresent(String.self, forKey: .workingDirectoryFilter)
         startDate = try container.decodeIfPresent(Date.self, forKey: .startDate)
         endDate = try container.decodeIfPresent(Date.self, forKey: .endDate)
         dateRanges = Self.sanitizedDateRanges(try container.decodeIfPresent([DateRangeCriterion].self, forKey: .dateRanges))
@@ -238,6 +258,8 @@ public struct FilterCriteria: Codable, Equatable, Sendable {
         try container.encode(tagFilterMode, forKey: .tagFilterMode)
         try container.encodeIfPresent(windowNameFilter, forKey: .windowNameFilter)
         try container.encodeIfPresent(browserUrlFilter, forKey: .browserUrlFilter)
+        try container.encodeIfPresent(taskTitleFilter, forKey: .taskTitleFilter)
+        try container.encodeIfPresent(workingDirectoryFilter, forKey: .workingDirectoryFilter)
         try container.encodeIfPresent(startDate, forKey: .startDate)
         try container.encodeIfPresent(endDate, forKey: .endDate)
         try container.encodeIfPresent(Self.sanitizedDateRanges(dateRanges), forKey: .dateRanges)

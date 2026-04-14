@@ -4,7 +4,7 @@ import Shared
 
 final class CaptureIntervalSettingsTests: XCTestCase {
     private func makeTestDefaults() -> UserDefaults {
-        let suiteName = "io.retrace.tests.pause-reminder.\(UUID().uuidString)"
+        let suiteName = "dev.arya.arya-retrace.tests.pause-reminder.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defaults.removePersistentDomain(forName: suiteName)
         return defaults

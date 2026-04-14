@@ -8,7 +8,7 @@ import App
 @MainActor
 final class DeveloperFrameIDToggleTests: XCTestCase {
     func testToggleFrameIDBadgeVisibilityFromDevMenuPersistsShowFrameIDsSetting() {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let originalValue = defaults.object(forKey: "showFrameIDs")
         defer {
             if let originalValue {

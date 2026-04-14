@@ -40,4 +40,13 @@ final class QueryParserTests: XCTestCase {
         XCTAssertTrue(scoped.contains("(otherText:(haseab*))"))
         XCTAssertTrue(scoped.contains("NOT ((text:(wave)) OR (otherText:(wave)))"))
     }
+
+    func testParseTaskAndWorkingDirectoryFilters() throws {
+        let parsed = try parser.parse(rawQuery: #"agent memory task:Claude cwd:~/Projects/retrace"#)
+
+        XCTAssertEqual(parsed.searchTerms, ["agent", "memory"])
+        XCTAssertEqual(parsed.taskFilter, "Claude")
+        XCTAssertEqual(parsed.workingDirectoryFilter, "~/Projects/retrace")
+        XCTAssertEqual(parsed.toFTSQuery(), "agent* memory*")
+    }
 }

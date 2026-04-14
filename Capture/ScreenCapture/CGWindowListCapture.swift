@@ -396,7 +396,12 @@ public actor CGWindowListCapture {
         let visibleWindowContext = exclusionResult.visibleWindowContext
         let resolvedAppBundleID = redactionSummary?.appBundleID ?? visibleWindowContext?.appBundleID
         let resolvedAppName = redactionSummary?.appName ?? visibleWindowContext?.appName
-        let resolvedWindowName = redactionSummary == nil ? visibleWindowContext?.windowName : nil
+        let resolvedWindowName = redactionSummary == nil
+            ? TerminalBundleRegistry.normalizedWindowName(
+                visibleWindowContext?.windowName,
+                bundleID: resolvedAppBundleID
+            )
+            : nil
 
         // Create captured frame
         let frame = CapturedFrame(
@@ -498,7 +503,10 @@ public actor CGWindowListCapture {
                 visibleWindowContext = VisibleWindowContext(
                     appBundleID: bundleID,
                     appName: appDisplayName(ownerName: ownerName, bundleID: bundleID),
-                    windowName: normalizedWindowTitle(windowName)
+                    windowName: TerminalBundleRegistry.normalizedWindowName(
+                        normalizedWindowTitle(windowName),
+                        bundleID: bundleID
+                    )
                 )
             }
 

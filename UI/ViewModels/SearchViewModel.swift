@@ -3,6 +3,7 @@ import Combine
 import CryptoKit
 import Shared
 import App
+import Search
 
 /// Lightweight struct for caching app info to disk
 private struct CachedAppInfo: Codable {
@@ -1343,6 +1344,7 @@ public class SearchViewModel: ObservableObject {
             try Task.checkCancellation()
 
             let searchQuery = buildSearchQuery(query)
+            recordTerminalFilterMetricIfNeeded(rawQuery: query, trigger: trigger)
             let searchResults = try await executeSearch(searchQuery)
 
             // Check for cancellation after the search completes
@@ -1441,6 +1443,29 @@ public class SearchViewModel: ObservableObject {
             mode: searchMode,
             sortOrder: sortOrder
         )
+    }
+
+    private func recordTerminalFilterMetricIfNeeded(rawQuery: String, trigger: String) {
+        let lowercaseQuery = rawQuery.lowercased()
+        guard lowercaseQuery.contains("task:") || lowercaseQuery.contains("cwd:") else {
+            return
+        }
+
+        let parser = QueryParser()
+        let parsed = try? parser.parse(rawQuery: rawQuery)
+        let metadata = DashboardViewModel.metricMetadataJSON([
+            "source": "search_query",
+            "trigger": trigger,
+            "taskFilter": parsed?.taskFilter ?? "",
+            "workingDirectoryFilter": parsed?.workingDirectoryFilter ?? ""
+        ])
+
+        Task {
+            try? await coordinator.recordMetricEvent(
+                metricType: .terminalFilterApplied,
+                metadata: metadata
+            )
+        }
     }
 
     /// Truncate query text to maximum allowed words

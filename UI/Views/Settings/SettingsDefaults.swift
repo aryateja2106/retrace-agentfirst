@@ -3,7 +3,7 @@ import Shared
 import App
 
 /// Shared UserDefaults store for consistent settings across debug/release builds.
-let settingsStore: UserDefaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+let settingsStore: UserDefaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 let rewindCutoffDateDefaultsKey = "rewindCutoffDate"
 let phraseLevelRedactionEnabledDefaultsKey = "phraseLevelRedactionEnabled"
 
@@ -93,6 +93,8 @@ enum SettingsDefaults {
     static let enableFrameIDSearch = false
     static let showOCRDebugOverlay = false
     static let showVideoControls = false
+    static let terminalCLIAccessEnabled = false
+    static let terminalAllowAgentFrameSearch = false
 
     static let ocrEnabled = true
     static let ocrOnlyWhenPluggedIn = false

@@ -182,6 +182,8 @@ public struct SettingsView: View {
     @AppStorage("enableFrameIDSearch", store: settingsStore) var enableFrameIDSearch = SettingsDefaults.enableFrameIDSearch
     @AppStorage("showOCRDebugOverlay", store: settingsStore) var showOCRDebugOverlay = SettingsDefaults.showOCRDebugOverlay
     @AppStorage("showVideoControls", store: settingsStore) var showVideoControls = SettingsDefaults.showVideoControls
+    @AppStorage(TerminalMemoryService.cliAccessEnabledDefaultsKey, store: settingsStore) var terminalCLIAccessEnabled = SettingsDefaults.terminalCLIAccessEnabled
+    @AppStorage(TerminalMemoryService.allowAgentFrameSearchDefaultsKey, store: settingsStore) var terminalAllowAgentFrameSearch = SettingsDefaults.terminalAllowAgentFrameSearch
 
     // MARK: OCR Power Settings
     @AppStorage("ocrEnabled", store: settingsStore) var ocrEnabled = SettingsDefaults.ocrEnabled
@@ -310,7 +312,7 @@ public struct SettingsView: View {
     static let powerOCRPriorityTargetID = "settings.powerOCRPriority"
     static let powerOCRPriorityAnchorID = "settings.powerOCRPriorityAnchor"
     static let inPageURLPermissionProbeQueue = DispatchQueue(
-        label: "io.retrace.settings.inPageURLPermissionProbe",
+        label: "\(AryaRetraceIdentity.bundleIdentifier).settings.inPageURLPermissionProbe",
         qos: .utility,
         attributes: .concurrent
     )

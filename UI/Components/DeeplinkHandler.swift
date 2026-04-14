@@ -2,9 +2,8 @@ import Foundation
 import SwiftUI
 import Shared
 
-/// Handles deeplink URL routing for Retrace
-/// Supports: retrace://search?q={query}&t={unix_ms}&app={bundle_id}
-///           retrace://timeline?t={unix_ms}
+/// Handles deeplink URL routing for arya-retrace
+/// Supports: arya-retrace:// and retrace:// — search?q=…&t=…&app=…, timeline?t=…
 ///           (legacy timestamp key `timestamp` is also accepted)
 @MainActor
 public class DeeplinkHandler: ObservableObject {
@@ -29,7 +28,7 @@ public class DeeplinkHandler: ObservableObject {
 
     /// Parse a deeplink URL into a route, accepting both `t` and `timestamp`.
     public static func route(for url: URL) -> DeeplinkRoute? {
-        guard url.scheme == "retrace" else {
+        guard url.scheme == "retrace" || url.scheme == "arya-retrace" else {
             Log.warning("[DeeplinkHandler] Invalid scheme: \(url.scheme ?? "none")", category: .ui)
             return nil
         }
@@ -78,7 +77,7 @@ public class DeeplinkHandler: ObservableObject {
     /// Generate a deeplink URL for sharing
     public static func generateSearchLink(query: String? = nil, timestamp: Date? = nil, appBundleID: String? = nil) -> URL? {
         var components = URLComponents()
-        components.scheme = "retrace"
+        components.scheme = "arya-retrace"
         components.host = "search"
 
         var queryItems: [URLQueryItem] = []
@@ -105,7 +104,7 @@ public class DeeplinkHandler: ObservableObject {
 
     public static func generateTimelineLink(timestamp: Date) -> URL? {
         var components = URLComponents()
-        components.scheme = "retrace"
+        components.scheme = "arya-retrace"
         components.host = "timeline"
 
         let unixMs = Int64(timestamp.timeIntervalSince1970 * 1000)

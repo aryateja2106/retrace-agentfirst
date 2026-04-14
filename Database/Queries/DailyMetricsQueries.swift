@@ -122,6 +122,20 @@ public enum DailyMetricsQueries {
         case frameDeleted = "frame_deleted"
         case segmentDeleted = "segment_deleted"
         case videoRewriteOutcome = "video_rewrite_outcome"
+
+        // Terminal memory / CLI metrics
+        case terminalTaskStarted = "terminal_task_started"
+        case terminalTaskCompleted = "terminal_task_completed"
+        case terminalCommandRecorded = "terminal_command_recorded"
+        case terminalCLIQuery = "terminal_cli_query"
+        case terminalCLIScopeDenied = "terminal_cli_scope_denied"
+        case terminalFilterApplied = "terminal_filter_applied"
+
+        // PM / project task timing (arya-retrace)
+        case pmProjectRegistered = "pm_project_registered"
+        case pmTaskTimerStart = "pm_task_timer_start"
+        case pmTaskTimerStop = "pm_task_timer_stop"
+        case pmTaskBlocked = "pm_task_blocked"
     }
 
     // MARK: - Insert

@@ -27,6 +27,8 @@ public actor ServiceContainer {
     // ⚠️ RELEASE 2 ONLY - Audio not implemented in Release 1
     // public let audioProcessing: AudioProcessingManager
     public let search: SearchManager
+    public let terminalMemory: TerminalMemoryService
+    public let projectTasks: ProjectTaskService
     public let migration: MigrationManager
     public let modelManager: ModelManager
     nonisolated public let onboardingManager: OnboardingManager
@@ -125,6 +127,11 @@ public actor ServiceContainer {
             database: database,
             ftsEngine: ftsEngine
         )
+        self.terminalMemory = TerminalMemoryService(
+            database: database,
+            search: self.search
+        )
+        self.projectTasks = ProjectTaskService(database: database)
 
         // Migration depends on database and processing
         self.migration = MigrationManager(
@@ -203,6 +210,11 @@ public actor ServiceContainer {
             database: database,
             ftsEngine: ftsEngine
         )
+        self.terminalMemory = TerminalMemoryService(
+            database: database,
+            search: self.search
+        )
+        self.projectTasks = ProjectTaskService(database: database)
 
         self.migration = MigrationManager(
             database: database,
@@ -339,7 +351,7 @@ public actor ServiceContainer {
         )
 
         // Register Rewind source if user opted in
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let useRewindData = defaults.bool(forKey: "useRewindData")
         Log.info("Checking Rewind source during initialization: useRewindData=\(useRewindData)", category: .app)
 
@@ -382,7 +394,7 @@ public actor ServiceContainer {
             return
         }
 
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let useRewindData = defaults.bool(forKey: "useRewindData")
         Log.info("Checking if Rewind source should be registered: useRewindData=\(useRewindData)", category: .app)
 
@@ -415,7 +427,7 @@ public actor ServiceContainer {
         }
 
         // Save preference
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         defaults.set(enabled, forKey: "useRewindData")
 
         if enabled {
@@ -447,7 +459,7 @@ public actor ServiceContainer {
             return false
         }
 
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         guard defaults.bool(forKey: "useRewindData") else {
             Log.info("Rewind cutoff updated in settings while Rewind data is disabled", category: .app)
             return false
@@ -487,7 +499,7 @@ public actor ServiceContainer {
             return
         }
 
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let cutoffDate = Self.rewindCutoffDate(in: defaults)
         if Self.storedRewindCutoffDate(in: defaults) != nil {
             Log.info("[ServiceContainer] Using user-configured Rewind cutoff \(cutoffDate)", category: .app)
@@ -666,7 +678,7 @@ extension StorageConfig {
     public static var `default`: StorageConfig {
         // Read settings from UserDefaults (synced with Settings UI)
         // Defaults: retention = forever (0/nil), storage = unlimited (500GB max)
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let retentionDays = defaults.object(forKey: "retentionDays") as? Int ?? 0
         let maxStorageGB = defaults.object(forKey: "maxStorageGB") as? Double ?? 500.0
 
@@ -682,7 +694,7 @@ extension StorageConfig {
 extension CaptureConfig {
     public static var `default`: CaptureConfig {
         // Read settings from UserDefaults (synced with Settings UI)
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let captureIntervalSeconds = defaults.object(forKey: "captureIntervalSeconds") as? Double ?? 2.0
         // Private/incognito redaction toggle (AXTitle marker-based)
         let excludePrivateWindows = defaults.object(forKey: "excludePrivateWindows") as? Bool ?? false

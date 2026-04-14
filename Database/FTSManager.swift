@@ -10,16 +10,19 @@ public actor FTSManager: FTSProtocol {
 
     private var db: OpaquePointer?
     private let databasePath: String
+    private let readOnly: Bool
 
     // MARK: - Initialization
 
-    public init(databasePath: String) {
+    public init(databasePath: String, readOnly: Bool = false) {
         self.databasePath = databasePath
+        self.readOnly = readOnly
     }
 
     /// Convenience initializer for in-memory database (testing)
     public init() {
         self.databasePath = ":memory:"
+        self.readOnly = false
     }
 
     /// Initialize the FTS manager (opens existing database connection)
@@ -28,13 +31,19 @@ public actor FTSManager: FTSProtocol {
 
         // Use sqlite3_open_v2 with SQLITE_OPEN_URI to support URI filenames like:
         // file:memdb_xxx?mode=memory&cache=shared (used by tests to share one in-memory DB)
-        let flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI
+        var flags = SQLITE_OPEN_URI
+        if readOnly {
+            flags |= SQLITE_OPEN_READONLY
+        } else {
+            flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
+        }
         guard sqlite3_open_v2(expandedPath, &db, flags, nil) == SQLITE_OK else {
             let errorMsg = db.map { String(cString: sqlite3_errmsg($0)) } ?? "Unknown error"
             throw DatabaseError.connectionFailed(underlying: errorMsg)
         }
 
-        SQLiteRuntimeDiagnostics.log(label: "FTSManager/open", db: db)
+        sqlite3_busy_timeout(db, 5_000)
+        SQLiteRuntimeDiagnostics.log(label: readOnly ? "FTSManager/open-readonly" : "FTSManager/open", db: db)
     }
 
     /// Close the database connection

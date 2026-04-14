@@ -30,6 +30,7 @@ UI/
 │   │   └── StandaloneQuickCommentView.swift # Dedicated standalone quick-comment UI
 │   ├── Dashboard/
 │   │   ├── DashboardView.swift          # Main dashboard
+│   │   ├── PMProjectTaskCard.swift      # Per-repo `.dot/` project/task timer + blockers
 │   │   ├── ChangelogView.swift          # Appcast-powered release notes view
 │   │   ├── AnalyticsCard.swift          # Stats widgets
 │   │   ├── MigrationPanel.swift         # Import UI
@@ -83,8 +84,10 @@ UI/
 ├── CrashRecoverySupport/
 │   └── CrashRecoverySupport.swift       # Shared crash-recovery constants, disconnect suppression, and XPC protocol
 ├── LaunchAgents/
-│   └── io.retrace.app.crash-recovery.plist # SMAppService launch-agent plist for crash recovery
+│   └── dev.arya.arya-retrace.crash-recovery.plist # SMAppService launch-agent plist for crash recovery
 ├── Components/
+│   ├── AppTheme.swift                   # Neutral monochrome design tokens (backgrounds, text, accent)
+│   ├── UpdaterManager.swift             # Sparkle wiring; respects AryaRetraceDisableSparkleUpdates
 │   ├── MasterKeyRedactionFlowCoordinator.swift # Shared missing-master-key prompt/recovery coordinator
 │   ├── BoundingBoxOverlay.swift         # Text region highlighting
 │   ├── CrashRecoveryManager.swift       # App-side SMAppService/XPC lifecycle manager

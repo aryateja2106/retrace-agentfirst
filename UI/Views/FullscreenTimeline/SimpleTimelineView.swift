@@ -4,7 +4,7 @@ import Shared
 import App
 import UniformTypeIdentifiers
 
-private let timelineSettingsStore: UserDefaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+private let timelineSettingsStore: UserDefaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
 /// Redesigned fullscreen timeline view with scrolling tape and fixed playhead
 /// The timeline tape moves left/right while the playhead stays fixed in center
@@ -1661,12 +1661,12 @@ class DoubleBufferedVideoView: NSView {
     private var seekGeneration: UInt64 = 0
 
     /// Enable detailed seek diagnostics in release builds with:
-    /// `defaults write io.retrace.app retrace.debug.filteredSeekDiagnostics -bool YES`
+    /// `defaults write dev.arya.arya-retrace retrace.debug.filteredSeekDiagnostics -bool YES`
     private static let isFilteredSeekDiagnosticsEnabled: Bool = {
         #if DEBUG
         return true
         #else
-        return (UserDefaults(suiteName: "io.retrace.app") ?? .standard)
+        return (UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard)
             .bool(forKey: "retrace.debug.filteredSeekDiagnostics")
         #endif
     }()
@@ -1989,7 +1989,7 @@ class DoubleBufferedVideoView: NSView {
     }
 
     private func configuredSeekToleranceFrames() -> Int {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         if let value = defaults.object(forKey: "retrace.debug.timelineSeekToleranceFrames") as? NSNumber {
             return max(0, value.intValue)
         }
@@ -10470,7 +10470,7 @@ struct TagSubmenuRow: View {
 
 /// Floating vertical card panel for timeline filtering
 /// Shared UserDefaults store for accessing settings
-private let filterPanelSettingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+private let filterPanelSettingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
 struct FilterPanel: View {
     @ObservedObject var viewModel: SimpleTimelineViewModel

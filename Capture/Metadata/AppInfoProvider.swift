@@ -33,14 +33,17 @@ struct AppInfoProvider: Sendable {
             var appName = visibleWindow.appName
 
             if bundleID == nil && visibleWindow.pid == ProcessInfo.processInfo.processIdentifier {
-                bundleID = Bundle.main.bundleIdentifier ?? "io.retrace.app"
+                bundleID = Bundle.main.bundleIdentifier ?? AryaRetraceIdentity.bundleIdentifier
                 appName = appName ?? "Retrace"
             }
 
-            let windowName = visibleWindow.windowName ?? getWindowTitle(
+            let windowName = TerminalBundleRegistry.normalizedWindowName(
+                visibleWindow.windowName ?? getWindowTitle(
                 for: visibleWindow.pid,
                 bundleID: bundleID,
                 appName: appName
+            ),
+                bundleID: bundleID
             )
 
             let browserURL = await resolveBrowserURL(
@@ -71,14 +74,17 @@ struct AppInfoProvider: Sendable {
         var appName = frontApp.localizedName
 
         if bundleID == nil && frontApp.processIdentifier == ProcessInfo.processInfo.processIdentifier {
-            bundleID = Bundle.main.bundleIdentifier ?? "io.retrace.app"
+            bundleID = Bundle.main.bundleIdentifier ?? AryaRetraceIdentity.bundleIdentifier
             appName = appName ?? "Retrace"
         }
 
-        let windowName = getWindowTitle(
+        let windowName = TerminalBundleRegistry.normalizedWindowName(
+            getWindowTitle(
             for: frontApp.processIdentifier,
             bundleID: bundleID,
             appName: appName
+        ),
+            bundleID: bundleID
         )
 
         let browserURL = await resolveBrowserURL(
@@ -118,12 +124,18 @@ struct AppInfoProvider: Sendable {
         }
 
         // 1) AX focused-window title
-        if let title = normalizedWindowTitle(PermissionMonitor.shared.safeGetWindowTitle(for: pid)) {
+        if let title = TerminalBundleRegistry.normalizedWindowName(
+            normalizedWindowTitle(PermissionMonitor.shared.safeGetWindowTitle(for: pid)),
+            bundleID: bundleID
+        ) {
             return title
         }
 
         // 2) CGWindow fallback (works for many PWA-style windows)
-        if let title = getWindowTitleFromWindowList(for: pid) {
+        if let title = TerminalBundleRegistry.normalizedWindowName(
+            getWindowTitleFromWindowList(for: pid),
+            bundleID: bundleID
+        ) {
             return title
         }
 
@@ -164,8 +176,11 @@ struct AppInfoProvider: Sendable {
             }
 
             let ownerName = normalizedWindowTitle(windowInfo[kCGWindowOwnerName as String] as? String)
-            let windowName = normalizedWindowTitle(windowInfo[kCGWindowName as String] as? String)
             let runningApp = NSRunningApplication(processIdentifier: pid)
+            let windowName = TerminalBundleRegistry.normalizedWindowName(
+                normalizedWindowTitle(windowInfo[kCGWindowName as String] as? String),
+                bundleID: runningApp?.bundleIdentifier
+            )
             let appName = normalizedWindowTitle(runningApp?.localizedName) ?? ownerName
             let bundleID = runningApp?.bundleIdentifier
 

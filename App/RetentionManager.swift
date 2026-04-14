@@ -89,7 +89,7 @@ public actor RetentionManager {
     /// Get the current retention policy from user settings
     /// Returns nil if retention is set to "Forever" (0 days)
     public nonisolated func getRetentionDays() -> Int? {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let days = defaults.integer(forKey: "retentionDays")
         return days == 0 ? nil : days
     }
@@ -111,7 +111,7 @@ public actor RetentionManager {
         // Exclusions disabled - always return empty set
         return []
         // Original code (commented out):
-        // let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        // let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         // guard let appsString = defaults.string(forKey: "retentionExcludedApps"), !appsString.isEmpty else {
         //     return []
         // }
@@ -124,7 +124,7 @@ public actor RetentionManager {
         // Exclusions disabled - always return empty set
         return []
         // Original code (commented out):
-        // let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        // let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         // guard let tagsString = defaults.string(forKey: "retentionExcludedTagIds"), !tagsString.isEmpty else {
         //     return []
         // }
@@ -137,7 +137,7 @@ public actor RetentionManager {
         // Exclusions disabled - never exclude hidden items
         return false
         // Original code (commented out):
-        // let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        // let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         // return defaults.bool(forKey: "retentionExcludeHidden")
     }
 
@@ -201,6 +201,12 @@ public actor RetentionManager {
             let deletedSegmentCount = try await deleteAppSegmentsOlderThan(cutoffDate, excludingApps: excludedApps, excludingTagIds: excludedTagIds, excludeHidden: excludeHidden)
             Log.info("[RetentionManager] Deleted \(deletedSegmentCount) app segments", category: .app)
 
+            // Step 3b: Delete old terminal task sessions and cascaded task events/frame links
+            let deletedTerminalTaskCount = try await database.deleteTerminalTasks(olderThan: cutoffDate)
+            if deletedTerminalTaskCount > 0 {
+                Log.info("[RetentionManager] Deleted \(deletedTerminalTaskCount) terminal task sessions", category: .app)
+            }
+
             // Step 4: Delete orphaned video segments and their files
             var reclaimedBytes: Int64 = 0
             var deletedVideoCount = 0
@@ -239,7 +245,7 @@ public actor RetentionManager {
                 Log.info("[RetentionManager] Database vacuumed", category: .app)
             }
 
-            Log.info("[RetentionManager] Cleanup complete. Frames: \(deletedFrameCount), Videos: \(deletedVideoCount), Segments: \(deletedSegmentCount), Reclaimed: \(formatBytes(reclaimedBytes))", category: .app)
+            Log.info("[RetentionManager] Cleanup complete. Frames: \(deletedFrameCount), Videos: \(deletedVideoCount), Segments: \(deletedSegmentCount), TerminalTasks: \(deletedTerminalTaskCount), Reclaimed: \(formatBytes(reclaimedBytes))", category: .app)
 
             return RetentionCleanupResult(
                 deletedFrames: deletedFrameCount,

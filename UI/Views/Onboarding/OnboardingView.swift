@@ -71,7 +71,7 @@ public struct OnboardingView: View {
     private static let automationPermissionTargetNotRunningStatus = OSStatus(procNotFound)
     private static let automationPermissionProbeTimeoutStatus = OSStatus(errAETimeout)
     private static let automationPermissionProbeQueue = DispatchQueue(
-        label: "io.retrace.onboarding.automationPermissionProbe",
+        label: "\(AryaRetraceIdentity.bundleIdentifier).onboarding.automationPermissionProbe",
         qos: .utility,
         attributes: .concurrent
     )
@@ -187,7 +187,7 @@ public struct OnboardingView: View {
 
     // Rewind data flow state
     @State private var hasRewindData: Bool? = nil
-    @State private var wantsRewindData: Bool? = (UserDefaults(suiteName: "io.retrace.app") ?? .standard).object(forKey: "useRewindData") as? Bool
+    @State private var wantsRewindData: Bool? = (UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard).object(forKey: "useRewindData") as? Bool
     @State private var rewindDataSizeGB: Double? = nil
 
     // Keyboard shortcuts - initialized from saved values or defaults
@@ -404,7 +404,7 @@ public struct OnboardingView: View {
             // Skip Rewind data step (7) if no Rewind data exists
             Button(action: {
                 setLaunchAtLogin(enabled: launchAtLogin)
-                let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+                let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
                 defaults.set(launchAtLogin, forKey: "launchAtLogin")
                 withAnimation { currentStep = hasRewindData == true ? 7 : 8 }
             }) {
@@ -424,7 +424,7 @@ public struct OnboardingView: View {
         case 7:
             // Rewind data - requires selection if data exists
             Button(action: {
-                let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+                let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
                 defaults.set(wantsRewindData == true, forKey: "useRewindData")
                 withAnimation { currentStep = 8 }
             }) {
@@ -4121,7 +4121,7 @@ public struct OnboardingView: View {
 
     @MainActor
     private func loadPersistedAutomationPreflightStatuses() -> [String: AutomationPreflightStatus] {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         guard let rawStatuses = defaults.dictionary(forKey: Self.automationPreflightStatusesKey) as? [String: String] else {
             return [:]
         }
@@ -4138,7 +4138,7 @@ public struct OnboardingView: View {
 
     @MainActor
     private func persistAutomationPreflightStatuses() {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let persistableStatuses: [String: String] = automationPreflightStatusByBundleID.compactMapValues { status in
             switch status {
             case .granted, .skipped, .denied:

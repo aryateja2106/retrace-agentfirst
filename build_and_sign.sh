@@ -6,7 +6,7 @@
 set -e  # Exit on error
 
 APP_NAME="Retrace"
-BUNDLE_ID="io.retrace.app"
+BUNDLE_ID="dev.arya.arya-retrace"
 BUILD_CONFIG="release"
 BUILD_DIR="$(swift build -c "$BUILD_CONFIG" --show-bin-path)"
 APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"

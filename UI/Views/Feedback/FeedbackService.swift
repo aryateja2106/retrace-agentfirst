@@ -191,7 +191,7 @@ public final class FeedbackService: @unchecked Sendable {
         }
 
         // If running in debug mode, try to find the app bundle by identifier
-        if let bundle = Bundle(identifier: "io.retrace.app") {
+        if let bundle = Bundle(identifier: AryaRetraceIdentity.bundleIdentifier) {
             return bundle
         }
 
@@ -292,7 +292,7 @@ public final class FeedbackService: @unchecked Sendable {
 
             let entries = try store.getEntries(at: position)
                 .compactMap { $0 as? OSLogEntryLog }
-                .filter { $0.subsystem == "io.retrace.app" }
+                .filter { $0.subsystem == AryaRetraceIdentity.logSubsystem }
                 .suffix(maxEntries)
 
             return entries.map { entry in
@@ -325,7 +325,7 @@ public final class FeedbackService: @unchecked Sendable {
     /// For list-type settings (excluded apps, OCR filtered apps), only the *count* is reported.
     /// Path settings are reduced to a boolean "is custom path set?" flag.
     private func collectSanitizedSettingsSnapshot() -> [String: String] {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
         var settings: [String: String] = [:]
 

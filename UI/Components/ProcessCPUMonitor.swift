@@ -517,7 +517,7 @@ private actor ProcessCPULogSampler {
     private let decoder = JSONDecoder()
 
     init() {
-        retraceBundleID = Bundle.main.bundleIdentifier ?? "io.retrace.app"
+        retraceBundleID = Bundle.main.bundleIdentifier ?? AryaRetraceIdentity.bundleIdentifier
         retraceDisplayName = (Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String)
             ?? (Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String)
             ?? "Retrace"

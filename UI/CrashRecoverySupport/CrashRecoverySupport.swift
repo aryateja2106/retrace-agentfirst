@@ -1,6 +1,7 @@
 import Darwin
 import Foundation
 import ServiceManagement
+import Shared
 
 public enum CrashRecoverySupport {
     public enum Status: Equatable {
@@ -81,14 +82,14 @@ public enum CrashRecoverySupport {
         }
     }
 
-    public static let launchAgentLabel = "io.retrace.app.crash-recovery"
-    public static let launchAgentPlistName = "io.retrace.app.crash-recovery.plist"
+    public static let launchAgentLabel = AryaRetraceIdentity.crashRecoveryLaunchAgentLabel
+    public static let launchAgentPlistName = AryaRetraceIdentity.crashRecoveryLaunchAgentPlistName
     public static let machServiceName = launchAgentLabel
     public static let crashRecoveryLaunchArgument = "--retrace-crash-recovery-relaunch"
     public static let crashRecoverySourceArgument = "--retrace-crash-recovery-source"
     public static let registeredBuildKey = "crashRecoveryRegisteredBuild"
     public static let registeredLaunchTargetPathKey = "crashRecoveryRegisteredLaunchTargetPath"
-    public static let preferencesSuiteName = "io.retrace.app"
+    public static let preferencesSuiteName = AryaRetraceIdentity.userDefaultsSuiteName
     public static let disconnectSuppressionMaxAgeSeconds: TimeInterval = 20
     public static let crashAutoRestartWindowSeconds: TimeInterval = 5 * 60
     public static let maxCrashAutoRestartsPerWindow = 2

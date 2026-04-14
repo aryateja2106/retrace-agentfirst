@@ -228,6 +228,8 @@ public actor DataAdapter {
     /// Filters that require Retrace-only semantics because Rewind lacks supporting tables/data.
     private func requiresRetraceOnly(_ filters: FilterCriteria) -> Bool {
         (filters.selectedTags != nil && !filters.selectedTags!.isEmpty) ||
+        (filters.taskTitleFilter?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false) ||
+        (filters.workingDirectoryFilter?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false) ||
         filters.hiddenFilter == .onlyHidden ||
         filters.commentFilter == .commentsOnly
     }
@@ -236,6 +238,8 @@ public actor DataAdapter {
     private func requiresRetraceOnly(_ filters: SearchFilters) -> Bool {
         (filters.selectedTagIds != nil && !filters.selectedTagIds!.isEmpty) ||
         (filters.excludedTagIds != nil && !filters.excludedTagIds!.isEmpty) ||
+        (filters.taskTitleFilter?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false) ||
+        (filters.workingDirectoryFilter?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false) ||
         filters.hiddenFilter == .onlyHidden ||
         filters.commentFilter == .commentsOnly
     }
@@ -1763,14 +1767,17 @@ public actor DataAdapter {
         // Window/browser metadata filters support encoded include/exclude term sets.
         let windowNameFilter = Self.decodeMetadataStringFilter(filters.windowNameFilter)
         let browserUrlFilter = Self.decodeMetadataStringFilter(filters.browserUrlFilter)
+        let taskTitleFilter = Self.decodeMetadataStringFilter(filters.taskTitleFilter)
+        let workingDirectoryFilter = Self.decodeMetadataStringFilter(filters.workingDirectoryFilter)
         let hasWindowNameFilter = windowNameFilter.hasActiveFilters
         let hasSelectedTagFilters = filters.selectedTags != nil && !filters.selectedTags!.isEmpty
         let hasBrowserUrlFilter = browserUrlFilter.hasActiveFilters
+        let hasTerminalTaskFilter = taskTitleFilter.hasActiveFilters || workingDirectoryFilter.hasActiveFilters
         let hasSegmentMetadataFilter = hasBrowserUrlFilter || hasWindowNameFilter
 
         // Sparse metadata filters are often selective; use a segment-first query shape so SQLite doesn't
         // scan the full frame table just to satisfy ORDER BY createdAt LIMIT N.
-        if hasSegmentMetadataFilter && !hasSelectedTagFilters && filters.hiddenFilter != .onlyHidden {
+        if hasSegmentMetadataFilter && !hasSelectedTagFilters && !hasTerminalTaskFilter && filters.hiddenFilter != .onlyHidden {
             return try Self.queryMostRecentFramesWithSegmentMetadataFilterSegmentFirst(
                 limit: limit,
                 connection: connection,
@@ -1817,6 +1824,8 @@ public actor DataAdapter {
         Log.debug("[Filter] Hidden filter: \(filters.hiddenFilter.rawValue), hiddenTagId: \(String(describing: hiddenTagId))", category: .database)
         Log.debug("[Filter] Window name filter: \(filters.windowNameFilter ?? "nil")", category: .database)
         Log.debug("[Filter] Browser URL filter: \(filters.browserUrlFilter ?? "nil")", category: .database)
+        Log.debug("[Filter] Task title filter: \(filters.taskTitleFilter ?? "nil")", category: .database)
+        Log.debug("[Filter] Working directory filter: \(filters.workingDirectoryFilter ?? "nil")", category: .database)
         Log.debug("[Filter] Date ranges: \(filters.effectiveDateRanges)", category: .database)
 
         let statement: OpaquePointer?
@@ -1910,6 +1919,8 @@ public actor DataAdapter {
     ) throws -> [FrameWithVideoInfo] {
         let windowNameFilter = Self.decodeMetadataStringFilter(filters.windowNameFilter)
         let browserUrlFilter = Self.decodeMetadataStringFilter(filters.browserUrlFilter)
+        let taskTitleFilter = Self.decodeMetadataStringFilter(filters.taskTitleFilter)
+        let workingDirectoryFilter = Self.decodeMetadataStringFilter(filters.workingDirectoryFilter)
         let hasBrowserUrlFilter = browserUrlFilter.hasActiveFilters
         let hasWindowNameFilter = windowNameFilter.hasActiveFilters
         guard hasBrowserUrlFilter || hasWindowNameFilter else {
@@ -1941,6 +1952,22 @@ public actor DataAdapter {
             columnName: "s2.windowName",
             parsedFilter: windowNameFilter,
             whereConditions: &segmentWhereClauses,
+            bindValues: &segmentMetadataBindValues
+        )
+        Self.appendTerminalTaskStringFilter(
+            columnName: "taskTitle",
+            parsedFilter: taskTitleFilter,
+            frameIDExpression: "f.id",
+            isRewindDatabase: isRewindDatabase,
+            whereConditions: &whereClauses,
+            bindValues: &segmentMetadataBindValues
+        )
+        Self.appendTerminalTaskStringFilter(
+            columnName: "workingDirectory",
+            parsedFilter: workingDirectoryFilter,
+            frameIDExpression: "f.id",
+            isRewindDatabase: isRewindDatabase,
+            whereConditions: &whereClauses,
             bindValues: &segmentMetadataBindValues
         )
 
@@ -3004,6 +3031,8 @@ public actor DataAdapter {
             outerBindValues.append(contentsOf: excludedAppBundleIDs)
         }
 
+        let isRewind = source == .rewind
+
         // Advanced metadata filters (single-value legacy and encoded multi-value include/exclude).
         let windowNameFilter = decodeMetadataStringFilter(query.filters.windowNameFilter)
         Self.appendMetadataStringFilter(
@@ -3020,11 +3049,28 @@ public actor DataAdapter {
             whereConditions: &outerWhereConditions,
             bindValues: &outerBindValues
         )
+        let taskTitleFilter = decodeMetadataStringFilter(query.filters.taskTitleFilter)
+        Self.appendTerminalTaskStringFilter(
+            columnName: "taskTitle",
+            parsedFilter: taskTitleFilter,
+            frameIDExpression: "f.id",
+            isRewindDatabase: isRewind,
+            whereConditions: &outerWhereConditions,
+            bindValues: &outerBindValues
+        )
+        let workingDirectoryFilter = decodeMetadataStringFilter(query.filters.workingDirectoryFilter)
+        Self.appendTerminalTaskStringFilter(
+            columnName: "workingDirectory",
+            parsedFilter: workingDirectoryFilter,
+            frameIDExpression: "f.id",
+            isRewindDatabase: isRewind,
+            whereConditions: &outerWhereConditions,
+            bindValues: &outerBindValues
+        )
 
         // Tag include filter - use INNER JOIN (more efficient than EXISTS subquery)
         // Note: Skip tag filters for Rewind database (it doesn't have segment_tag table)
         // When no tags selected, tagJoin is empty and no join happens
-        let isRewind = source == .rewind
         var tagJoinBindValues: [Int64] = []
         let tagJoin: String
         if !isRewind, let tagIds = query.filters.selectedTagIds, !tagIds.isEmpty {
@@ -3493,6 +3539,8 @@ public actor DataAdapter {
             whereConditions.append(visibilityClause)
         }
 
+        let isRewind = source == .rewind
+
         // App include filter
         let hasAppFilter = query.filters.appBundleIDs != nil && !query.filters.appBundleIDs!.isEmpty
         if let appBundleIDs = query.filters.appBundleIDs, !appBundleIDs.isEmpty {
@@ -3536,11 +3584,28 @@ public actor DataAdapter {
             whereConditions: &whereConditions,
             bindValues: &bindValues
         )
+        let taskTitleFilter = decodeMetadataStringFilter(query.filters.taskTitleFilter)
+        Self.appendTerminalTaskStringFilter(
+            columnName: "taskTitle",
+            parsedFilter: taskTitleFilter,
+            frameIDExpression: "f.id",
+            isRewindDatabase: isRewind,
+            whereConditions: &whereConditions,
+            bindValues: &bindValues
+        )
+        let workingDirectoryFilter = decodeMetadataStringFilter(query.filters.workingDirectoryFilter)
+        Self.appendTerminalTaskStringFilter(
+            columnName: "workingDirectory",
+            parsedFilter: workingDirectoryFilter,
+            frameIDExpression: "f.id",
+            isRewindDatabase: isRewind,
+            whereConditions: &whereConditions,
+            bindValues: &bindValues
+        )
 
         // Tag include filter - use INNER JOIN (more efficient than EXISTS subquery)
         // Note: Skip tag filters for Rewind database (it doesn't have segment_tag table)
         // When no tags selected, tagJoin is empty and no join happens
-        let isRewind = source == .rewind
         let hasTagIncludeFilter = !isRewind && query.filters.selectedTagIds != nil && !query.filters.selectedTagIds!.isEmpty
         var tagJoinBindValues: [Int64] = []
         let tagJoin: String
@@ -3611,12 +3676,14 @@ public actor DataAdapter {
             (!isRewind && query.filters.excludedTagIds != nil && !query.filters.excludedTagIds!.isEmpty) ||
             (!isRewind && query.filters.hiddenFilter != .showAll)
         let hasMetadataFilters = windowNameFilter.hasActiveFilters || browserUrlFilter.hasActiveFilters
+        let hasTerminalTaskFilters = taskTitleFilter.hasActiveFilters || workingDirectoryFilter.hasActiveFilters
 
         let useRewindDocIDFastPath =
             source == .rewind &&
             !hasAppFilter &&
             !hasTagFilters &&
             !hasMetadataFilters &&
+            !hasTerminalTaskFilters &&
             whereConditions.isEmpty &&
             tagJoinBindValues.isEmpty &&
             bindValues.isEmpty
@@ -4097,6 +4164,15 @@ public actor DataAdapter {
                 continue
             }
 
+            let lowercasedToken = token.lowercased()
+            if lowercasedToken.hasPrefix("app:") ||
+                lowercasedToken.hasPrefix("after:") ||
+                lowercasedToken.hasPrefix("before:") ||
+                lowercasedToken.hasPrefix("task:") ||
+                lowercasedToken.hasPrefix("cwd:") {
+                continue
+            }
+
             if token.hasPrefix("-") && token.count > 1 {
                 let rawExcluded = String(token.dropFirst())
                 if rawExcluded.hasPrefix("\""), rawExcluded.hasSuffix("\""), rawExcluded.count > 1 {
@@ -4293,6 +4369,88 @@ public actor DataAdapter {
         appendMetadataStringFilter(
             columnName: columnName,
             parsedFilter: parsedFilter,
+            whereConditions: &whereConditions,
+            bindValues: &stringBindValues
+        )
+        bindValues.append(contentsOf: stringBindValues)
+    }
+
+    private static func appendTerminalTaskStringFilter(
+        columnName: String,
+        parsedFilter: ParsedMetadataStringFilter,
+        frameIDExpression: String,
+        isRewindDatabase: Bool,
+        whereConditions: inout [String],
+        bindValues: inout [String]
+    ) {
+        guard parsedFilter.hasActiveFilters else {
+            return
+        }
+
+        guard !isRewindDatabase else {
+            whereConditions.append("1 = 0")
+            return
+        }
+
+        for term in parsedFilter.includeTerms {
+            guard let predicate = metadataStringFilterPredicate(
+                columnName: "tt.\(columnName)",
+                term: term,
+                negate: false
+            ) else {
+                continue
+            }
+            whereConditions.append(
+                """
+                EXISTS (
+                    SELECT 1
+                    FROM terminal_task_frame ttf
+                    INNER JOIN terminal_task tt ON tt.id = ttf.taskId
+                    WHERE ttf.frameId = \(frameIDExpression)
+                      AND \(predicate.clause)
+                )
+                """
+            )
+            bindValues.append(contentsOf: predicate.bindValues)
+        }
+
+        for term in parsedFilter.excludeTerms {
+            guard let predicate = metadataStringFilterPredicate(
+                columnName: "tt.\(columnName)",
+                term: term,
+                negate: false
+            ) else {
+                continue
+            }
+            whereConditions.append(
+                """
+                NOT EXISTS (
+                    SELECT 1
+                    FROM terminal_task_frame ttf
+                    INNER JOIN terminal_task tt ON tt.id = ttf.taskId
+                    WHERE ttf.frameId = \(frameIDExpression)
+                      AND \(predicate.clause)
+                )
+                """
+            )
+            bindValues.append(contentsOf: predicate.bindValues)
+        }
+    }
+
+    private static func appendTerminalTaskStringFilter(
+        columnName: String,
+        parsedFilter: ParsedMetadataStringFilter,
+        frameIDExpression: String,
+        isRewindDatabase: Bool,
+        whereConditions: inout [String],
+        bindValues: inout [Any]
+    ) {
+        var stringBindValues: [String] = []
+        appendTerminalTaskStringFilter(
+            columnName: columnName,
+            parsedFilter: parsedFilter,
+            frameIDExpression: frameIDExpression,
+            isRewindDatabase: isRewindDatabase,
             whereConditions: &whereConditions,
             bindValues: &stringBindValues
         )
@@ -4639,6 +4797,8 @@ public actor DataAdapter {
         let appBundleIDs = filters.selectedApps?.sorted() ?? []
         let windowNameFilter = Self.decodeMetadataStringFilter(filters.windowNameFilter)
         let browserUrlFilter = Self.decodeMetadataStringFilter(filters.browserUrlFilter)
+        let taskTitleFilter = Self.decodeMetadataStringFilter(filters.taskTitleFilter)
+        let workingDirectoryFilter = Self.decodeMetadataStringFilter(filters.workingDirectoryFilter)
 
         let tagFilterMode = filters.tagFilterMode
         let hasTagFilter = !orderedTagIDs.isEmpty
@@ -4689,6 +4849,22 @@ public actor DataAdapter {
         Self.appendMetadataStringFilter(
             columnName: "s.windowName",
             parsedFilter: windowNameFilter,
+            whereConditions: &whereClauses,
+            bindValues: &metadataBindValues
+        )
+        Self.appendTerminalTaskStringFilter(
+            columnName: "taskTitle",
+            parsedFilter: taskTitleFilter,
+            frameIDExpression: "f.id",
+            isRewindDatabase: isRewindDatabase,
+            whereConditions: &whereClauses,
+            bindValues: &metadataBindValues
+        )
+        Self.appendTerminalTaskStringFilter(
+            columnName: "workingDirectory",
+            parsedFilter: workingDirectoryFilter,
+            frameIDExpression: "f.id",
+            isRewindDatabase: isRewindDatabase,
             whereConditions: &whereClauses,
             bindValues: &metadataBindValues
         )

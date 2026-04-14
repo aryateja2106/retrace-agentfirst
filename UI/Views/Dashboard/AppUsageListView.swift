@@ -402,6 +402,21 @@ struct AppUsageListView: View {
                         .foregroundColor(.retraceSecondary.opacity(0.5))
                         .lineLimit(1)
                         .truncationMode(.middle)
+                } else if window.isTerminalTask {
+                    HStack(spacing: 6) {
+                        if let subtitle = window.subtitle, !subtitle.isEmpty {
+                            Text(subtitle)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+
+                        if let commandCount = window.commandCount {
+                            Text("•")
+                            Text("\(commandCount) command\(commandCount == 1 ? "" : "s")")
+                        }
+                    }
+                    .font(.system(size: 10))
+                    .foregroundColor(.retraceSecondary.opacity(0.6))
                 }
             }
 

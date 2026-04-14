@@ -88,38 +88,22 @@ public class MilestoneCelebrationManager: ObservableObject {
             switch self {
             case .tenHours:
                 return """
-                You've just hit 10 hours of captured screen time - that's awesome! I'm glad you're finding Retrace useful.
-
-                I'm excited for you to see how Retrace will help in small unexpected ways. 
-                
-                Just remember: Anytime you're finding yourself wanting to search for something, Retrace will likely be useful!
+                You've reached 10 hours of captured screen time. arya-retrace is building your local, searchable history—use search whenever you want to recall something you saw on screen.
                 """
 
             case .hundredHours:
                 return """
-                100 hours of screen time captured! I'm happy that you've made Retrace part of your daily workflow.
-
-                I really tried to make this product as useful as possible, and it's great it being put to use.
-
-                If Retrace has saved you time or helped you remember something important, I'd be grateful for even a small contribution to help keep this project alive and growing!
+                100 hours of screen history captured. That's a solid foundation of local memory—keep using timeline and search to stay oriented across projects.
                 """
 
             case .thousandHours:
                 return """
-                ONE THOUSAND HOURS. You're officially a power user. The fact that Retrace has been running alongside you for this long is honestly really cool.
-
-                I know how important it was for me to have something like this, so I'm glad it's been useful for you.
-
-                If Retrace has been an active part of your workflow, I'd be incredibly grateful for any support ❤️
+                1,000 hours captured. You're getting deep value from local-first screen memory—arya-retrace will keep indexing what matters to you.
                 """
 
             case .tenThousandHours:
                 return """
-                I don't even know what to say. TEN THOUSAND HOURS. That means you've used this product for about 3 years or more. You've achieved screen mastery 👑
-
-                Now that we've been acquainted for 3 years, please dm me. I wanna know your name. I wanna chat about what got into you to want to use this product for 3+ years.
-
-                You dropped your crown, king 🫴👑
+                10,000 hours. That's years of captured context—an extraordinary personal archive in arya-retrace.
                 """
             }
         }
@@ -128,7 +112,7 @@ public class MilestoneCelebrationManager: ObservableObject {
     // MARK: - Configuration
 
     /// UserDefaults suite for app settings
-    private static let settingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+    private static let settingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
     /// Key for storing cumulative screen time (survives database resets)
     private static let cumulativeScreenTimeKey = "retraceCumulativeScreenTimeSeconds"
@@ -150,7 +134,7 @@ public class MilestoneCelebrationManager: ObservableObject {
     /// Get the current color theme (respects user's preference)
     /// Marked nonisolated because it only reads from thread-safe UserDefaults
     public nonisolated static func getCurrentTheme() -> ColorTheme {
-        let settingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let settingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         #if DEBUG
         if let rawValue = settingsStore.string(forKey: "retraceDebugThemeOverride"),
            let theme = ColorTheme(rawValue: rawValue) {
@@ -167,7 +151,7 @@ public class MilestoneCelebrationManager: ObservableObject {
 
     /// Get the user's color theme preference
     public nonisolated static func getColorThemePreference() -> ColorTheme {
-        let settingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let settingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         if let rawValue = settingsStore.string(forKey: "retraceColorThemePreference"),
            let theme = ColorTheme(rawValue: rawValue) {
             return theme
@@ -177,7 +161,7 @@ public class MilestoneCelebrationManager: ObservableObject {
 
     /// Set the user's color theme preference
     public nonisolated static func setColorThemePreference(_ theme: ColorTheme) {
-        let settingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let settingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         settingsStore.set(theme.rawValue, forKey: "retraceColorThemePreference")
         // Post notification so views can update
         DispatchQueue.main.async {
@@ -189,7 +173,7 @@ public class MilestoneCelebrationManager: ObservableObject {
     /// Set the debug theme override (shared across all views)
     /// Marked nonisolated because it only writes to thread-safe UserDefaults
     public nonisolated static func setDebugThemeOverride(_ theme: ColorTheme?) {
-        let settingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let settingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         if let theme = theme {
             settingsStore.set(theme.rawValue, forKey: "retraceDebugThemeOverride")
         } else {
@@ -199,7 +183,7 @@ public class MilestoneCelebrationManager: ObservableObject {
 
     /// Get the debug theme override
     public nonisolated static func getDebugThemeOverride() -> ColorTheme? {
-        let settingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let settingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         guard let rawValue = settingsStore.string(forKey: "retraceDebugThemeOverride") else {
             return nil
         }
@@ -347,29 +331,11 @@ public class MilestoneCelebrationManager: ObservableObject {
 
     /// Open the support link for the current milestone
     public func openSupportLink() {
-        guard let milestone = currentMilestone else { return }
-        let urlString: String
-        switch milestone {
-        case .tenHours:
-            urlString = "https://dub.sh/support-retrace-10h"
-        case .hundredHours:
-            urlString = "https://dub.sh/support-retrace-100h"
-        case .thousandHours:
-            urlString = "https://dub.sh/support-retrace-1000h"
-        case .tenThousandHours:
-            // No support link for 10k - they're the GOAT, we don't ask them for money
-            return
-        }
-        if let url = URL(string: urlString) {
-            NSWorkspace.shared.open(url)
-        }
+        // Private fork: no external sponsorship links.
     }
 
-    /// Open the Discord community invite link
-    public func openDiscordLink() {
-        guard let url = URL(string: "https://dub.sh/retrace-discord") else { return }
-        NSWorkspace.shared.open(url)
-    }
+    /// Community link (disabled for arya-retrace private build).
+    public func openDiscordLink() {}
 
     // MARK: - Cleanup
 

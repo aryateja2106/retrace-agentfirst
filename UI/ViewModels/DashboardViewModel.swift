@@ -4,6 +4,7 @@ import CrashRecoverySupport
 import Shared
 import App
 import Database
+import Capture
 import ApplicationServices
 import Dispatch
 
@@ -147,7 +148,7 @@ public class DashboardViewModel: ObservableObject {
     // MARK: - Dependencies
 
     private let coordinator: AppCoordinator
-    private let settingsStore = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+    private let settingsStore = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
     private var cancellables = Set<AnyCancellable>()
     private var refreshTimer: DispatchSourceTimer?
     /// Prevents the 2s poll from clobbering optimistic toggle UI while start/stop is in flight.
@@ -1767,6 +1768,33 @@ public class DashboardViewModel: ObservableObject {
         do {
             let queryRange = resolvedAppUsageQueryRange()
 
+            if terminalBundleIDs.contains(bundleID) {
+                let taskUsage = try await coordinator.getTerminalTaskUsageForApp(
+                    bundleID: bundleID,
+                    from: queryRange.start,
+                    to: queryRange.end,
+                    limit: limit
+                )
+
+                if !taskUsage.isEmpty {
+                    let totalDuration = taskUsage.reduce(0) { $0 + $1.totalDuration }
+                    let rows = taskUsage.map { usage in
+                        WindowUsageData(
+                            windowName: usage.task.effectiveTitle,
+                            isWebsite: false,
+                            duration: usage.totalDuration,
+                            percentage: totalDuration > 0 ? usage.totalDuration / totalDuration : 0,
+                            taskID: usage.task.id,
+                            subtitle: usage.task.workingDirectory,
+                            commandCount: usage.task.commandCount,
+                            lastActiveAt: usage.task.lastActivityAt,
+                            workingDirectory: usage.task.workingDirectory
+                        )
+                    }
+                    return WindowUsagePage(rows: rows, totalCount: taskUsage.count)
+                }
+            }
+
             let windowStats = try await coordinator.getWindowUsageForApp(
                 bundleID: bundleID,
                 from: queryRange.start,
@@ -2214,6 +2242,10 @@ public class DashboardViewModel: ObservableObject {
             return nil
         }
         return json
+    }
+
+    static func metricMetadataJSON(_ payload: [String: Any]) -> String? {
+        jsonMetadata(payload)
     }
 
     private static func jsonMetadata<T: Encodable>(_ payload: T) -> String? {
@@ -2697,6 +2729,7 @@ public class DashboardViewModel: ObservableObject {
 
 /// Browser bundle IDs used for browser-specific breakdown behavior (references shared list)
 private var browserBundleIDs: Set<String> { AppInfo.browserBundleIDs }
+private var terminalBundleIDs: Set<String> { Set(TerminalBundleRegistry.supportedBundleIDs) }
 
 public struct AppUsageData: Identifiable {
     public let id = UUID()
@@ -2711,9 +2744,20 @@ public struct AppUsageData: Identifiable {
         browserBundleIDs.contains(appBundleID)
     }
 
+    public var isTerminal: Bool {
+        terminalBundleIDs.contains(appBundleID)
+    }
+
     /// Display label for the unique item count (e.g. "42 websites" or "15 tabs")
     public var uniqueItemLabel: String {
-        let itemType = isBrowser ? "website" : "tab"
+        let itemType: String
+        if isBrowser {
+            itemType = "website"
+        } else if isTerminal {
+            itemType = "task"
+        } else {
+            itemType = "tab"
+        }
         let plural = uniqueItemCount == 1 ? "" : "s"
         return "\(uniqueItemCount) \(itemType)\(plural)"
     }
@@ -2752,14 +2796,36 @@ public struct WindowUsageData: Identifiable {
     public let duration: TimeInterval
     public let percentage: Double
     public let tabCount: Int?
+    public let taskID: TerminalTaskID?
+    public let subtitle: String?
+    public let commandCount: Int?
+    public let lastActiveAt: Date?
+    public let workingDirectory: String?
 
-    public init(windowName: String?, browserUrl: String? = nil, isWebsite: Bool = true, duration: TimeInterval, percentage: Double, tabCount: Int? = nil) {
+    public init(
+        windowName: String?,
+        browserUrl: String? = nil,
+        isWebsite: Bool = true,
+        duration: TimeInterval,
+        percentage: Double,
+        tabCount: Int? = nil,
+        taskID: TerminalTaskID? = nil,
+        subtitle: String? = nil,
+        commandCount: Int? = nil,
+        lastActiveAt: Date? = nil,
+        workingDirectory: String? = nil
+    ) {
         self.windowName = windowName
         self.browserUrl = browserUrl
         self.isWebsite = isWebsite
         self.duration = duration
         self.percentage = percentage
         self.tabCount = tabCount
+        self.taskID = taskID
+        self.subtitle = subtitle
+        self.commandCount = commandCount
+        self.lastActiveAt = lastActiveAt
+        self.workingDirectory = workingDirectory
     }
 
     /// Display name for the window (handles nil/empty cases)
@@ -2768,6 +2834,10 @@ public struct WindowUsageData: Identifiable {
             return name
         }
         return "Untitled Window"
+    }
+
+    public var isTerminalTask: Bool {
+        taskID != nil
     }
 }
 

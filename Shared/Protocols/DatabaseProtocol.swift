@@ -232,10 +232,116 @@ public protocol DatabaseProtocol: Actor {
     /// Delete FTS content for a frame
     func deleteFTSContent(frameId: Int64) async throws
 
+    // MARK: - Terminal Task Memory
+
+    /// Create or update a terminal task session keyed by shell session/window context.
+    func upsertTerminalTaskSession(_ session: TerminalTaskSession) async throws -> TerminalTaskSession
+
+    /// Append a terminal task event.
+    func appendTerminalTaskEvent(_ event: TerminalTaskEvent) async throws -> Int64
+
+    /// Mark a terminal task session closed.
+    func closeTerminalTaskSession(id: TerminalTaskID, endDate: Date, commandCount: Int?) async throws
+
+    /// Link a captured frame to a terminal task.
+    func linkFrameToTerminalTask(frameID: FrameID, taskID: TerminalTaskID) async throws
+
+    /// Return terminal tasks overlapping a time range, optionally limited to one bundle.
+    func getTerminalTasks(
+        bundleID: String?,
+        from startDate: Date,
+        to endDate: Date,
+        limit: Int
+    ) async throws -> [TerminalTaskSession]
+
+    /// Fetch a single terminal task.
+    func getTerminalTask(id: TerminalTaskID) async throws -> TerminalTaskSession?
+
+    /// Fetch terminal task events.
+    func getTerminalEvents(taskID: TerminalTaskID, limit: Int) async throws -> [TerminalTaskEvent]
+
+    /// Fetch terminal usage rows for a given app bundle and date range.
+    func getTerminalTaskUsageForApp(
+        bundleID: String,
+        from startDate: Date,
+        to endDate: Date,
+        limit: Int?
+    ) async throws -> [TerminalTaskUsage]
+
+    /// Search terminal tasks and events without exposing raw frame history.
+    func searchTerminalTasks(
+        query: String,
+        bundleID: String?,
+        from startDate: Date?,
+        to endDate: Date?,
+        limit: Int
+    ) async throws -> [TerminalTaskSearchResult]
+
+    /// Terminal task linked to a captured frame, if any.
+    func getTerminalTaskForFrame(frameID: FrameID) async throws -> TerminalTaskSession?
+
     // MARK: - Statistics
 
     /// Get database statistics
     func getStatistics() async throws -> DatabaseStatistics
+}
+
+public extension DatabaseProtocol {
+    func upsertTerminalTaskSession(_ session: TerminalTaskSession) async throws -> TerminalTaskSession {
+        session
+    }
+
+    func appendTerminalTaskEvent(_ event: TerminalTaskEvent) async throws -> Int64 {
+        throw DatabaseError.queryFailed(query: "terminal_event", underlying: "Terminal task events are not implemented")
+    }
+
+    func closeTerminalTaskSession(id: TerminalTaskID, endDate: Date, commandCount: Int?) async throws {
+        throw DatabaseError.queryFailed(query: "terminal_task", underlying: "Terminal task sessions are not implemented")
+    }
+
+    func linkFrameToTerminalTask(frameID: FrameID, taskID: TerminalTaskID) async throws {
+        throw DatabaseError.queryFailed(query: "terminal_task_frame", underlying: "Terminal task frame links are not implemented")
+    }
+
+    func getTerminalTasks(
+        bundleID: String?,
+        from startDate: Date,
+        to endDate: Date,
+        limit: Int
+    ) async throws -> [TerminalTaskSession] {
+        []
+    }
+
+    func getTerminalTask(id: TerminalTaskID) async throws -> TerminalTaskSession? {
+        nil
+    }
+
+    func getTerminalEvents(taskID: TerminalTaskID, limit: Int) async throws -> [TerminalTaskEvent] {
+        []
+    }
+
+    func getTerminalTaskUsageForApp(
+        bundleID: String,
+        from startDate: Date,
+        to endDate: Date,
+        limit: Int?
+    ) async throws -> [TerminalTaskUsage] {
+        []
+    }
+
+    func searchTerminalTasks(
+        query: String,
+        bundleID: String?,
+        from startDate: Date?,
+        to endDate: Date?,
+        limit: Int
+    ) async throws -> [TerminalTaskSearchResult] {
+        []
+    }
+
+    func getTerminalTaskForFrame(frameID: FrameID) async throws -> TerminalTaskSession? {
+        nil
+    }
 }
 
 // MARK: - FTS Protocol

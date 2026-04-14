@@ -535,14 +535,14 @@ public class SimpleTimelineViewModel: ObservableObject {
 
     /// Enables very verbose timeline logging (useful for debugging, expensive in production).
     /// Disabled by default in all builds; enable manually via:
-    /// `defaults write io.retrace.app retrace.debug.timelineVerboseLogs -bool YES`
+    /// `defaults write dev.arya.arya-retrace retrace.debug.timelineVerboseLogs -bool YES`
     private static let isVerboseTimelineLoggingEnabled: Bool = {
         return UserDefaults.standard.bool(forKey: "retrace.debug.timelineVerboseLogs")
     }()
 
     /// Enables filtered-timeline scrub diagnostics (tracks requested frame identities during fast scroll).
     /// Disabled by default in all builds; opt in with:
-    /// `defaults write io.retrace.app retrace.debug.filteredScrubDiagnostics -bool YES`
+    /// `defaults write dev.arya.arya-retrace retrace.debug.filteredScrubDiagnostics -bool YES`
     private static let isFilteredScrubDiagnosticsEnabled: Bool = {
         return UserDefaults.standard.bool(forKey: "retrace.debug.filteredScrubDiagnostics")
     }()
@@ -601,7 +601,7 @@ public class SimpleTimelineViewModel: ObservableObject {
     nonisolated private static let captureMousePositionKey = "captureMousePosition"
 
     private static func isInPageURLCollectionEnabled() -> Bool {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         guard defaults.object(forKey: inPageURLCollectionExperimentalKey) != nil else {
             return false
         }
@@ -609,7 +609,7 @@ public class SimpleTimelineViewModel: ObservableObject {
     }
 
     private static func isMousePositionCaptureEnabled() -> Bool {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         guard defaults.object(forKey: captureMousePositionKey) != nil else {
             return true
         }
@@ -1151,13 +1151,13 @@ public class SimpleTimelineViewModel: ObservableObject {
 
     /// Whether to show frame IDs in debug mode (read from UserDefaults)
     public var showFrameIDs: Bool {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         return defaults.bool(forKey: "showFrameIDs")
     }
 
     /// Whether to show OCR debug overlay (bounding boxes and tile grid) in timeline (read from UserDefaults)
     public var showOCRDebugOverlay: Bool {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         return defaults.bool(forKey: "showOCRDebugOverlay")
     }
 
@@ -1283,7 +1283,7 @@ public class SimpleTimelineViewModel: ObservableObject {
 
     /// Whether video controls are enabled (read from UserDefaults)
     public var showVideoControls: Bool {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         return defaults.bool(forKey: "showVideoControls")
     }
 
@@ -1365,7 +1365,7 @@ public class SimpleTimelineViewModel: ObservableObject {
     }
 
     public func toggleFrameIDBadgeVisibilityFromDevMenu() {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let isEnabled = !defaults.bool(forKey: "showFrameIDs")
         defaults.set(isEnabled, forKey: "showFrameIDs")
         DashboardViewModel.recordDeveloperSettingToggle(
@@ -2880,7 +2880,7 @@ public class SimpleTimelineViewModel: ObservableObject {
         let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         return cachesDirectory
-            .appendingPathComponent("io.retrace.app", isDirectory: true)
+            .appendingPathComponent(AryaRetraceIdentity.bundleIdentifier, isDirectory: true)
             .appendingPathComponent("TimelineFrameBuffer", isDirectory: true)
     }
 
@@ -6759,7 +6759,7 @@ public class SimpleTimelineViewModel: ObservableObject {
     }
 
     nonisolated private static func currentRewindAppBundleIDCacheContext() -> RewindAppBundleIDCacheContext {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         return RewindAppBundleIDCacheContext(
             cutoffDate: ServiceContainer.rewindCutoffDate(in: defaults),
             effectiveRewindDatabasePath: normalizedFilesystemPath(AppPaths.rewindDBPath),
@@ -7023,6 +7023,20 @@ public class SimpleTimelineViewModel: ObservableObject {
             coordinator: coordinator,
             metadata: buildTimelineFilterMetricMetadata()
         )
+
+        if normalizedPendingCriteria.taskTitleFilter?.isEmpty == false ||
+            normalizedPendingCriteria.workingDirectoryFilter?.isEmpty == false {
+            Task {
+                try? await coordinator.recordMetricEvent(
+                    metricType: .terminalFilterApplied,
+                    metadata: DashboardViewModel.metricMetadataJSON([
+                        "source": "timeline_filters",
+                        "taskFilter": normalizedPendingCriteria.taskTitleFilter ?? "",
+                        "workingDirectoryFilter": normalizedPendingCriteria.workingDirectoryFilter ?? ""
+                    ])
+                )
+            }
+        }
 
         if dismissPanel {
             dismissFilterPanel()
@@ -14057,7 +14071,7 @@ public class SimpleTimelineViewModel: ObservableObject {
         guard !frames.isEmpty else { return }
 
         // Read user sensitivity setting (0.1–1.0, default 0.50)
-        let store = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let store = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let userSensitivity = store.object(forKey: "scrollSensitivity") != nil ? store.double(forKey: "scrollSensitivity") : 0.50
         let sensitivityMultiplier = CGFloat(userSensitivity / 0.50) // Normalize so 0.50 = current behavior
 
@@ -14306,7 +14320,7 @@ public class SimpleTimelineViewModel: ObservableObject {
 
     /// Whether frame ID search is enabled (read from UserDefaults)
     public var enableFrameIDSearch: Bool {
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         return defaults.bool(forKey: "enableFrameIDSearch")
     }
 

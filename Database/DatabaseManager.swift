@@ -282,6 +282,7 @@ public actor DatabaseManager: DatabaseProtocol {
     private let databasePath: String
     private let storageRootPath: String
     private let inMemorySharedConnection: SharedSQLiteConnection?
+    private nonisolated let openMode: DatabaseOpenMode
     private var isInitialized = false
     private var dbActorOperationSequence: UInt64 = 0
     private var dbActorOperationStack: [(id: UInt64, name: String, startedAt: CFAbsoluteTime)] = []
@@ -369,7 +370,11 @@ public actor DatabaseManager: DatabaseProtocol {
 
     // MARK: - Initialization
 
-    public init(databasePath: String, storageRootPath: String = AppPaths.expandedStorageRoot) {
+    public init(
+        databasePath: String,
+        storageRootPath: String = AppPaths.expandedStorageRoot,
+        openMode: DatabaseOpenMode = .readWrite
+    ) {
         if Self.isInMemoryDatabasePath(databasePath) {
             let sharedConnection = SharedSQLiteConnection()
             self.readConnectionPool = SQLiteReadConnectionPool(
@@ -389,6 +394,7 @@ public actor DatabaseManager: DatabaseProtocol {
 
         self.databasePath = databasePath
         self.storageRootPath = NSString(string: storageRootPath).expandingTildeInPath
+        self.openMode = openMode
     }
 
     /// Convenience initializer for in-memory database (testing)
@@ -401,6 +407,7 @@ public actor DatabaseManager: DatabaseProtocol {
         self.inMemorySharedConnection = sharedConnection
         self.databasePath = ":memory:"
         self.storageRootPath = AppPaths.expandedStorageRoot
+        self.openMode = .readWrite
     }
 
     private nonisolated static func isInMemoryDatabasePath(_ databasePath: String) -> Bool {
@@ -413,13 +420,50 @@ public actor DatabaseManager: DatabaseProtocol {
         guard !isInitialized else { return }
         Log.debug("[DatabaseManager] initialize() started", category: .database)
 
+        let isInMemory = databasePath == ":memory:" || databasePath.contains("mode=memory")
+
+        if openMode == .readOnlyExisting {
+            guard !isInMemory else {
+                throw DatabaseError.connectionFailed(
+                    underlying: "DatabaseOpenMode.readOnlyExisting cannot be used with an in-memory database path."
+                )
+            }
+            let expandedPath = NSString(string: databasePath).expandingTildeInPath
+            guard FileManager.default.fileExists(atPath: expandedPath) else {
+                throw DatabaseError.connectionFailed(
+                    underlying: "Database file does not exist at \(expandedPath)"
+                )
+            }
+            Log.debug("[DatabaseManager] Opening database read-only at: \(expandedPath)", category: .database)
+            let flags = SQLITE_OPEN_READONLY | SQLITE_OPEN_URI | SQLITE_OPEN_FULLMUTEX
+            guard sqlite3_open_v2(expandedPath, &db, flags, nil) == SQLITE_OK else {
+                let errorMsg = db.map { String(cString: sqlite3_errmsg($0)) } ?? "Unknown error"
+                Log.critical("[DatabaseManager] Failed to open read-only database at: \(expandedPath) - \(errorMsg)", category: .database)
+                throw DatabaseError.connectionFailed(underlying: errorMsg)
+            }
+            SQLiteRuntimeDiagnostics.log(label: "DatabaseManager/open-readonly", db: db)
+
+            try await setEncryptionKey()
+
+            Log.debug("[DatabaseManager] Executing read-only pragmas...", category: .database)
+            try executeReadOnlyPragmas()
+            Log.debug("[DatabaseManager] Read-only pragmas executed", category: .database)
+
+            Log.debug("[DatabaseManager] Verifying FTS5 runtime support...", category: .database)
+            try verifyFTS5RuntimeSupport()
+            Log.debug("[DatabaseManager] FTS5 runtime support verified", category: .database)
+
+            isInitialized = true
+            Log.info("[DatabaseManager] Read-only database initialized at: \(expandedPath)", category: .database)
+            return
+        }
+
         // Expand tilde in path if present
         let expandedPath = NSString(string: databasePath).expandingTildeInPath
         Log.debug("[DatabaseManager] Expanded path: \(expandedPath)", category: .database)
 
         // Create parent directory if needed (unless in-memory)
         // Check for both ":memory:" and URI-based in-memory databases (file:xxx?mode=memory)
-        let isInMemory = databasePath == ":memory:" || databasePath.contains("mode=memory")
         if !isInMemory {
             let directory = (expandedPath as NSString).deletingLastPathComponent
             do {
@@ -488,7 +532,7 @@ public actor DatabaseManager: DatabaseProtocol {
 
         // Checkpoint WAL before closing (if not in-memory)
         let isInMemory = databasePath == ":memory:" || databasePath.contains("mode=memory")
-        if !isInMemory {
+        if !isInMemory, openMode == .readWrite {
             try await checkpoint()
         }
 
@@ -1194,6 +1238,113 @@ public actor DatabaseManager: DatabaseProtocol {
             throw DatabaseError.connectionFailed(underlying: "Database not initialized")
         }
         return try AppSegmentQueries.getBrowserTabUsageForDomain(db: db, bundleID: bundleID, domain: domain, from: startDate, to: endDate)
+    }
+
+    // MARK: - Terminal Task Memory
+
+    public func upsertTerminalTaskSession(_ session: TerminalTaskSession) async throws -> TerminalTaskSession {
+        try withTracedDatabaseOperation("upsert_terminal_task_session") { db in
+            try TerminalTaskQueries.upsert(db: db, session: session)
+        }
+    }
+
+    public func appendTerminalTaskEvent(_ event: TerminalTaskEvent) async throws -> Int64 {
+        try withTracedDatabaseOperation("append_terminal_task_event") { db in
+            try TerminalTaskQueries.appendEvent(db: db, event: event)
+        }
+    }
+
+    public func closeTerminalTaskSession(
+        id: TerminalTaskID,
+        endDate: Date,
+        commandCount: Int? = nil
+    ) async throws {
+        try withTracedDatabaseOperation("close_terminal_task_session") { db in
+            try TerminalTaskQueries.close(db: db, id: id, endDate: endDate, commandCount: commandCount)
+        }
+    }
+
+    public func linkFrameToTerminalTask(frameID: FrameID, taskID: TerminalTaskID) async throws {
+        try withTracedDatabaseOperation("link_frame_to_terminal_task") { db in
+            try TerminalTaskQueries.linkFrame(db: db, frameID: frameID, taskID: taskID)
+        }
+    }
+
+    public func getTerminalTasks(
+        bundleID: String? = nil,
+        from startDate: Date,
+        to endDate: Date,
+        limit: Int = 100
+    ) async throws -> [TerminalTaskSession] {
+        try await withDashboardReadConnection(operation: "get_terminal_tasks") { db in
+            try TerminalTaskQueries.getByTimeRange(
+                db: db,
+                bundleID: bundleID,
+                from: startDate,
+                to: endDate,
+                limit: limit
+            )
+        }
+    }
+
+    public func getTerminalTask(id: TerminalTaskID) async throws -> TerminalTaskSession? {
+        try await withDashboardReadConnection(operation: "get_terminal_task") { db in
+            try TerminalTaskQueries.getByID(db: db, id: id)
+        }
+    }
+
+    public func getTerminalEvents(taskID: TerminalTaskID, limit: Int = 200) async throws -> [TerminalTaskEvent] {
+        try await withDashboardReadConnection(operation: "get_terminal_events") { db in
+            try TerminalTaskQueries.getEvents(db: db, taskID: taskID, limit: limit)
+        }
+    }
+
+    public func getTerminalTaskUsageForApp(
+        bundleID: String,
+        from startDate: Date,
+        to endDate: Date,
+        limit: Int? = nil
+    ) async throws -> [TerminalTaskUsage] {
+        try await withDashboardReadConnection(operation: "get_terminal_task_usage_for_app") { db in
+            try TerminalTaskQueries.getUsageForApp(
+                db: db,
+                bundleID: bundleID,
+                from: startDate,
+                to: endDate,
+                limit: limit
+            )
+        }
+    }
+
+    public func searchTerminalTasks(
+        query: String,
+        bundleID: String? = nil,
+        from startDate: Date? = nil,
+        to endDate: Date? = nil,
+        limit: Int = 25
+    ) async throws -> [TerminalTaskSearchResult] {
+        try await withDashboardReadConnection(operation: "search_terminal_tasks") { db in
+            try TerminalTaskQueries.search(
+                db: db,
+                query: query,
+                bundleID: bundleID,
+                from: startDate,
+                to: endDate,
+                limit: limit
+            )
+        }
+    }
+
+    public func getTerminalTaskForFrame(frameID: FrameID) async throws -> TerminalTaskSession? {
+        try await withDashboardReadConnection(operation: "get_terminal_task_for_frame") { db in
+            try TerminalTaskQueries.taskForFrame(db: db, frameID: frameID)
+        }
+    }
+
+    public func deleteTerminalTasks(olderThan date: Date) async throws -> Int {
+        try withTracedDatabaseOperation("delete_terminal_tasks_older_than") { db in
+            try TerminalTaskQueries.deleteOlderThan(db: db, date: date)
+        }
     }
 
     public func deleteSegment(id: Int64) async throws {
@@ -3626,6 +3777,34 @@ public actor DatabaseManager: DatabaseProtocol {
         }
     }
 
+    /// Pragmas safe for a read-only connection (no journal/WAL mode changes).
+    private func executeReadOnlyPragmas() throws {
+        guard let db = db else {
+            throw DatabaseError.connectionFailed(underlying: "Database not initialized")
+        }
+
+        let pragmas = [
+            Schema.enableForeignKeys,
+            Schema.setTempStoreMemory,
+            Schema.setCacheSize
+        ]
+
+        for pragma in pragmas {
+            var errorMessage: UnsafeMutablePointer<CChar>?
+            defer {
+                sqlite3_free(errorMessage)
+            }
+
+            guard sqlite3_exec(db, pragma, nil, nil, &errorMessage) == SQLITE_OK else {
+                let message = errorMessage.map { String(cString: $0) } ?? "Unknown error"
+                Log.error("[DatabaseManager] Read-only PRAGMA failed: \(pragma) - \(message)", category: .database)
+                throw DatabaseError.queryFailed(query: pragma, underlying: message)
+            }
+        }
+
+        sqlite3_busy_timeout(db, 5_000)
+    }
+
     private func executePragmas() throws {
         guard let db = db else {
             throw DatabaseError.connectionFailed(underlying: "Database not initialized")
@@ -3694,7 +3873,7 @@ public actor DatabaseManager: DatabaseProtocol {
 
         // Check if encryption is enabled in UserDefaults
         // Default to false (disabled) - user must explicitly enable it during onboarding
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let encryptionEnabled = defaults.object(forKey: "encryptionEnabled") as? Bool ?? false
 
         // For unencrypted databases, simply don't set any PRAGMA key.
@@ -3879,7 +4058,7 @@ public actor DatabaseManager: DatabaseProtocol {
         // Add new item
         let status = SecItemAdd(query as CFDictionary, nil)
         guard status == errSecSuccess else {
-            throw NSError(domain: "com.retrace.keychain", code: Int(status), userInfo: [NSLocalizedDescriptionKey: "Failed to save encryption key to Keychain (status: \(status))"])
+            throw NSError(domain: AryaRetraceIdentity.keychainErrorDomain, code: Int(status), userInfo: [NSLocalizedDescriptionKey: "Failed to save encryption key to Keychain (status: \(status))"])
         }
 
         Log.debug("[DatabaseManager] Generated and saved new database encryption key to Keychain during onboarding", category: .database)
@@ -3903,7 +4082,7 @@ public actor DatabaseManager: DatabaseProtocol {
         let status = SecItemCopyMatching(query as CFDictionary, &result)
 
         guard status == errSecSuccess, let _ = result as? Data else {
-            throw NSError(domain: "com.retrace.keychain", code: Int(status), userInfo: [NSLocalizedDescriptionKey: "Failed to verify encryption key in Keychain (status: \(status))"])
+            throw NSError(domain: AryaRetraceIdentity.keychainErrorDomain, code: Int(status), userInfo: [NSLocalizedDescriptionKey: "Failed to verify encryption key in Keychain (status: \(status))"])
         }
 
         return true

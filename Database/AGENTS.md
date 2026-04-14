@@ -33,11 +33,13 @@ Database/
 │   ├── V16_ProcessingQueueFrameIDIndex.swift
 │   ├── V17_FrameCaptureTrigger.swift
 │   ├── V18_DailyMetricsRecencyIndex.swift
-│   └── V19_FrameEncodedAt.swift
+│   ├── V19_FrameEncodedAt.swift
+│   └── V20_TerminalMemory.swift # Terminal task/session/event tables
 ├── Queries/
 │   ├── FrameQueries.swift     # Frame CRUD operations
 │   ├── SegmentQueries.swift   # Segment CRUD operations
-│   └── DocumentQueries.swift  # Document/FTS operations
+│   ├── DocumentQueries.swift  # Document/FTS operations
+│   └── TerminalTaskQueries.swift # Terminal task/session/event queries
 └── Tests/
     ├── AsyncQueuePipelineTests.swift
     ├── DatabaseManagerTests.swift

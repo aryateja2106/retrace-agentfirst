@@ -43,7 +43,7 @@ private enum LayoutSize {
 private let dashboardMaxWidth: CGFloat = 1100
 /// Shared breakpoint for compact dashboard-style layouts.
 let dashboardCompactLayoutThreshold: CGFloat = 850
-private let dashboardSettingsStore: UserDefaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+private let dashboardSettingsStore: UserDefaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
 
 private struct RecordingIndicatorAnchorPreferenceKey: PreferenceKey {
     static var defaultValue: Anchor<CGRect>? = nil
@@ -80,6 +80,8 @@ public struct DashboardView: View {
     @State private var showDiscordFollowup = false
     @State private var currentTheme: MilestoneCelebrationManager.ColorTheme = MilestoneCelebrationManager.getCurrentTheme()
     @Binding var hasLoadedInitialData: Bool
+
+    @State private var projectTaskService: ProjectTaskService?
 
     enum AppUsageViewMode: String {
         case list = "list"
@@ -352,6 +354,9 @@ public struct DashboardView: View {
                                             layoutSize: layoutSize
                                         )
                                     }
+                                    if let pm = projectTaskService {
+                                        PMProjectTaskCard(projectTaskService: pm)
+                                    }
                                 }
                                 .padding(.top, 2)
                                 .padding(.bottom, 20) // Extra padding for scroll affordance
@@ -409,6 +414,9 @@ public struct DashboardView: View {
         .task {
             viewModel.isWindowVisible = true
             crashRecoveryBannerModel.refresh()
+            if projectTaskService == nil {
+                projectTaskService = await coordinatorWrapper.coordinator.projectTaskService()
+            }
             if !hasLoadedInitialData {
                 hasLoadedInitialData = true
                 Log.debug("[Dashboard] Initial load - first appearance", category: .ui)
@@ -612,11 +620,28 @@ public struct DashboardView: View {
         let clickStartTime = CFAbsoluteTimeGetCurrent()
         let selectedRange = viewModel.appUsageQueryRange
 
+        if window.isTerminalTask {
+            Task {
+                try? await coordinatorWrapper.coordinator.recordMetricEvent(
+                    metricType: .terminalFilterApplied,
+                    metadata: DashboardViewModel.metricMetadataJSON([
+                        "source": "dashboard_task_open",
+                        "bundleID": app.appBundleID,
+                        "taskID": window.taskID?.value ?? 0,
+                        "taskTitle": window.displayName,
+                        "workingDirectory": window.workingDirectory ?? ""
+                    ])
+                )
+            }
+        }
+
         // Launch filtered timeline instantly instead of showing sessions dialog
         TimelineWindowController.shared.showWithFilter(
             bundleID: app.appBundleID,
             windowName: window.windowName,
             browserUrl: window.browserUrl,
+            taskTitle: window.isTerminalTask ? window.displayName : nil,
+            workingDirectory: window.workingDirectory,
             startDate: selectedRange.start,
             endDate: selectedRange.end,
             clickStartTime: clickStartTime
@@ -708,8 +733,6 @@ public struct DashboardView: View {
 
     // MARK: - Footer Hover States
 
-    @State private var isHoveringHaseab = false
-    @State private var isHoveringSupportMe = false
     @State private var isHoveringFeedback = false
 
     // MARK: - Timeline Button
@@ -1585,54 +1608,9 @@ public struct DashboardView: View {
             Spacer()
 
             HStack(spacing: 16) {
-                Link(destination: URL(string: "https://dub.sh/haseab-twitter")!) {
-                    HStack(spacing: 4) {
-                        Text("Made with")
-                            .foregroundColor(.retraceSecondary)
-                        Text("❤️")
-                        Text("by")
-                            .foregroundColor(.retraceSecondary)
-                        Text("@haseab")
-                            .foregroundColor(Color(red: 74/255, green: 144/255, blue: 226/255))  // Bright blue for link
-                            .scaleEffect(isHoveringHaseab ? 1.05 : 1.0)
-                            .animation(.easeInOut(duration: 0.15), value: isHoveringHaseab)
-                    }
-                    .font(.retraceCaption2Medium)
-                }
-                .buttonStyle(.plain)
-                .onHover { hovering in
-                    isHoveringHaseab = hovering
-                    if hovering {
-                        NSCursor.pointingHand.push()
-                    } else {
-                        NSCursor.pop()
-                    }
-                }
-
-                Circle()
-                    .fill(Color.retraceSecondary.opacity(0.5))
-                    .frame(width: 3, height: 3)
-
-                Link(destination: URL(string: "https://dub.sh/support-haseab")!) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "cup.and.saucer.fill")
-                            .font(.retraceCaption2)
-                        Text("Support Me")
-                    }
+                Text("\(AryaRetraceIdentity.displayName) \(BuildInfo.displayVersion)")
                     .font(.retraceCaption2Medium)
                     .foregroundColor(.retraceSecondary)
-                    .scaleEffect(isHoveringSupportMe ? 1.05 : 1.0)
-                    .animation(.easeInOut(duration: 0.15), value: isHoveringSupportMe)
-                }
-                .buttonStyle(.plain)
-                .onHover { hovering in
-                    isHoveringSupportMe = hovering
-                    if hovering {
-                        NSCursor.pointingHand.push()
-                    } else {
-                        NSCursor.pop()
-                    }
-                }
 
                 Circle()
                     .fill(Color.retraceSecondary.opacity(0.5))

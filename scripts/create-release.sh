@@ -17,7 +17,7 @@ set -e
 
 # Configuration
 APP_NAME="Retrace"
-BUNDLE_ID="io.retrace.app"
+BUNDLE_ID="dev.arya.arya-retrace"
 BUILD_DIR="build/Release"
 RELEASES_DIR="releases"
 APPCAST_FILE="appcast.xml"

@@ -28,7 +28,7 @@ for arg in "$@"; do
     esac
 done
 
-BUNDLE_ID="io.retrace.app"
+BUNDLE_ID="dev.arya.arya-retrace"
 DEFAULTS_DOMAIN="Retrace"  # App uses "Retrace" for UserDefaults.standard
 PREFERENCES_DIR="$HOME/Library/Preferences"
 

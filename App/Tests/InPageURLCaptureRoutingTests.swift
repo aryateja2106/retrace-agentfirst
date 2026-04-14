@@ -3,6 +3,7 @@ import CoreGraphics
 import Shared
 import Database
 import Storage
+import Search
 import SQLCipher
 @testable import App
 
@@ -151,7 +152,7 @@ final class SegmentUsageAlignmentTests: XCTestCase {
 
 final class ServiceContainerRewindCutoffTests: XCTestCase {
     func testStoredRewindCutoffDateReturnsPersistedValue() {
-        let suiteName = "io.retrace.app.tests.rewindCutoff.\(UUID().uuidString)"
+        let suiteName = "dev.arya.arya-retrace.tests.rewindCutoff.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {
             XCTFail("Failed to create isolated defaults suite")
             return
@@ -180,7 +181,7 @@ final class ServiceContainerRewindCutoffTests: XCTestCase {
     }
 
     func testRewindCutoffDateFallsBackToDefaultWhenUnset() {
-        let suiteName = "io.retrace.app.tests.rewindCutoff.\(UUID().uuidString)"
+        let suiteName = "dev.arya.arya-retrace.tests.rewindCutoff.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {
             XCTFail("Failed to create isolated defaults suite")
             return
@@ -1641,7 +1642,7 @@ final class CrashRecoveryStartupTests: XCTestCase {
             .appendingPathComponent("CrashRecoveryCoalesce_\(UUID().uuidString)", isDirectory: true)
         let services = makeServices(storageRoot: storageRoot)
         let coordinator = AppCoordinator(services: services)
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let previousUseRewindData = defaults.object(forKey: "useRewindData")
 
         defaults.set(false, forKey: "useRewindData")
@@ -1711,7 +1712,7 @@ final class CrashRecoveryStartupTests: XCTestCase {
             .appendingPathComponent("CrashRecoveryResumeFinalize_\(UUID().uuidString)", isDirectory: true)
         let services = makeServices(storageRoot: storageRoot)
         let coordinator = AppCoordinator(services: services)
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let previousUseRewindData = defaults.object(forKey: "useRewindData")
 
         defaults.set(false, forKey: "useRewindData")
@@ -1780,7 +1781,7 @@ final class CrashRecoveryStartupTests: XCTestCase {
             .appendingPathComponent("CrashRecoveryResumePreserveRecoverableWAL_\(UUID().uuidString)", isDirectory: true)
         let services = makeServices(storageRoot: storageRoot)
         let coordinator = AppCoordinator(services: services)
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let previousUseRewindData = defaults.object(forKey: "useRewindData")
 
         defaults.set(false, forKey: "useRewindData")
@@ -1848,7 +1849,7 @@ final class CrashRecoveryStartupTests: XCTestCase {
             .appendingPathComponent("CrashRecoverySkipResume_\(UUID().uuidString)", isDirectory: true)
         let services = makeServices(storageRoot: storageRoot)
         let coordinator = AppCoordinator(services: services)
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let previousUseRewindData = defaults.object(forKey: "useRewindData")
 
         defaults.set(false, forKey: "useRewindData")
@@ -1909,7 +1910,7 @@ final class CrashRecoveryStartupTests: XCTestCase {
             .appendingPathComponent("CrashRecoveryRepairBeforePrepare_\(UUID().uuidString)", isDirectory: true)
         let services = makeServices(storageRoot: storageRoot)
         let coordinator = AppCoordinator(services: services)
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let previousUseRewindData = defaults.object(forKey: "useRewindData")
 
         defaults.set(false, forKey: "useRewindData")
@@ -1996,7 +1997,7 @@ final class CrashRecoveryStartupTests: XCTestCase {
             .appendingPathComponent("CrashRecoveryStartupTests_\(UUID().uuidString)", isDirectory: true)
         let services = makeServices(storageRoot: storageRoot)
         let coordinator = AppCoordinator(services: services)
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let previousUseRewindData = defaults.object(forKey: "useRewindData")
 
         defaults.set(false, forKey: "useRewindData")
@@ -2068,7 +2069,7 @@ final class CrashRecoveryStartupTests: XCTestCase {
             .appendingPathComponent("CrashRecoveryActiveWALPathMP4_\(UUID().uuidString)", isDirectory: true)
         let services = makeServices(storageRoot: storageRoot)
         let coordinator = AppCoordinator(services: services)
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let previousUseRewindData = defaults.object(forKey: "useRewindData")
 
         defaults.set(false, forKey: "useRewindData")
@@ -2134,7 +2135,7 @@ final class CrashRecoveryStartupTests: XCTestCase {
         let storageRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent("ServiceContainerStorageRootTests_\(UUID().uuidString)", isDirectory: true)
         let services = makeServices(storageRoot: storageRoot)
-        let defaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
+        let defaults = UserDefaults(suiteName: AryaRetraceIdentity.userDefaultsSuiteName) ?? .standard
         let previousUseRewindData = defaults.object(forKey: "useRewindData")
 
         defaults.set(false, forKey: "useRewindData")
@@ -2670,5 +2671,217 @@ final class VideoQualityMetricsTests: XCTestCase {
             try? await services.shutdown()
             throw error
         }
+    }
+}
+
+final class TerminalMemoryServiceTests: XCTestCase {
+    private struct Harness {
+        let database: DatabaseManager
+        let service: TerminalMemoryService
+        let defaults: UserDefaults
+        let defaultsSuiteName: String
+    }
+
+    func testProcessRequestRejectsCLIRequestsWhenAccessDisabled() async throws {
+        let harness = try await makeHarness()
+        defer { Task { await self.teardownHarness(harness) } }
+
+        do {
+            _ = try await harness.service.processRequest(
+                TerminalMemoryCLIRequest(kind: .tasksList, limit: 5)
+            )
+            XCTFail("Expected cliAccessDisabled error")
+        } catch let error as TerminalMemoryError {
+            guard case .cliAccessDisabled = error else {
+                return XCTFail("Expected cliAccessDisabled, got \(error)")
+            }
+        }
+    }
+
+    func testProcessRequestRejectsFrameSearchWhenAgentFrameSearchDisabled() async throws {
+        let harness = try await makeHarness()
+        harness.defaults.set(true, forKey: TerminalMemoryService.cliAccessEnabledDefaultsKey)
+        harness.defaults.set(false, forKey: TerminalMemoryService.allowAgentFrameSearchDefaultsKey)
+        defer { Task { await self.teardownHarness(harness) } }
+
+        do {
+            _ = try await harness.service.processRequest(
+                TerminalMemoryCLIRequest(
+                    kind: .memorySearch,
+                    query: "warp",
+                    scope: .frames,
+                    limit: 5
+                )
+            )
+            XCTFail("Expected frameSearchDisabled error")
+        } catch let error as TerminalMemoryError {
+            guard case .frameSearchDisabled = error else {
+                return XCTFail("Expected frameSearchDisabled, got \(error)")
+            }
+        }
+    }
+
+    func testLinkCapturedFrameIfNeededLinksMatchingWarpTask() async throws {
+        let harness = try await makeHarness()
+        defer { Task { await self.teardownHarness(harness) } }
+
+        let now = Date()
+        let bundleID = "dev.warp.Warp-Stable"
+        let workingDirectoryTitle = "~/Projects/retrace"
+        let frameTitle = "Claude Code Session"
+
+        let persistedTask = try await harness.database.upsertTerminalTaskSession(
+            TerminalTaskSession(
+                id: TerminalTaskID(value: 0),
+                bundleID: bundleID,
+                windowName: workingDirectoryTitle,
+                taskTitle: workingDirectoryTitle,
+                workingDirectory: "/Users/aryateja/Projects/retrace",
+                shell: "zsh",
+                sessionKey: "warp-session-1",
+                startDate: now.addingTimeInterval(-120),
+                endDate: nil,
+                lastActivityAt: now.addingTimeInterval(-30),
+                source: .shellHook,
+                confidence: 0.9,
+                commandCount: 2,
+                metadataJSON: nil
+            )
+        )
+
+        let segmentID = try await harness.database.insertSegment(
+            bundleID: bundleID,
+            startDate: now.addingTimeInterval(-60),
+            endDate: now,
+            windowName: workingDirectoryTitle,
+            browserUrl: nil,
+            type: 0
+        )
+
+        let frameID = try await harness.database.insertFrame(
+            FrameReference(
+                id: FrameID(value: 0),
+                timestamp: now,
+                segmentID: AppSegmentID(value: segmentID),
+                frameIndexInSegment: 0,
+                metadata: FrameMetadata(
+                    appBundleID: bundleID,
+                    appName: "Warp",
+                    windowName: "\(frameTitle) — Warp"
+                ),
+                source: .native
+            )
+        )
+
+        let matchedTask = try await harness.service.linkCapturedFrameIfNeeded(
+            frameID: FrameID(value: frameID),
+            timestamp: now,
+            metadata: FrameMetadata(
+                appBundleID: bundleID,
+                appName: "Warp",
+                windowName: "\(frameTitle) — Warp"
+            )
+        )
+
+        XCTAssertEqual(matchedTask?.id, persistedTask.id)
+        XCTAssertEqual(matchedTask?.effectiveTitle, frameTitle)
+        let linkedTask = try await harness.database.getTerminalTaskForFrame(frameID: FrameID(value: frameID))
+        XCTAssertEqual(linkedTask?.id, persistedTask.id)
+        XCTAssertEqual(linkedTask?.effectiveTitle, frameTitle)
+    }
+
+    func testLinkCapturedFrameIfNeededReturnsNilWithoutMatchingTask() async throws {
+        let harness = try await makeHarness()
+        defer { Task { await self.teardownHarness(harness) } }
+
+        let now = Date()
+        let bundleID = "dev.warp.Warp-Stable"
+        let segmentID = try await harness.database.insertSegment(
+            bundleID: bundleID,
+            startDate: now.addingTimeInterval(-30),
+            endDate: now,
+            windowName: "~/Projects/retrace",
+            browserUrl: nil,
+            type: 0
+        )
+
+        let frameID = try await harness.database.insertFrame(
+            FrameReference(
+                id: FrameID(value: 0),
+                timestamp: now,
+                segmentID: AppSegmentID(value: segmentID),
+                frameIndexInSegment: 0,
+                metadata: FrameMetadata(
+                    appBundleID: bundleID,
+                    appName: "Warp",
+                    windowName: "Claude Code — Warp"
+                ),
+                source: .native
+            )
+        )
+
+        let matchedTask = try await harness.service.linkCapturedFrameIfNeeded(
+            frameID: FrameID(value: frameID),
+            timestamp: now,
+            metadata: FrameMetadata(
+                appBundleID: bundleID,
+                appName: "Warp",
+                windowName: "Claude Code — Warp"
+            )
+        )
+
+        XCTAssertNil(matchedTask)
+        let linkedTask = try await harness.database.getTerminalTaskForFrame(frameID: FrameID(value: frameID))
+        XCTAssertNil(linkedTask)
+    }
+
+    func testTerminalShellHookBuilderSnippetsFailOpen() {
+        let zsh = TerminalShellHookBuilder.snippet(for: "zsh")
+        XCTAssertTrue(zsh.contains("hook prompt"))
+        XCTAssertTrue(zsh.contains("hook command-end"))
+        XCTAssertTrue(zsh.contains(">/dev/null 2>&1 || true"))
+        XCTAssertFalse(zsh.contains("_retrace_set_title"))
+        XCTAssertFalse(zsh.contains("--task-title \"$RETRACE_LAST_COMMAND\""))
+
+        let fish = TerminalShellHookBuilder.snippet(for: "fish")
+        XCTAssertTrue(fish.contains("hook command-start"))
+        XCTAssertTrue(fish.contains(">/dev/null 2>&1; or true"))
+        XCTAssertFalse(fish.contains("__retrace_set_title"))
+        XCTAssertFalse(fish.contains("--task-title \"$RETRACE_LAST_COMMAND\""))
+    }
+
+    private func makeHarness() async throws -> Harness {
+        let database = DatabaseManager(databasePath: "file:terminal-memory-\(UUID().uuidString)?mode=memory&cache=shared")
+        try await database.initialize()
+
+        let search = SearchManager(
+            database: database,
+            ftsEngine: FTSManager()
+        )
+
+        let defaultsSuiteName = "dev.arya.arya-retrace.tests.terminal-memory.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: defaultsSuiteName) else {
+            XCTFail("Expected dedicated defaults suite")
+            throw NSError(domain: "TerminalMemoryServiceTests", code: 1)
+        }
+        defaults.removePersistentDomain(forName: defaultsSuiteName)
+
+        let service = TerminalMemoryService(
+            database: database,
+            search: search,
+            defaults: defaults
+        )
+
+        return Harness(
+            database: database,
+            service: service,
+            defaults: defaults,
+            defaultsSuiteName: defaultsSuiteName
+        )
+    }
+
+    private func teardownHarness(_ harness: Harness) async {
+        harness.defaults.removePersistentDomain(forName: harness.defaultsSuiteName)
+        try? await harness.database.close()
     }
 }

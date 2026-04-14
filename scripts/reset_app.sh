@@ -15,7 +15,7 @@ set -e  # Exit on error
 # Get storage root from app settings or default
 source "$(dirname "$0")/_get_storage_root.sh"
 
-BUNDLE_ID="io.retrace.app"
+BUNDLE_ID="dev.arya.arya-retrace"
 APP_SUPPORT_DIR="$RETRACE_STORAGE_ROOT"
 PREFERENCES_DIR="$HOME/Library/Preferences"
 CACHES_DIR="$HOME/Library/Caches/$BUNDLE_ID"
@@ -57,7 +57,7 @@ echo ""
 echo "Step 2: Removing Preferences"
 echo "─────────────────────────────"
 remove_file "$PREFERENCES_DIR/$BUNDLE_ID.plist"
-remove_file "$PREFERENCES_DIR/io.retrace.app.plist"
+remove_file "$PREFERENCES_DIR/dev.arya.arya-retrace.plist"
 echo ""
 
 echo "Step 3: Removing Caches"

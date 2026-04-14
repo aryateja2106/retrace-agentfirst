@@ -38,6 +38,9 @@ xcuserdata/
 .DS_Store
 Thumbs.db
 
+# arya-retrace per-project PM data (optional; tracked projects use ./.dot/)
+.dot/
+
 # Logs
 *.log
 logs/

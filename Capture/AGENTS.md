@@ -22,7 +22,8 @@ Capture/
 │   └── PerceptualHash.swift       # dHash (difference hash) for comparison
 ├── Metadata/
 │   ├── AppInfoProvider.swift      # Get active app info via NSWorkspace
-│   └── BrowserURLExtractor.swift  # Extract URL from browsers (AX API)
+│   ├── BrowserURLExtractor.swift  # Extract URL from browsers (AX API)
+│   └── TerminalBundleRegistry.swift # Terminal bundle IDs + title normalization for task correlation
 └── Tests/
     ├── AccessibilityInspectorTest.swift
     ├── BrowserURLAppleScriptCoordinatorTests.swift

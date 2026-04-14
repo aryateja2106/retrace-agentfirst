@@ -36,7 +36,7 @@ public enum Log {
     // MARK: - Configuration
 
     /// Subsystem for os.log
-    private static let subsystem = "io.retrace.app"
+    private static let subsystem = AryaRetraceIdentity.logSubsystem
 
     /// Shared ISO8601 formatter for timestamps (avoids expensive allocations per log call)
     private static let iso8601Formatter: ISO8601DateFormatter = {

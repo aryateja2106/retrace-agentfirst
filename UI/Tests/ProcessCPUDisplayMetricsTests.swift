@@ -103,18 +103,18 @@ final class ProcessCPUDisplayMetricsTests: XCTestCase {
     func testBuildRowsUsesLatestSamplePercentForCurrentColumnWhileKeepingAverageSortOrder() {
         let rows = ProcessCPUDisplayMetrics.buildRows(
             cumulativeNanosecondsByGroup: [
-                "bundle:io.retrace.app": 15_000_000_000,
+                "bundle:dev.arya.arya-retrace": 15_000_000_000,
                 "bundle:com.google.Chrome": 10_000_000_000
             ],
             latestDeltaNanosecondsByGroup: [
-                "bundle:io.retrace.app": 250_000_000,
+                "bundle:dev.arya.arya-retrace": 250_000_000,
                 "bundle:com.google.Chrome": 1_000_000_000
             ],
             latestSampleDurationSeconds: 1,
             energyNanojoulesByGroup: [:],
             peakPowerWattsByGroup: [:],
             displayNamesByKey: [
-                "bundle:io.retrace.app": "Retrace",
+                "bundle:dev.arya.arya-retrace": "arya-retrace",
                 "bundle:com.google.Chrome": "Google Chrome"
             ],
             totalDuration: 100,
@@ -122,7 +122,7 @@ final class ProcessCPUDisplayMetricsTests: XCTestCase {
         )
 
         XCTAssertEqual(rows.map(\.id), [
-            "bundle:io.retrace.app",
+            "bundle:dev.arya.arya-retrace",
             "bundle:com.google.Chrome"
         ])
         XCTAssertEqual(rows[0].currentCapacityPercent, 2.5, accuracy: 0.000_1)
@@ -146,26 +146,26 @@ final class ProcessCPUDisplayMetricsTests: XCTestCase {
     func testBuildMemoryRowsCalculatesCurrentAverageAndPeakValues() {
         let rows = ProcessCPUDisplayMetrics.buildMemoryRows(
             currentBytesByKey: [
-                "bundle:io.retrace.app": 300,
+                "bundle:dev.arya.arya-retrace": 300,
                 "retrace-proc:retrace-main": 120
             ],
             memoryByteSecondsByKey: [
-                "bundle:io.retrace.app": 2_400,
+                "bundle:dev.arya.arya-retrace": 2_400,
                 "retrace-proc:retrace-main": 600
             ],
             peakBytesByKey: [
-                "bundle:io.retrace.app": 420,
+                "bundle:dev.arya.arya-retrace": 420,
                 "retrace-proc:retrace-main": 180
             ],
             displayNamesByKey: [
-                "bundle:io.retrace.app": "Retrace",
+                "bundle:dev.arya.arya-retrace": "arya-retrace",
                 "retrace-proc:retrace-main": "Retrace (main)"
             ],
             totalDuration: 10
         )
 
         XCTAssertEqual(rows.map(\.id), [
-            "bundle:io.retrace.app",
+            "bundle:dev.arya.arya-retrace",
             "retrace-proc:retrace-main"
         ])
         XCTAssertEqual(rows[0].currentBytes, 300)
@@ -410,7 +410,7 @@ final class ProcessCPUDisplayMetricsTests: XCTestCase {
     }
 
     func testProcessMemoryCardPresentationPinsRetraceRowWhenOutsideVisiblePage() {
-        let retraceRowID = "bundle:io.retrace.app"
+        let retraceRowID = "bundle:dev.arya.arya-retrace"
         var topRows: [ProcessMemoryRow] = []
         topRows.reserveCapacity(11)
         for index in 1...11 {
@@ -444,7 +444,7 @@ final class ProcessCPUDisplayMetricsTests: XCTestCase {
     }
 
     func testProcessMemoryCardPresentationAppendsExpandedCategoriesFamiliesAndChildrenAfterRetrace() {
-        let retraceRowID = "bundle:io.retrace.app"
+        let retraceRowID = "bundle:dev.arya.arya-retrace"
         let categoryID = "explicit"
         let familyID = "processing.extract"
         let snapshot = makeMemorySnapshot(

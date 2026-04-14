@@ -82,9 +82,11 @@ public actor SearchManager: SearchProtocol {
                 hiddenFilter: filters.hiddenFilter,
                 commentFilter: filters.commentFilter,
                 windowNameFilter: filters.windowNameFilter,
-                browserUrlFilter: filters.browserUrlFilter
+                browserUrlFilter: filters.browserUrlFilter,
+                taskTitleFilter: parsed.taskFilter ?? filters.taskTitleFilter,
+                workingDirectoryFilter: parsed.workingDirectoryFilter ?? filters.workingDirectoryFilter
             )
-        } else if parsed.dateRange.start != nil || parsed.dateRange.end != nil {
+        } else if parsed.dateRange.start != nil || parsed.dateRange.end != nil || parsed.taskFilter != nil || parsed.workingDirectoryFilter != nil {
             filters = SearchFilters(
                 startDate: filters.startDate ?? parsed.dateRange.start,
                 endDate: filters.endDate ?? parsed.dateRange.end,
@@ -96,7 +98,9 @@ public actor SearchManager: SearchProtocol {
                 hiddenFilter: filters.hiddenFilter,
                 commentFilter: filters.commentFilter,
                 windowNameFilter: filters.windowNameFilter,
-                browserUrlFilter: filters.browserUrlFilter
+                browserUrlFilter: filters.browserUrlFilter,
+                taskTitleFilter: parsed.taskFilter ?? filters.taskTitleFilter,
+                workingDirectoryFilter: parsed.workingDirectoryFilter ?? filters.workingDirectoryFilter
             )
         }
 
@@ -132,7 +136,8 @@ public actor SearchManager: SearchProtocol {
                     ),
                     segmentID: frame.segmentID,
                     videoID: match.videoID,
-                    frameIndex: match.frameIndex
+                    frameIndex: match.frameIndex,
+                    terminalTask: nil
                 )
                 results.append(result)
             }

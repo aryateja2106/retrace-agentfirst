@@ -333,7 +333,7 @@ struct MilestoneCelebrationView: View {
         case .tenHours:
             return .continueOnly
         case .hundredHours, .thousandHours:
-            return .maybeLaterAndSupport
+            return .continueOnly
         case .tenThousandHours:
             return .acceptCrown
         }
