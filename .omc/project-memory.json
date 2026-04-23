@@ -1,0 +1,364 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1776376363826,
+  "projectRoot": "/Users/aryateja/Projects/retrace",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "scripts"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "App": {
+      "path": "App",
+      "purpose": "Application code",
+      "fileCount": 9,
+      "lastAccessed": 1776376363708,
+      "keyFiles": [
+        "AppCoordinator.swift",
+        "AppLifecycle.swift",
+        "DataAdapter.swift",
+        "FeedbackRecentMetricSupport.swift",
+        "ModelManager.swift"
+      ]
+    },
+    "AppIcon.iconset": {
+      "path": "AppIcon.iconset",
+      "purpose": null,
+      "fileCount": 10,
+      "lastAccessed": 1776376363735,
+      "keyFiles": [
+        "icon_128x128.png",
+        "icon_128x128@2x.png",
+        "icon_16x16.png",
+        "icon_16x16@2x.png",
+        "icon_256x256.png"
+      ]
+    },
+    "AppIcon_backup.iconset": {
+      "path": "AppIcon_backup.iconset",
+      "purpose": null,
+      "fileCount": 10,
+      "lastAccessed": 1776376363782,
+      "keyFiles": [
+        "icon_128x128.png",
+        "icon_128x128@2x.png",
+        "icon_16x16.png",
+        "icon_16x16@2x.png",
+        "icon_256x256.png"
+      ]
+    },
+    "Capture": {
+      "path": "Capture",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1776376363782,
+      "keyFiles": [
+        "AGENTS.md",
+        "CaptureManager.swift",
+        "README.md"
+      ]
+    },
+    "Database": {
+      "path": "Database",
+      "purpose": null,
+      "fileCount": 10,
+      "lastAccessed": 1776376363787,
+      "keyFiles": [
+        "AGENTS.md",
+        "DatabaseConfig.swift",
+        "DatabaseConnection.swift",
+        "DatabaseManager.swift",
+        "FTSManager.swift"
+      ]
+    },
+    "Migration": {
+      "path": "Migration",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1776376363790,
+      "keyFiles": [
+        "AGENTS.md",
+        "MigrationManager.swift",
+        "README.md"
+      ]
+    },
+    "Processing": {
+      "path": "Processing",
+      "purpose": null,
+      "fileCount": 7,
+      "lastAccessed": 1776376363800,
+      "keyFiles": [
+        "AGENTS.md",
+        "ExtractMemoryInstrumentation.swift",
+        "ExtractRequestInstrumentation.swift",
+        "FrameProcessingQueue.swift",
+        "ProcessingManager.swift"
+      ]
+    },
+    "Search": {
+      "path": "Search",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1776376363801,
+      "keyFiles": [
+        "AGENTS.md",
+        "IngestionManager.swift",
+        "README.md",
+        "SearchManager.swift"
+      ]
+    },
+    "Shared": {
+      "path": "Shared",
+      "purpose": null,
+      "fileCount": 7,
+      "lastAccessed": 1776376363804,
+      "keyFiles": [
+        "AppPaths.swift",
+        "BGRAImageUtilities.swift",
+        "EmergencyDiagnostics.swift",
+        "Logging.swift",
+        "MasterKeyManager.swift"
+      ]
+    },
+    "Sources": {
+      "path": "Sources",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1776376363811,
+      "keyFiles": []
+    },
+    "Storage": {
+      "path": "Storage",
+      "purpose": null,
+      "fileCount": 9,
+      "lastAccessed": 1776376363811,
+      "keyFiles": [
+        "AGENTS.md",
+        "GeneratorCachePolicy.swift",
+        "ImageExtractor.swift",
+        "ImageExtractor.swift.bak",
+        "IncrementalSegmentWriter.swift"
+      ]
+    },
+    "UI": {
+      "path": "UI",
+      "purpose": null,
+      "fileCount": 7,
+      "lastAccessed": 1776376363812,
+      "keyFiles": [
+        "AGENTS.md",
+        "BuildInfo.swift",
+        "ContentView.swift",
+        "Info.plist",
+        "README.md"
+      ]
+    },
+    "Vendors": {
+      "path": "Vendors",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1776376363815,
+      "keyFiles": []
+    },
+    "_release2_only": {
+      "path": "_release2_only",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1776376363817,
+      "keyFiles": []
+    },
+    "releases": {
+      "path": "releases",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1776376363817,
+      "keyFiles": [
+        "template.html"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 16,
+      "lastAccessed": 1776376363818,
+      "keyFiles": [
+        "UPSTREAM.md",
+        "_get_storage_root.sh",
+        "check_no_nanoseconds_sleep.sh",
+        "create-release.sh",
+        "generate_modulemap.sh"
+      ]
+    },
+    "App/Tests": {
+      "path": "App/Tests",
+      "purpose": "Test files",
+      "fileCount": 6,
+      "lastAccessed": 1776376363819,
+      "keyFiles": [
+        "FeedbackRecentMetricSupportTests.swift",
+        "InPageURLCaptureRoutingTests.swift",
+        "MasterKeyManagerTests.swift"
+      ]
+    },
+    "Capture/Tests": {
+      "path": "Capture/Tests",
+      "purpose": "Test files",
+      "fileCount": 6,
+      "lastAccessed": 1776376363820,
+      "keyFiles": [
+        "AccessibilityInspectorTest.swift",
+        "BrowserURLAppleScriptCoordinatorTests.swift",
+        "CaptureBlockDetectionTests.swift"
+      ]
+    },
+    "Database/Migrations": {
+      "path": "Database/Migrations",
+      "purpose": "Database migrations",
+      "fileCount": 20,
+      "lastAccessed": 1776376363821,
+      "keyFiles": [
+        "MigrationRunner.swift",
+        "V10_SegmentCommentSearchIndex.swift",
+        "V11_SegmentCommentLinkCompositeIndex.swift"
+      ]
+    },
+    "Processing/Tests": {
+      "path": "Processing/Tests",
+      "purpose": "Test files",
+      "fileCount": 6,
+      "lastAccessed": 1776376363821,
+      "keyFiles": [
+        "ExtractRequestInstrumentationTests.swift",
+        "InPageURLMetadataResolutionTests.swift",
+        "OCRMemoryBackpressurePolicyTests.swift"
+      ]
+    },
+    "Search/Tests": {
+      "path": "Search/Tests",
+      "purpose": "Test files",
+      "fileCount": 2,
+      "lastAccessed": 1776376363822,
+      "keyFiles": [
+        "QueryParserTests.swift",
+        "TestLogger.swift"
+      ]
+    },
+    "Shared/Models": {
+      "path": "Shared/Models",
+      "purpose": "Data models",
+      "fileCount": 12,
+      "lastAccessed": 1776376363823,
+      "keyFiles": [
+        "Audio.swift",
+        "Comment.swift",
+        "Config.swift"
+      ]
+    },
+    "UI/Components": {
+      "path": "UI/Components",
+      "purpose": "UI components",
+      "fileCount": 35,
+      "lastAccessed": 1776376363826,
+      "keyFiles": [
+        "AnalyticsCard.swift",
+        "AppMetadataCache.swift",
+        "AppMover.swift"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "App/RetentionManager.swift",
+      "accessCount": 2,
+      "lastAccessed": 1776376965547,
+      "type": "file"
+    },
+    {
+      "path": "Database/Schema.swift",
+      "accessCount": 2,
+      "lastAccessed": 1776376971756,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1776376923700,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1776376924080,
+      "type": "file"
+    },
+    {
+      "path": "Package.swift",
+      "accessCount": 1,
+      "lastAccessed": 1776376924373,
+      "type": "file"
+    },
+    {
+      "path": "Search/SearchManager.swift",
+      "accessCount": 1,
+      "lastAccessed": 1776376972014,
+      "type": "file"
+    },
+    {
+      "path": "Capture/Deduplication/FrameDeduplicator.swift",
+      "accessCount": 1,
+      "lastAccessed": 1776376972470,
+      "type": "file"
+    },
+    {
+      "path": "Capture/Deduplication/PerceptualHash.swift",
+      "accessCount": 1,
+      "lastAccessed": 1776376972705,
+      "type": "file"
+    },
+    {
+      "path": "Search/Ranking/ResultRanker.swift",
+      "accessCount": 1,
+      "lastAccessed": 1776376981196,
+      "type": "file"
+    },
+    {
+      "path": "Database/FTSManager.swift",
+      "accessCount": 1,
+      "lastAccessed": 1776376986883,
+      "type": "file"
+    },
+    {
+      "path": "Database/Migrations/V1_InitialSchema.swift",
+      "accessCount": 1,
+      "lastAccessed": 1776377001419,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
