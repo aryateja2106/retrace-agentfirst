@@ -11,6 +11,7 @@ extension SettingsView {
             journalContextCard
             privateIntegrationsCard
         }
+        .textSelection(.enabled)
         .onChange(of: dailyJournalEnabled) { _ in
             Task { await coordinatorWrapper.coordinator.refreshDailyJournalSchedule() }
         }
@@ -88,9 +89,7 @@ extension SettingsView {
                 .foregroundColor(.retraceSecondary)
 
                 if let journalStatusMessage {
-                    Text(journalStatusMessage)
-                        .font(.retraceCaption)
-                        .foregroundColor(journalStatusIsError ? .retraceDanger : .retraceSecondary)
+                    journalStatusRow(journalStatusMessage)
                 }
             }
         }
@@ -108,14 +107,98 @@ extension SettingsView {
     }
 
     private func cliCommand(_ command: String) -> some View {
-        Text(command)
-            .font(.retraceMono)
-            .foregroundColor(.retracePrimary)
+        HStack(spacing: 8) {
+            Text(command)
+                .font(.retraceMono)
+                .foregroundColor(.retracePrimary)
+                .textSelection(.enabled)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button {
+                copyToClipboard(command)
+            } label: {
+                Image(systemName: "doc.on.doc")
+                    .font(.retraceCaptionMedium)
+                    .foregroundColor(.retraceSecondary)
+                    .padding(5)
+            }
+            .buttonStyle(.plain)
+            .help("Copy command")
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.04))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .contextMenu {
+            Button("Copy Command") {
+                copyToClipboard(command)
+            }
+        }
+    }
+
+    private func journalStatusRow(_ message: String) -> some View {
+        let path = journalStatusPath(from: message)
+
+        return VStack(alignment: .leading, spacing: 6) {
+            Text(path == nil ? "Status" : "Journal output")
+                .font(.retraceCaptionMedium)
+                .foregroundColor(.retracePrimary)
+
+            HStack(spacing: 8) {
+                Text(message)
+                    .font(.retraceCaption)
+                    .foregroundColor(journalStatusIsError ? .retraceDanger : .retraceSecondary)
+                    .textSelection(.enabled)
+                    .lineLimit(2)
+                    .truncationMode(.middle)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Button {
+                    copyToClipboard(path.map(shellQuotedPath) ?? message)
+                } label: {
+                    Image(systemName: "doc.on.doc")
+                        .font(.retraceCaptionMedium)
+                        .foregroundColor(.retraceSecondary)
+                        .padding(5)
+                }
+                .buttonStyle(.plain)
+                .help(path == nil ? "Copy status" : "Copy file path")
+
+                if let path {
+                    Button {
+                        openPath(path)
+                    } label: {
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.retraceCaptionMedium)
+                            .foregroundColor(.retraceSecondary)
+                            .padding(5)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Reveal journal file")
+                }
+            }
             .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 8)
             .background(Color.white.opacity(0.04))
             .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+            )
+            .contextMenu {
+                Button(path == nil ? "Copy Status" : "Copy File Path") {
+                    copyToClipboard(path.map(shellQuotedPath) ?? message)
+                }
+                if let path {
+                    Button("Reveal in Finder") {
+                        openPath(path)
+                    }
+                }
+            }
+        }
     }
 
     private func integrationRow(_ title: String, _ detail: String) -> some View {
@@ -147,6 +230,25 @@ extension SettingsView {
                         .stroke(Color.white.opacity(0.08), lineWidth: 1)
                 )
         }
+    }
+
+    private func copyToClipboard(_ value: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(value, forType: .string)
+    }
+
+    private func journalStatusPath(from message: String) -> String? {
+        guard message.hasPrefix("/") else { return nil }
+        return message
+    }
+
+    private func shellQuotedPath(_ path: String) -> String {
+        "'\(path.replacingOccurrences(of: "'", with: "'\\''"))'"
+    }
+
+    private func openPath(_ path: String) {
+        NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)])
     }
 
     private func chooseJournalFolder() {

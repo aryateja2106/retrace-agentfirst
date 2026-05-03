@@ -224,15 +224,15 @@ final class SearchViewModelAvailableAppsTests: XCTestCase {
 
     @MainActor
     private func waitUntil(
-        timeoutNanoseconds: UInt64 = 1_000_000_000,
+        timeout: Duration = .seconds(1),
         condition: @escaping () -> Bool
     ) async {
-        let deadline = ContinuousClock.now + .nanoseconds(Int64(timeoutNanoseconds))
+        let deadline = ContinuousClock.now + timeout
         while ContinuousClock.now < deadline {
             if condition() {
                 return
             }
-            try? await Task.sleep(nanoseconds: 10_000_000)
+            try? await Task.sleep(for: .milliseconds(10), clock: .continuous)
         }
         XCTFail("Timed out waiting for condition")
     }

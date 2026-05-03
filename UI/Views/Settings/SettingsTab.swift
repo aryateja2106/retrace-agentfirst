@@ -18,7 +18,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: return "gearshape"
         case .capture: return "video"
         case .storage: return "externaldrive"
-        case .context: return "text.badge.sparkles"
+        case .context: return "doc.text.magnifyingglass"
         case .privacy: return "lock.shield"
         case .power: return "bolt.fill"
         case .tags: return "tag"

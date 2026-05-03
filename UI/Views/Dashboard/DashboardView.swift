@@ -988,8 +988,6 @@ public struct DashboardView: View {
 
     // MARK: - Footer Hover States
 
-    @State private var isHoveringHaseab = false
-    @State private var isHoveringSupportMe = false
     @State private var isHoveringFeedback = false
 
     // MARK: - Timeline Button
@@ -1932,56 +1930,6 @@ public struct DashboardView: View {
             Spacer()
 
             HStack(spacing: 16) {
-                Link(destination: URL(string: "https://retrace.to/l/haseab-twitter")!) {
-                    HStack(spacing: 4) {
-                        Text("Retrace by")
-                            .foregroundColor(.retraceSecondary)
-                        Text("@haseab")
-                            .foregroundColor(isHoveringHaseab ? .retracePrimary : .retraceSecondary)
-                            .scaleEffect(isHoveringHaseab ? 1.05 : 1.0)
-                            .animation(.easeInOut(duration: 0.15), value: isHoveringHaseab)
-                    }
-                    .font(.retraceCaption2Medium)
-                }
-                .buttonStyle(.plain)
-                .onHover { hovering in
-                    isHoveringHaseab = hovering
-                    if hovering {
-                        NSCursor.pointingHand.push()
-                    } else {
-                        NSCursor.pop()
-                    }
-                }
-
-                Circle()
-                    .fill(Color.retraceSecondary.opacity(0.5))
-                    .frame(width: 3, height: 3)
-
-                Link(destination: URL(string: "https://retrace.to/l/support-haseab")!) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "cup.and.saucer.fill")
-                            .font(.retraceCaption2)
-                        Text("Support Me")
-                    }
-                    .font(.retraceCaption2Medium)
-                    .foregroundColor(.retraceSecondary)
-                    .scaleEffect(isHoveringSupportMe ? 1.05 : 1.0)
-                    .animation(.easeInOut(duration: 0.15), value: isHoveringSupportMe)
-                }
-                .buttonStyle(.plain)
-                .onHover { hovering in
-                    isHoveringSupportMe = hovering
-                    if hovering {
-                        NSCursor.pointingHand.push()
-                    } else {
-                        NSCursor.pop()
-                    }
-                }
-
-                Circle()
-                    .fill(Color.retraceSecondary.opacity(0.5))
-                    .frame(width: 3, height: 3)
-
                 Button(action: {
                     presentFeedbackSheet()
                 }) {

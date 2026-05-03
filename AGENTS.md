@@ -60,6 +60,8 @@ retrace/
 ├── DESIGN_CONTEXT.md            # Monochrome fork UI design direction
 ├── CLI_CONTEXT.md               # Agent-facing retrace-cli contract and privacy rules
 ├── Package.swift                # Swift Package Manager configuration
+├── docs/
+│   └── screenshots/             # Visual references for fork UI and app usage reminders
 ├── CLI/                         # Agent-readable local CLI skill
 │   └── SKILL.md                 # Safe retrace-cli commands and privacy rules
 ├── Sources/

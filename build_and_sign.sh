@@ -5,9 +5,78 @@
 
 set -e  # Exit on error
 
-APP_NAME="Retrace"
-BUNDLE_ID="io.retrace.app"
 BUILD_CONFIG="release"
+APP_VARIANT="${RETRACE_APP_VARIANT:-prod}"
+INSTALL_TO_APPLICATIONS="${RETRACE_INSTALL_TO_APPLICATIONS:-}"
+DEFAULT_CODESIGN_IDENTITY="Retrace Local Dev"
+if security find-identity -v -p codesigning 2>/dev/null | grep -q "\"$DEFAULT_CODESIGN_IDENTITY\""; then
+    CODESIGN_IDENTITY="${RETRACE_CODESIGN_IDENTITY:-$DEFAULT_CODESIGN_IDENTITY}"
+else
+    CODESIGN_IDENTITY="${RETRACE_CODESIGN_IDENTITY:--}"
+fi
+
+usage() {
+    echo "Usage: $0 [--prod|--dev] [--install|--no-install]"
+    echo ""
+    echo "  --prod        Build the production app identity: Retrace.app"
+    echo "  --dev         Build the parallel dev app identity: Retrace Dev.app"
+    echo "  --install     Copy/update the selected app in /Applications and install retrace-cli"
+    echo "  --no-install  Leave the app only in the SwiftPM build directory"
+    echo ""
+    echo "Environment:"
+    echo "  RETRACE_CODESIGN_IDENTITY   Code signing identity to use (default: ad-hoc '-')"
+    echo "                              Example: RETRACE_CODESIGN_IDENTITY=\"$DEFAULT_CODESIGN_IDENTITY\" $0 --dev --install"
+}
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --prod)
+            APP_VARIANT="prod"
+            ;;
+        --dev)
+            APP_VARIANT="dev"
+            ;;
+        --install)
+            INSTALL_TO_APPLICATIONS="1"
+            ;;
+        --no-install)
+            INSTALL_TO_APPLICATIONS="0"
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+case "$APP_VARIANT" in
+    prod)
+        APP_NAME="Retrace"
+        BUNDLE_ID="io.retrace.app"
+        EXECUTABLE_NAME="Retrace"
+        URL_SCHEME="retrace"
+        IS_DEV_BUILD="true"
+        ;;
+    dev)
+        APP_NAME="Retrace Dev"
+        BUNDLE_ID="io.retrace.app.dev"
+        EXECUTABLE_NAME="Retrace Dev"
+        URL_SCHEME="retrace-dev"
+        IS_DEV_BUILD="true"
+        ;;
+    *)
+        echo "Unknown RETRACE_APP_VARIANT: $APP_VARIANT"
+        usage
+        exit 1
+        ;;
+esac
+
 BUILD_DIR="$(swift build -c "$BUILD_CONFIG" --show-bin-path)"
 APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
 
@@ -47,15 +116,23 @@ BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
 REMOTE_URL=$(git remote get-url origin 2>/dev/null || true)
 FORK_NAME=$(printf "%s" "$REMOTE_URL" | sed -E 's#^(git@github\.com:|ssh://git@github\.com/|https://github\.com/)##; s#\.git$##')
 
-echo "🔨 Building Retrace..."
+echo "🔨 Building $APP_NAME..."
 ./scripts/check_no_nanoseconds_sleep.sh
-echo "🔨 Building Retrace v${MARKETING_VERSION} (${BUILD_CONFIG})..."
+echo "🔨 Building $APP_NAME v${MARKETING_VERSION} (${BUILD_CONFIG})..."
 echo "   commit: ${GIT_COMMIT} (${GIT_BRANCH})"
+echo "   bundle: ${BUNDLE_ID}"
+echo "   signing identity: ${CODESIGN_IDENTITY}"
 ./scripts/check_no_nanoseconds_sleep.sh
 swift build -c release
 
-if [ ! -f "$BUILD_DIR/$APP_NAME" ]; then
-    echo "❌ Expected release executable not found at $BUILD_DIR/$APP_NAME"
+if [ ! -f "$BUILD_DIR/Retrace" ]; then
+    echo "❌ Expected release executable not found at $BUILD_DIR/Retrace"
+    echo "   SwiftPM release bin path: $BUILD_DIR"
+    exit 1
+fi
+
+if [ ! -f "$BUILD_DIR/retrace-cli" ]; then
+    echo "❌ Expected release CLI not found at $BUILD_DIR/retrace-cli"
     echo "   SwiftPM release bin path: $BUILD_DIR"
     exit 1
 fi
@@ -70,8 +147,9 @@ mkdir -p "$APP_BUNDLE/Contents/Frameworks"
 mkdir -p "$APP_BUNDLE/Contents/Library/Helpers"
 mkdir -p "$APP_BUNDLE/Contents/Library/LaunchAgents"
 
-# Copy executable
-cp "$BUILD_DIR/Retrace" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+# Copy executable. The dev bundle uses a distinct executable name so it can sit
+# beside the production app in Activity Monitor and Finder.
+cp "$BUILD_DIR/Retrace" "$APP_BUNDLE/Contents/MacOS/$EXECUTABLE_NAME"
 
 # Copy bundled crash recovery helper assets used by the app's launch agent flow.
 CRASH_RECOVERY_HELPER="$BUILD_DIR/RetraceCrashRecoveryHelper"
@@ -132,44 +210,83 @@ set_plist_string "RetraceGitCommitFull" "$GIT_COMMIT_FULL"
 set_plist_string "RetraceGitBranch" "$GIT_BRANCH"
 set_plist_string "RetraceBuildDate" "$BUILD_DATE"
 set_plist_string "RetraceBuildConfig" "$BUILD_CONFIG"
-set_plist_bool "RetraceIsDevBuild" "true"
+set_plist_string "RetraceBuildVariant" "$APP_VARIANT"
+set_plist_bool "RetraceIsDevBuild" "$IS_DEV_BUILD"
 set_plist_string "RetraceForkName" "$FORK_NAME"
+set_plist_string "CFBundleName" "$APP_NAME"
+set_plist_string "CFBundleDisplayName" "$APP_NAME"
+set_plist_string "CFBundleIdentifier" "$BUNDLE_ID"
+set_plist_string "CFBundleExecutable" "$EXECUTABLE_NAME"
+/usr/libexec/PlistBuddy -c "Set :CFBundleURLTypes:0:CFBundleURLSchemes:0 $URL_SCHEME" "$APP_BUNDLE/Contents/Info.plist"
+
+if [ "$APP_VARIANT" = "dev" ]; then
+    set_plist_bool "SUEnableAutomaticChecks" "false"
+    set_plist_bool "SUAllowsAutomaticUpdates" "false"
+    set_plist_bool "SUAutomaticallyUpdate" "false"
+fi
 
 # Create PkgInfo
 echo -n "APPL????" > "$APP_BUNDLE/Contents/PkgInfo"
 
 echo "✍️  Signing app bundle..."
 
+CODESIGN_ARGS=(--force --sign "$CODESIGN_IDENTITY")
+if [ "$CODESIGN_IDENTITY" != "-" ]; then
+    CODESIGN_ARGS+=(--timestamp=none)
+fi
+
 # Sign frameworks first (required before signing the app)
 for fw in "$APP_BUNDLE/Contents/Frameworks/"*.framework; do
-    [ -d "$fw" ] && codesign --force --sign - "$fw"
+    [ -d "$fw" ] && codesign "${CODESIGN_ARGS[@]}" "$fw"
 done
 
 # Sign nested helper executables before the containing app.
 if [ -f "$APP_BUNDLE/Contents/Library/Helpers/RetraceCrashRecoveryHelper" ]; then
-    codesign --force --sign - "$APP_BUNDLE/Contents/Library/Helpers/RetraceCrashRecoveryHelper"
+    codesign "${CODESIGN_ARGS[@]}" "$APP_BUNDLE/Contents/Library/Helpers/RetraceCrashRecoveryHelper"
 fi
 
-# Sign the app bundle with ad-hoc signature and entitlements
-codesign --force --deep --sign - --entitlements "UI/Retrace.entitlements" "$APP_BUNDLE"
+# Sign the app bundle with entitlements. Prefer a stable local identity so TCC
+# permissions survive rebuilds; fall back to ad-hoc when no identity is present.
+codesign "${CODESIGN_ARGS[@]}" --deep --entitlements "UI/Retrace.entitlements" "$APP_BUNDLE"
+
+install_cli() {
+    local cli_install_dir="${RETRACE_CLI_INSTALL_DIR:-$HOME/.local/bin}"
+    mkdir -p "$cli_install_dir"
+    cp "$BUILD_DIR/retrace-cli" "$cli_install_dir/retrace-cli"
+    chmod +x "$cli_install_dir/retrace-cli"
+    echo "✅ Installed retrace-cli to $cli_install_dir/retrace-cli"
+}
 
 echo "✅ Build complete!"
 echo ""
 echo "📍 App bundle location: $APP_BUNDLE"
 echo "   Version: $MARKETING_VERSION ($BUILD_NUMBER) · $GIT_COMMIT"
+echo "   Bundle ID: $BUNDLE_ID"
 echo ""
 
-# Check if app is already in Applications
-if [ -d "/Applications/$APP_NAME.app" ]; then
-    echo "📲 Found existing app in /Applications/, updating in place..."
-    echo "   This preserves your permissions settings."
+if [ -z "$INSTALL_TO_APPLICATIONS" ]; then
+    if [ -d "/Applications/$APP_NAME.app" ]; then
+        INSTALL_TO_APPLICATIONS="1"
+    else
+        INSTALL_TO_APPLICATIONS="0"
+    fi
+fi
+
+if [ "$INSTALL_TO_APPLICATIONS" = "1" ]; then
+    if [ -d "/Applications/$APP_NAME.app" ]; then
+        echo "📲 Found existing $APP_NAME in /Applications/, updating in place..."
+        echo "   This preserves your permissions settings."
+    else
+        echo "📲 Installing $APP_NAME to /Applications/..."
+    fi
 
     # Kill the app if running
-    pkill -x "$APP_NAME" 2>/dev/null || true
+    pkill -x "$EXECUTABLE_NAME" 2>/dev/null || true
 
-    # Replace the app
+    # Replace the selected app variant.
     rm -rf "/Applications/$APP_NAME.app"
     cp -r "$APP_BUNDLE" /Applications/
+    install_cli
 
     echo "✅ Updated /Applications/$APP_NAME.app"
     echo ""
@@ -177,7 +294,7 @@ if [ -d "/Applications/$APP_NAME.app" ]; then
     echo "  open /Applications/$APP_NAME.app"
 else
     echo "💡 For persistent permissions during development, install to /Applications/:"
-    echo "   cp -r $APP_BUNDLE /Applications/ && open /Applications/$APP_NAME.app"
+    echo "   $0 --$APP_VARIANT --install && open \"/Applications/$APP_NAME.app\""
     echo ""
     echo "Or run from build directory (permissions reset on each rebuild):"
     echo "   open $APP_BUNDLE"

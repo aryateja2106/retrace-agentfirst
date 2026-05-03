@@ -438,7 +438,7 @@ public class SearchViewModel: ObservableObject {
     private let debounceDelay: TimeInterval = 0.3
     private let defaultResultLimit = 50
     private let maxSearchWords = 15  // Limit search queries to prevent performance issues
-    private let otherAppsRefreshDelayNs: UInt64 = 2_000_000_000
+    private let otherAppsRefreshDelay: Duration = .seconds(2)
     private let memoryReportIntervalNs: UInt64 = 5_000_000_000
     private let maxInMemoryThumbnailCount = 60
     nonisolated private static let memoryLedgerSummaryIntervalSeconds: TimeInterval = 30
@@ -1770,7 +1770,7 @@ public class SearchViewModel: ObservableObject {
             guard let self else { return }
 
             do {
-                try await Task.sleep(nanoseconds: otherAppsRefreshDelayNs)
+                try await Task.sleep(for: otherAppsRefreshDelay, clock: .continuous)
             } catch {
                 return
             }
