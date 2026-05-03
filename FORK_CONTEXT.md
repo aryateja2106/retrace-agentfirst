@@ -17,6 +17,7 @@ This fork keeps Retrace's upstream data contract intact while adding Arya-specif
 - `App/DailyJournalManager.swift` adds low-impact collection, Ollama summarization, and markdown writing.
 - `UI/Views/Settings/Sections/ContextSettingsView.swift` adds opt-in context/journal settings.
 - `UI/Components/AppTheme.swift` and `UI/Components/MilestoneCelebrationManager.swift` enforce the fork's monochrome token system across dashboard, settings, timeline/search chrome, menus, and milestone surfaces.
+- `PRODUCT_CONTEXT.md`, `CONTEXT.md`, `CLAUDE.md`, and `SKILLS.md` document the agent-first product constitution and host-tool entrypoints.
 
 ## Pulling Upstream
 

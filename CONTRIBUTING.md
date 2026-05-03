@@ -45,10 +45,13 @@ Before generating code, ensure your AI assistant has read:
 ```
 # Essential reading for AI assistants
 CONTRIBUTING.md          ← You are here (coding standards, testing requirements)
-RETRACE_GUIDE.md        ← Full technical specification
+README.md               ← Human product overview and setup
+PRODUCT_CONTEXT.md      ← Product constitution, hard constraints, milestones
+FORK_CONTEXT.md         ← Upstream compatibility and fork-specific changed surfaces
+DESIGN_CONTEXT.md       ← Monochrome UI direction
+CLI_CONTEXT.md          ← Agent-facing CLI contract and privacy rules
 AGENTS.md               ← Architecture overview and module rules (industry standard)
 {Module}/AGENTS.md      ← Module-specific guidelines (e.g., Database/AGENTS.md)
-{Module}/README.md      ← Implementation details for the module you're working on
 ```
 
 **Example prompts for Cursor/Claude Code:**
@@ -153,11 +156,11 @@ gh issue create --title 'Crash on launch from /Applications' --body-file /tmp/re
 
 **Cursor**: Create a `.cursorrules` file in the project root (or point to AGENTS.md)
 
-**Claude Code**: Automatically reads `AGENTS.md` and `{Module}/AGENTS.md` files
+**Claude Code**: Start from `CLAUDE.md`, which points back to `AGENTS.md`, `PRODUCT_CONTEXT.md`, and `{Module}/AGENTS.md`
 
 **GitHub Copilot**: Create a `.github/copilot-instructions.md` file (or point to AGENTS.md)
 
-**Codex**: Uses `.cursorrules`
+**Codex**: Use `AGENTS.md` and `CONTEXT.md` as the canonical project entrypoints
 
 All tools benefit from the same core rules defined in AGENTS.md:
 
@@ -188,7 +191,8 @@ All tools benefit from the same core rules defined in AGENTS.md:
 Before generating code, consult:
 
 - CONTRIBUTING.md - Coding standards
-- RETRACE_GUIDE.md - Technical spec
+- README.md - Human product overview and setup
+- PRODUCT_CONTEXT.md - Product constitution and hard constraints
 - AGENTS.md - Architecture overview (industry standard)
 - {Module}/AGENTS.md - Module-specific rules
 
@@ -386,7 +390,8 @@ This project follows standard open-source collaboration practices:
 
 2. **Read the technical documentation**
 
-   - [RETRACE_GUIDE.md](RETRACE_GUIDE.md) - Full technical specification
+   - [README.md](README.md) - Human product overview and setup
+   - [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT.md) - Product constitution and hard constraints
    - [AGENTS.md](AGENTS.md) - Project structure and module overview (industry standard)
    - Module-specific AGENTS.md and README files in each directory
 
@@ -1091,7 +1096,7 @@ Maintain these performance benchmarks:
 
 ## Getting Help
 
-- **Documentation**: Start with [RETRACE_GUIDE.md](RETRACE_GUIDE.md)
+- **Documentation**: Start with [README.md](README.md), then [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT.md) and [AGENTS.md](AGENTS.md)
 - **Issues**: Check existing issues or create a new one
 - **Discussions**: Use GitHub Discussions for questions
 - **Code Review**: Don't hesitate to ask questions in PR comments

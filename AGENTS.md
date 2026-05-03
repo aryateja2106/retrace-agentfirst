@@ -2,7 +2,7 @@
 
 > **Standard**: This file follows the [AGENTS.md](https://agents.md) specification - a vendor-agnostic standard for AI agent guidance. For human-readable project information, see [README.md](README.md).
 
-Retrace is a local-first screen recording and search application for macOS, inspired by Rewind AI. It captures screens, extracts text via OCR, and makes everything searchable—all locally on-device.
+Retrace Agentfirst is a local-first screen recording, search, time tracking, and agent context application for macOS. It is Arya's fork of Hasib's Retrace, preserving upstream storage/database contracts while adding agent-first CLI, journal, context, and product-direction surfaces.
 
 **Status**: Core screen capture (CGWindowListCapture), OCR (Vision), full-text search (FTS5), HEVC encoding, and Rewind import are working. Audio transcription and vector search are planned for future releases.
 
@@ -11,11 +11,12 @@ Retrace is a local-first screen recording and search application for macOS, insp
 ## Quick Reference
 
 - **Module-Specific Instructions**: Each module has its own `AGENTS.md` file in its directory
-- **Human Documentation**: [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [AI_ISSUE_TEMPLATE.md](AI_ISSUE_TEMPLATE.md)
+- **Human Documentation**: [README.md](README.md), [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT.md), [CONTEXT.md](CONTEXT.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [AI_ISSUE_TEMPLATE.md](AI_ISSUE_TEMPLATE.md)
 - **Fork Context**: [FORK_CONTEXT.md](FORK_CONTEXT.md), [DESIGN_CONTEXT.md](DESIGN_CONTEXT.md), and [CLI_CONTEXT.md](CLI_CONTEXT.md)
+- **Host Tool Pointers**: [CLAUDE.md](CLAUDE.md) and [SKILLS.md](SKILLS.md) are thin indexes back to the canonical docs
 - **Issue Reporting**: Use `AI_ISSUE_TEMPLATE.md` and `gh issue create --body-file ...` for AI-authored GitHub issues
 - **Bug Fixes by Non-Owners**: If the user is fixing a bug/crash and does not appear to be the repo owner, encourage them to create or link a GitHub issue before making code changes
-- **Technical Audit Docs**: `local/docs/` (includes deep-dive implementation and performance audit notes)
+- **Design References**: `docs/screenshots/` and optional local design-reference notes are supporting material, not product policy
 
 ---
 
@@ -56,6 +57,10 @@ retrace/
 ├── AI_ISSUE_TEMPLATE.md         # Canonical markdown template for AI-authored bug reports
 ├── README.md                    # Human-readable project overview
 ├── CONTRIBUTING.md              # Contribution guidelines
+├── PRODUCT_CONTEXT.md           # Product constitution, hard constraints, and milestones
+├── CONTEXT.md                   # Short read-order index for humans and agents
+├── CLAUDE.md                    # Thin Claude/Claude Code compatibility pointer
+├── SKILLS.md                    # Thin root skill index pointing to CLI/SKILL.md
 ├── FORK_CONTEXT.md              # Fork compatibility guardrails and changed surfaces
 ├── DESIGN_CONTEXT.md            # Monochrome fork UI design direction
 ├── CLI_CONTEXT.md               # Agent-facing retrace-cli contract and privacy rules
@@ -496,7 +501,8 @@ Then check which path actually executes and fix the right code.
 - **AGENTS.md Specification**: https://agents.md
 - **Contribution Guide**: [CONTRIBUTING.md](CONTRIBUTING.md)
 - **Human README**: [README.md](README.md)
+- **Product Constitution**: [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT.md)
 
 ---
 
-_This file follows the AGENTS.md standard for AI agent guidance. Last updated: 2026-04-04_
+_This file follows the AGENTS.md standard for AI agent guidance. Last updated: 2026-05-03_

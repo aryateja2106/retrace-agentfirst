@@ -4033,7 +4033,6 @@ public class SimpleTimelineViewModel: ObservableObject {
             targetIndex = findClosestFrameIndex(to: targetDate)
         }
 
-        guard requestStillCurrent?() ?? true else { return nil }
         navigateToFrame(targetIndex)
         return targetIndex
     }

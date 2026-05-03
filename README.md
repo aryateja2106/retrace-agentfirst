@@ -1,286 +1,216 @@
+# Retrace Agentfirst
 
-# Retrace
+Retrace Agentfirst is Arya's fork of [haseab/retrace](https://github.com/haseab/retrace): a local-first macOS timeline, time tracker, and agent context layer built from screen history.
 
-> ⚠️ **VERY EARLY DEVELOPMENT** - This project is in very early development. Expect breaking changes, incomplete features, and bugs.
+The upstream project gives you a searchable memory of what appeared on your screen. This fork keeps that core intact, then adds an agent-first direction: private CLI access, journal generation, project context, monochrome UI, and a product constitution for building personal software without turning the app into a heavy all-in-one platform.
 
-A local-first screen recording and search application for macOS, inspired by Rewind AI. Retrace captures your screen activity, extracts text via OCR, and makes everything searchable—all locally on-device.
+> Status: early, local-first, and intentionally modular. Expect breaking changes while the fork finds its shape.
 
-## What is Retrace?
+## Product Direction
 
-Retrace is an open source alternative to Rewind AI that gives you photographic memory of everything you've seen on your screen. It continuously captures screenshots (every 2 seconds by default), extracts text using OCR, and stores everything in a searchable database—entirely on your Mac with no cloud dependencies.
+Retrace Agentfirst should help answer four questions:
 
-## Current Status
+- What did I do?
+- What did my agents do?
+- Which project was that work for?
+- Can I find, summarize, and reuse the context later without sending private screen data to a cloud service?
 
-### ✅ What's Working
+The app is not meant to replace every tool on the Mac. It should become a lightweight memory and automation layer that works well with native macOS utilities, terminal agents, Raycast-style launchers, and local models.
 
-- **Continuous screen capture** with configurable intervals (every 2 seconds default)
-- **OCR text extraction** using Apple's Vision framework
-- **Full-text search** with advanced filters (app, date, exclusions)
-- **Timeline viewer** - Scrub through your screen history frame-by-frame
-- **Dashboard analytics** - Visualize app usage, screen time, and activity patterns
-- **Rewind AI import** - Seamless, resumable background import of existing Rewind data
-- **Settings panel** - Comprehensive controls for capture, storage, privacy, and shortcuts
-- **Global hotkeys** - Quick access (Cmd+Shift+T for timeline, Cmd+Shift+D for dashboard)
-- **HEVC video encoding** - Working but not yet optimized for efficiency
-- **Search highlighting** - Visual highlighting of search results in frames
-- **Privacy controls** - Exclude apps and private browsing windows
+## Fork Principles
 
-### 🚧 Coming Soon
+- Keep upstream Retrace's storage and database contracts compatible unless there is a documented migration.
+- Prefer local-first, private-by-default workflows over cloud dashboards or telemetry.
+- Build features as small modules: capture, OCR, search, time tracking, CLI, journals, and integrations should remain separable.
+- Make agent workflows explicit and auditable through docs, CLI commands, and structured local outputs.
+- Add native macOS affordances when they remove friction, but avoid background services or broad APIs by default.
+- Keep the UI calm, monochrome, and fast. App icons may keep their natural color; product chrome should stay restrained.
 
-- **Optimized storage** - Improving HEVC compression efficiency
-- **Audio recording and transcription** - Whisper.cpp integration ready but disabled
-- **Advanced keyboard shortcuts** - More customizable shortcuts
-- **Decrypt and backup Rewind database** - Export your Rewind data
+The canonical product constitution lives in [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT.md). Fork compatibility rules live in [FORK_CONTEXT.md](FORK_CONTEXT.md).
 
-## Architecture
+## What's Working
 
-**Data Flow:**
+- Continuous local screen capture using `CGWindowListCapture`
+- OCR text extraction with Apple's Vision framework
+- SQLite + FTS5 full-text search
+- Timeline viewer with frame navigation, search, copy, comments, and contextual actions
+- Dashboard app usage, screen time, storage, and local activity metrics
+- Rewind AI import
+- HEVC video encoding
+- Privacy controls for excluded apps, private windows, redaction, and retention
+- Feedback export/submission flow with local diagnostics
+- Agent-facing `retrace-cli` for bounded context, journal, recording, storage, and Ollama checks
+- Local daily journal generation from already persisted OCR text
+- Monochrome fork UI direction
 
-```
-CGWindowListCapture (every 2s)
-    ↓
-Frame Deduplication
-    ↓
-Split into two paths:
-    ├─ OCR Path: Vision OCR → Text Extraction → SQLite Database
-    └─ Video Path: HEVC Encoding → .mp4 segments
-    ↓
-Full-Text Search (FTS5) → Timeline/Dashboard UI
-```
+## Agentfirst Additions
 
-Retrace is built with a modular architecture:
+The fork currently adds these surfaces on top of upstream:
 
-- **Database** - SQLite + FTS5 for metadata and full-text search
-- **Storage** - HEVC video encoding for screen recordings
-- **Capture** - Screen capture using CGWindowListCapture API
-- **Processing** - OCR text extraction using Apple's Vision framework
-- **Search** - Query parsing, FTS5 ranking, and result snippets
-- **Migration** - Import from Rewind AI databases
-- **App** - Coordination, lifecycle management, service container
-- **UI** - SwiftUI interface with search, timeline, and settings
-
-See [AGENTS.md](AGENTS.md) for detailed architecture documentation.
-
-## Tech Stack
-
-### Active
-
-- **Language**: Swift 5.9+ with async/await, Actors, Sendable
-- **Platform**: macOS 13.0+ (Apple Silicon required)
-- **UI**: SwiftUI with custom design system
-- **Screen Capture**: CGWindowListCapture API (legacy, no privacy indicator)
-- **OCR**: Vision framework (macOS native)
-- **Video**: VideoToolbox (HEVC encoding)
-- **Database**: SQLite with FTS5 full-text search
-- **Encryption**: CryptoKit (AES-256-GCM) for database
-
-### Planned for Future Releases
-
-- **Audio transcription**: whisper.cpp (bundled, ready but disabled)
-- **Embeddings**: llama.cpp for semantic search (prepared but not active)
-
-## Requirements
-
-- **macOS 13.0+** (Ventura or later)
-- **Apple Silicon** (M1/M2/M3) - Intel not supported
-- **Xcode 15.0+** or Swift 5.9+ for building from source
-
-### Permissions Required
-
-Retrace needs the following macOS permissions:
-
-- **Screen Recording** - To capture your screen
-- **Accessibility** - For enhanced context extraction (app names, window titles, browser URLs)
+- `Sources/RetraceCLI/` - local CLI for agents and terminal workflows
+- `CLI/SKILL.md` - agent-readable command guide for `retrace-cli`
+- `Database/Queries/ActivityContextQueries.swift` - bounded read-only context queries
+- `App/DailyJournalManager.swift` - local OCR-context collection, Ollama summarization, and markdown journals
+- `UI/Views/Settings/Sections/ContextSettingsView.swift` - opt-in context and journal settings
+- `DESIGN_CONTEXT.md` - monochrome UI direction
+- `FORK_CONTEXT.md` - upstream compatibility promises
+- `CLI_CONTEXT.md` - CLI privacy and command contract
+- `PRODUCT_CONTEXT.md` - product constitution and next milestones
 
 ## Quick Start
 
-### 1. Clone the Repository
+### Clone
 
 ```bash
-git clone https://github.com/haseab/retrace.git
-cd retrace
+git clone https://github.com/aryateja2106/retrace-agentfirst.git
+cd retrace-agentfirst
 ```
 
-### 2. Build and Run
+To compare with upstream:
 
-**Option A: Using Xcode (Recommended)**
+```bash
+git remote add upstream https://github.com/haseab/retrace.git
+git fetch upstream
+```
+
+In this workspace, `origin` may point to `haseab/retrace` and `agentfirst` may point to this fork. Check before pushing:
+
+```bash
+git remote -v
+```
+
+### Build And Run
+
+```bash
+swift build
+.build/debug/Retrace
+```
+
+For Xcode:
 
 ```bash
 open Package.swift
 ```
 
-1. Wait for Swift Package Manager to resolve dependencies
-2. Select the `Retrace` scheme in Xcode
-3. Build and run (⌘R)
+On first launch, grant:
 
-**Option B: Command Line**
+- Screen Recording permission
+- Accessibility permission
 
-```bash
-# Build the project
-swift build -c release
+Retrace stores local data under `~/Library/Application Support/Retrace/` unless changed in Settings.
 
-# Run the executable
-.build/release/Retrace
-```
+## CLI For Agents
 
-**First Launch:**
-
-1. Grant **Screen Recording** permission when prompted (System Settings → Privacy & Security)
-2. Grant **Accessibility** permission for enhanced context extraction
-3. Complete the onboarding flow
-4. Optionally import existing Rewind AI data
-5. Configure settings (capture interval, excluded apps, shortcuts)
-
-The app will create its database at the default location (`~/Library/Application Support/Retrace/`) or a custom location if configured in Settings.
-
-### 3. Development Scripts
-
-**Reset database** (keeps settings):
+Build the CLI with the package:
 
 ```bash
-./scripts/reset_database.sh
+swift build --product retrace-cli
 ```
 
-**Reset onboarding** (safe, preserves data):
+Safe read examples:
 
 ```bash
-./scripts/reset_onboarding_safe.sh
+retrace-cli recording status --json
+retrace-cli storage inspect --json
+retrace-cli context recent --hours 1 --json
+retrace-cli context search "pull request" --hours 24 --json
+retrace-cli journal today --json
+retrace-cli ollama status --model gemma4:e2b --json
 ```
 
-**Hard reset** (deletes everything):
+Write commands require explicit confirmation or dry-run:
 
 ```bash
-./scripts/hardreset_onboarding.sh
+retrace-cli journal generate --hours 1 --dry-run --json
+retrace-cli journal append --stdin --yes
 ```
 
-**Draft or submit a bug issue**:
+Agent rules:
 
-```bash
-# Start from the canonical AI issue template
-cp AI_ISSUE_TEMPLATE.md /tmp/retrace-issue.md
+- Prefer `--json`.
+- Keep queries bounded by time, limit, and max text length.
+- Do not expose raw screenshots, video files, secrets, or unrestricted database paths.
+- Do not start a server or MCP bridge by default.
 
-# After filling it in, create the issue with gh if needed
-gh issue create --title "Crash on launch" --body-file /tmp/retrace-issue.md
+See [CLI_CONTEXT.md](CLI_CONTEXT.md) and [CLI/SKILL.md](CLI/SKILL.md).
+
+## Architecture
+
+```text
+Capture
+  CGWindowListCapture -> frame deduplication
+
+Processing
+  Vision OCR -> sanitized text regions
+
+Storage
+  HEVC video segments -> local files
+
+Database
+  SQLite tables + FTS5 search index
+
+App/UI
+  Timeline, dashboard, settings, feedback, context, journals
+
+CLI
+  bounded local read/write workflows for agents
 ```
+
+Modules:
+
+- `Shared/` - shared models, protocols, paths, logging, redaction helpers
+- `Capture/` - screen capture and metadata extraction
+- `Processing/` - OCR, URL extraction, text merging
+- `Storage/` - file layout, video encoding, WAL recovery
+- `Database/` - SQLite, FTS, migrations, context queries
+- `Search/` - query parsing and result ranking
+- `Migration/` - Rewind import
+- `App/` - orchestration and services
+- `UI/` - SwiftUI/AppKit interface
+- `Sources/RetraceCLI/` - local CLI
 
 ## Development
 
-Retrace follows a Test-Driven Development (TDD) approach. See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-
-- Development workflow and conventions
-- Testing requirements (TDD, mocking protocols)
-- AI-assisted development guidelines
-- AI bug issue template
-- Module boundaries and architecture decisions
-- Code style and Swift patterns
-
-### Running Tests
-
 ```bash
+swift build
 swift test
+swift test --filter TimelineBlockNavigationTests
+./scripts/check_no_nanoseconds_sleep.sh
 ```
 
-### Project Structure
+For behavior changes, use focused tests first, then run the full suite. For UI/perf-sensitive changes, smoke timeline reopen, search overlay navigation, and settings/storage picker responsiveness.
 
-```
-retrace/
-├── App/                 # App coordination and lifecycle
-├── UI/                  # SwiftUI views and view models
-├── Database/            # SQLite + FTS5 implementation
-├── Storage/             # HEVC video encoding and file management
-├── Capture/             # Screen capture (CGWindowListCapture)
-├── Processing/          # OCR and text extraction
-├── Search/              # Query parsing and FTS5 ranking
-├── Migration/           # Rewind import tools
-├── Shared/              # Protocols and shared models
-└── scripts/             # Build and utility scripts
-```
+Agents should read:
+
+- [AGENTS.md](AGENTS.md)
+- [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT.md)
+- [FORK_CONTEXT.md](FORK_CONTEXT.md)
+- [DESIGN_CONTEXT.md](DESIGN_CONTEXT.md)
+- [CLI_CONTEXT.md](CLI_CONTEXT.md)
+- The relevant module `AGENTS.md`
 
 ## Roadmap
 
-### Current Release ✅
+Near-term milestones are documented in [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT.md). The current priority order is:
 
-- [x] Screen capture with deduplication
-- [x] OCR text extraction (Vision framework)
-- [x] Full-text search (SQLite FTS5)
-- [x] Dashboard with app usage analytics
-- [x] Timeline frame viewer
-- [x] HEVC video encoding (working but not optimized)
-- [x] Settings and preferences
-- [x] Rewind AI import (resumable)
-- [x] Menu bar and global hotkeys
-- [x] Search highlighting
+1. Keep the fork synced with upstream without breaking storage/database compatibility.
+2. Clarify the product constitution and README.
+3. Demote noisy dashboard analytics and tighten metric privacy.
+4. Add Shottr-style screenshot essentials as a separate, privacy-gated module.
+5. Track human work and agent work with project/tag attribution.
 
-### Future Releases - TBD
+## Privacy And Security
 
-_Roadmap for future releases to be determined based on user feedback and priorities._
-
-## Performance
-
-**Current Metrics:**
-
-- **Capture Rate**: Every 2 seconds (configurable: 1-60 seconds)
-- **OCR Speed**: ~200-500ms per frame on Apple Silicon
-- **Search Speed**: <100ms for typical queries
-
-**Storage (Work in Progress):**
-
-- **Current**: ~50-70GB/month (HEVC working but not optimized)
-- **Target**: ~15-20GB/month with optimized compression
-
-## Known Limitations
-
-- **macOS 13.0+ and Apple Silicon only** - Intel Macs not supported
-- **Storage not yet efficient** - Currently 4-5x less efficient than Rewind AI (~50-70GB/month vs ~15GB/month). HEVC encoding is working but not optimized
-- **No audio capture** - Audio recording and transcription infrastructure exists but is currently disabled
-
-See [GitHub Issues](https://github.com/haseab/retrace/issues) for known bugs and feature requests.
-
-## Privacy & Security
-
-- **100% Local** - All processing happens on your device
-- **Encrypted at Rest** - AES-256-GCM encryption for stored data
-- **No Telemetry** - No data sent to external servers
-- **Open Source** - Audit the code yourself
-
-## Dependencies
-
-Retrace uses minimal external dependencies:
-
-- **[swift-sqlcipher](https://github.com/skiptools/swift-sqlcipher)** - SQLite with encryption for Rewind database import
-- **[Sparkle](https://github.com/sparkle-project/Sparkle)** - Auto-update framework
-- **Apple Frameworks**: CoreGraphics, Vision, AppKit, SwiftUI, VideoToolbox, CryptoKit
-
-Future releases will add:
-- **whisper.cpp** (bundled in Vendors/) - Local audio transcription
-- **llama.cpp** (bundled in Vendors/) - Local embeddings for semantic search
-
-## Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
-
-- Code conventions and testing requirements
-- How to work with AI assistants (Claude, GitHub Copilot)
-- Architecture decisions and module boundaries
-- Submitting pull requests
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- Processing is local by default.
+- The app should not upload screen history or OCR text without explicit user action.
+- CLI output must stay bounded and automation-friendly.
+- Screenshot, video, and raw OCR export features require explicit opt-in.
+- Database, keychain, storage paths, URL schemes, and video layout changes need migration plans.
 
 ## Attribution
 
-Created with ♥ by [@haseab](https://github.com/haseab)
+This fork is based on [haseab/retrace](https://github.com/haseab/retrace), created by [@haseab](https://github.com/haseab). The upstream project is inspired by Rewind AI.
 
-- GitHub: [haseab/retrace](https://github.com/haseab/retrace)
-- Twitter/X: [@haseab\_](https://x.com/haseab_)
+## License
 
-## Acknowledgments
-
-- Inspired by [Rewind AI](https://www.rewind.ai/)
-- Future audio transcription will use [whisper.cpp](https://github.com/ggerganov/whisper.cpp) by @ggerganov
-- Future semantic search will use [llama.cpp](https://github.com/ggerganov/llama.cpp) by @ggerganov
-
----
-
-**Would appreciate a Github Star if the project is useful!** ⭐
+MIT. See [LICENSE](LICENSE).
