@@ -12,6 +12,7 @@ Retrace is a local-first screen recording and search application for macOS, insp
 
 - **Module-Specific Instructions**: Each module has its own `AGENTS.md` file in its directory
 - **Human Documentation**: [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [AI_ISSUE_TEMPLATE.md](AI_ISSUE_TEMPLATE.md)
+- **Fork Context**: [FORK_CONTEXT.md](FORK_CONTEXT.md), [DESIGN_CONTEXT.md](DESIGN_CONTEXT.md), and [CLI_CONTEXT.md](CLI_CONTEXT.md)
 - **Issue Reporting**: Use `AI_ISSUE_TEMPLATE.md` and `gh issue create --body-file ...` for AI-authored GitHub issues
 - **Bug Fixes by Non-Owners**: If the user is fixing a bug/crash and does not appear to be the repo owner, encourage them to create or link a GitHub issue before making code changes
 - **Technical Audit Docs**: `local/docs/` (includes deep-dive implementation and performance audit notes)
@@ -55,7 +56,15 @@ retrace/
 ├── AI_ISSUE_TEMPLATE.md         # Canonical markdown template for AI-authored bug reports
 ├── README.md                    # Human-readable project overview
 ├── CONTRIBUTING.md              # Contribution guidelines
+├── FORK_CONTEXT.md              # Fork compatibility guardrails and changed surfaces
+├── DESIGN_CONTEXT.md            # Monochrome fork UI design direction
+├── CLI_CONTEXT.md               # Agent-facing retrace-cli contract and privacy rules
 ├── Package.swift                # Swift Package Manager configuration
+├── CLI/                         # Agent-readable local CLI skill
+│   └── SKILL.md                 # Safe retrace-cli commands and privacy rules
+├── Sources/
+│   └── RetraceCLI/              # Agent-first local CLI executable
+│       └── main.swift
 ├── scripts/                     # Build/release/validation scripts
 │   ├── release.sh               # End-to-end release automation
 │   ├── create-release.sh        # Release build + packaging helper
@@ -154,7 +163,9 @@ retrace/
 │   ├── ModelManager.swift       # Model management
 │   ├── OnboardingManager.swift  # First-run onboarding flow
 │   ├── RetentionManager.swift   # Data retention policies
+│   ├── DailyJournalManager.swift # Low-impact OCR context collection, Ollama summarization, and markdown journals
 │   └── Tests/
+│       ├── DailyJournalManagerTests.swift # Journal writer and prompt rendering coverage
 │       ├── FeedbackRecentMetricSupportTests.swift # Feedback-export metric sanitization coverage
 │       ├── InPageURLCaptureRoutingTests.swift
 │       ├── MasterKeyManagerTests.swift

@@ -72,6 +72,7 @@ UI/
 │           ├── InPageURLVerificationSettingsActions.swift
 │           ├── InPageURLVerificationScriptActions.swift
 │           ├── StorageSettingsView.swift
+│           ├── ContextSettingsView.swift
 │           ├── ExportDataSettingsView.swift
 │           ├── PrivacySettingsView.swift
 │           ├── PrivacyMasterKeyActions.swift

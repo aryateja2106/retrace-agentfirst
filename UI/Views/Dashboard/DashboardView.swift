@@ -1590,6 +1590,8 @@ public struct DashboardView: View {
             case .blue:
                 // Deeper blue orb: #0e2a68
                 return Color(red: 14/255, green: 42/255, blue: 104/255)
+            case .monochrome:
+                return Color.white.opacity(0.85)
             case .gold:
                 // Warm amber instead of pure gold
                 return Color(red: 255/255, green: 160/255, blue: 60/255)
@@ -1603,6 +1605,7 @@ public struct DashboardView: View {
         let glowOpacity: Double = {
             switch theme {
             case .blue: return 0.3
+            case .monochrome: return 0.05
             case .gold: return 0.05
             case .purple: return 0.08
             }
@@ -1610,6 +1613,7 @@ public struct DashboardView: View {
         let edgeGlowOpacity: Double = {
             switch theme {
             case .blue: return 0.6
+            case .monochrome: return 0.04
             case .gold: return 0.04
             case .purple: return 0.06
             }
@@ -1617,6 +1621,7 @@ public struct DashboardView: View {
         let cornerGlowOpacity: Double = {
             switch theme {
             case .blue: return 0.5
+            case .monochrome: return 0.03
             case .gold: return 0.03
             case .purple: return 0.05
             }

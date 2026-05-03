@@ -121,6 +121,17 @@ public enum DailyMetricsQueries {
         case crashAutoRestart = "crash_auto_restart"  // metadata: JSON {source}
         case rewindCutoffDateUpdated = "rewind_cutoff_date_updated"  // metadata: JSON {cutoffTimestampMs}
 
+        // Agent-first context and journal metrics
+        case cliInvocation = "cli_invocation"  // metadata: JSON {command, outcome}
+        case journalGenerationRequested = "journal_generation_requested"  // metadata: JSON {reason, dryRun}
+        case journalGenerationSucceeded = "journal_generation_succeeded"  // metadata: JSON {reason, dryRun}
+        case journalGenerationFailed = "journal_generation_failed"  // metadata: JSON {reason, error}
+        case journalGenerationSkipped = "journal_generation_skipped"  // metadata: JSON {reason}
+        case ollamaStatusChecked = "ollama_status_checked"  // metadata: JSON {reachable, modelInstalled, model}
+        case journalFolderChanged = "journal_folder_changed"  // metadata: JSON {source}
+        case journalManualAppend = "journal_manual_append"  // metadata: JSON {source, bytes}
+        case journalManualGenerate = "journal_manual_generate"  // metadata: JSON {source, dryRun}
+
         // Delete actions
         case frameDeleted = "frame_deleted"
         case segmentDeleted = "segment_deleted"

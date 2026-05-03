@@ -5,6 +5,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
     case general = "General"
     case capture = "Capture"
     case storage = "Data"
+    case context = "Context"
     case privacy = "Privacy"
     case power = "Power"
     case tags = "Tags"
@@ -17,6 +18,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: return "gearshape"
         case .capture: return "video"
         case .storage: return "externaldrive"
+        case .context: return "text.badge.sparkles"
         case .privacy: return "lock.shield"
         case .power: return "bolt.fill"
         case .tags: return "tag"
@@ -29,6 +31,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: return "Startup, appearance, and shortcuts"
         case .capture: return "Frame rate, resolution, and display options"
         case .storage: return "Retention, rewind, and database locations"
+        case .context: return "Agent CLI and local journal summaries"
         case .privacy: return "Encryption, exclusions, and permissions"
         case .power: return "OCR processing and battery optimization"
         case .tags: return "Manage and delete tags"
@@ -41,6 +44,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: return .retraceAccentGradient
         case .capture: return .retracePurpleGradient
         case .storage: return .retraceOrangeGradient
+        case .context: return .retraceAccentGradient
         case .privacy: return .retraceGreenGradient
         case .power: return .retraceOrangeGradient
         case .tags: return .retraceAccentGradient
@@ -56,6 +60,8 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
             return { view.resetCaptureSettings() }
         case .storage:
             return { view.resetStorageSettings() }
+        case .context:
+            return { view.resetContextSettings() }
         case .privacy:
             return { view.resetPrivacySettings() }
         case .power:

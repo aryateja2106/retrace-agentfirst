@@ -139,6 +139,17 @@ public struct SettingsView: View {
     @AppStorage("customRewindDBLocation", store: settingsStore) var customRewindDBLocation: String?
     @State var rewindDBLocationChanged = false
 
+    // MARK: Context and Journal Settings
+    @AppStorage(DailyJournalConfiguration.enabledKey, store: settingsStore) var dailyJournalEnabled = SettingsDefaults.dailyJournalEnabled
+    @AppStorage(DailyJournalConfiguration.folderPathKey, store: settingsStore) var dailyJournalFolderPath = SettingsDefaults.dailyJournalFolderPath
+    @AppStorage(DailyJournalConfiguration.ollamaBaseURLKey, store: settingsStore) var dailyJournalOllamaBaseURL = SettingsDefaults.dailyJournalOllamaBaseURL
+    @AppStorage(DailyJournalConfiguration.ollamaModelKey, store: settingsStore) var dailyJournalOllamaModel = SettingsDefaults.dailyJournalOllamaModel
+    @AppStorage(DailyJournalConfiguration.cadenceSecondsKey, store: settingsStore) var dailyJournalCadenceSeconds = SettingsDefaults.dailyJournalCadenceSeconds
+    @State var isGeneratingJournal = false
+    @State var isCheckingOllama = false
+    @State var journalStatusMessage: String?
+    @State var journalStatusIsError = false
+
     // Track the Retrace DB path the app was launched with (to know if restart is needed)
     @State var launchedWithRetraceDBPath: String?
     @State var launchedPathInitialized = false

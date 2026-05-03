@@ -3256,6 +3256,44 @@ public actor DatabaseManager: DatabaseProtocol {
         }
     }
 
+    nonisolated public func getActivityContextSamples(
+        from startDate: Date,
+        to endDate: Date,
+        limit: Int,
+        maxTextLength: Int,
+        newestFirst: Bool = false
+    ) async throws -> [ActivityContextQueries.Sample] {
+        try await readConnectionPool.withConnection(operation: "get_activity_context_samples") { connection in
+            try ActivityContextQueries.fetchSamples(
+                connection: connection,
+                from: startDate,
+                to: endDate,
+                limit: limit,
+                maxTextLength: maxTextLength,
+                newestFirst: newestFirst
+            )
+        }
+    }
+
+    nonisolated public func searchActivityContextSamples(
+        query: String,
+        from startDate: Date,
+        to endDate: Date,
+        limit: Int,
+        maxTextLength: Int
+    ) async throws -> [ActivityContextQueries.Sample] {
+        try await readConnectionPool.withConnection(operation: "search_activity_context_samples") { connection in
+            try ActivityContextQueries.searchSamples(
+                connection: connection,
+                query: query,
+                from: startDate,
+                to: endDate,
+                limit: limit,
+                maxTextLength: maxTextLength
+            )
+        }
+    }
+
     /// Get daily screen time totals (for graphs)
     /// Returns array of (date, totalSeconds) tuples sorted by date ascending
     nonisolated public func getDailyScreenTime(

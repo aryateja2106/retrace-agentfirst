@@ -4318,6 +4318,33 @@ public actor AppCoordinator {
         )
     }
 
+    public func refreshDailyJournalSchedule() async {
+        await services.dailyJournalManager.start()
+    }
+
+    public func generateDailyJournalNow(
+        from startDate: Date,
+        to endDate: Date,
+        dryRun: Bool = false
+    ) async throws -> JournalGenerationResult {
+        try? await recordMetricEvent(
+            metricType: .journalManualGenerate,
+            metadata: Self.metricMetadata([
+                "source": "settings",
+                "dryRun": dryRun
+            ])
+        )
+        return try await services.dailyJournalManager.generateNow(
+            from: startDate,
+            to: endDate,
+            dryRun: dryRun
+        )
+    }
+
+    public func getOllamaJournalStatus() async throws -> OllamaModelStatus {
+        try await services.dailyJournalManager.ollamaStatus()
+    }
+
     private func recordMouseClickCaptureMetricIfNeeded(
         outcome: MouseClickCaptureOutcome,
         timestamp: Date

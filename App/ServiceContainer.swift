@@ -31,6 +31,7 @@ public actor ServiceContainer {
     public let modelManager: ModelManager
     nonisolated public let onboardingManager: OnboardingManager
     public let retentionManager: RetentionManager
+    public let dailyJournalManager: DailyJournalManager
     public var dataAdapter: DataAdapter?
     public var processingQueue: FrameProcessingQueue?
 
@@ -142,6 +143,7 @@ public actor ServiceContainer {
             storage: storage,
             search: search
         )
+        self.dailyJournalManager = DailyJournalManager(database: database)
 
         Log.info("ServiceContainer created", category: .app)
     }
@@ -219,6 +221,7 @@ public actor ServiceContainer {
             storage: storage,
             search: search
         )
+        self.dailyJournalManager = DailyJournalManager(database: database)
 
         Log.info("ServiceContainer created (in-memory mode)", category: .app)
     }
@@ -357,6 +360,10 @@ public actor ServiceContainer {
         // 10. Start retention manager (runs periodic cleanup based on user settings)
         await retentionManager.start()
         Log.info("✓ Retention manager started", category: .app)
+
+        // 11. Start daily journal manager when explicitly enabled in settings.
+        await dailyJournalManager.start()
+        Log.info("✓ Daily journal manager checked", category: .app)
 
         // Capture is initialized when startCapture() is called
 
@@ -674,6 +681,9 @@ public actor ServiceContainer {
         // Stop retention manager
         await retentionManager.stop()
         Log.info("✓ Retention manager stopped", category: .app)
+
+        await dailyJournalManager.stop()
+        Log.info("✓ Daily journal manager stopped", category: .app)
 
         // Shutdown DataAdapter (disconnects all sources)
         await dataAdapter?.shutdown()

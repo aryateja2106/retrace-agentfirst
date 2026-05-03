@@ -477,8 +477,8 @@ public enum TagColorStore {
 
 extension Color {
     // MARK: Brand Colors (matching retrace-frontend design)
-    // Deep blue background: #051127
-    public static let retraceDeepBlue = Color(red: 5/255, green: 17/255, blue: 39/255)
+    // Fork theme background: near-black monochrome.
+    public static let retraceDeepBlue = Color(red: 9/255, green: 9/255, blue: 10/255)
 
     // Primary accent color - adapts based on user's color theme preference
     // Blue: Retrace accent color (lighter blue for better visibility)
@@ -489,6 +489,8 @@ extension Color {
         switch theme {
         case .blue:
             return Color(red: 59/255, green: 130/255, blue: 246/255)  // #3B82F6 - lighter blue
+        case .monochrome:
+            return Color(red: 245/255, green: 245/255, blue: 245/255)
         case .gold:
             return Color(red: 255/255, green: 200/255, blue: 0/255)  // Gold
         case .purple:
@@ -505,6 +507,8 @@ extension Color {
         switch theme {
         case .blue:
             return Color(red: 59/255, green: 130/255, blue: 246/255)
+        case .monochrome:
+            return Color(red: 232/255, green: 232/255, blue: 232/255)
         case .gold:
             return Color(red: 245/255, green: 180/255, blue: 0/255)
         case .purple:
@@ -512,17 +516,17 @@ extension Color {
         }
     }
 
-    // Card background: hsl(222, 47%, 7%)
-    public static let retraceCard = Color(red: 9/255, green: 18/255, blue: 38/255)
+    // Card background
+    public static let retraceCard = Color(red: 16/255, green: 16/255, blue: 18/255)
 
-    // Secondary: hsl(217, 33%, 17%)
-    public static let retraceSecondaryColor = Color(red: 29/255, green: 41/255, blue: 58/255)
+    // Secondary surface
+    public static let retraceSecondaryColor = Color(red: 38/255, green: 38/255, blue: 42/255)
 
     // Foreground: hsl(210, 40%, 98%)
     public static let retraceForeground = Color(red: 247/255, green: 249/255, blue: 252/255)
 
-    // Muted foreground: hsl(215, 20%, 65%)
-    public static let retraceMutedForeground = Color(red: 150/255, green: 160/255, blue: 181/255)
+    // Muted foreground
+    public static let retraceMutedForeground = Color(red: 166/255, green: 166/255, blue: 170/255)
 
     // State colors
     public static let retraceDanger = Color(red: 220/255, green: 38/255, blue: 38/255)
@@ -783,6 +787,15 @@ extension LinearGradient {
                 colors: [
                     Color(red: 60/255, green: 130/255, blue: 220/255),   // Bright blue
                     Color(red: 90/255, green: 160/255, blue: 240/255)    // Lighter blue
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .monochrome:
+            return LinearGradient(
+                colors: [
+                    Color.white.opacity(0.95),
+                    Color.white.opacity(0.55)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing

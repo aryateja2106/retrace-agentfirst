@@ -453,6 +453,18 @@ extension SettingsView {
         startRetentionChangeTimer()
     }
 
+    /// Reset all Context settings to defaults
+    func resetContextSettings() {
+        dailyJournalEnabled = SettingsDefaults.dailyJournalEnabled
+        dailyJournalFolderPath = SettingsDefaults.dailyJournalFolderPath
+        dailyJournalOllamaBaseURL = SettingsDefaults.dailyJournalOllamaBaseURL
+        dailyJournalOllamaModel = SettingsDefaults.dailyJournalOllamaModel
+        dailyJournalCadenceSeconds = SettingsDefaults.dailyJournalCadenceSeconds
+        Task {
+            await coordinatorWrapper.coordinator.refreshDailyJournalSchedule()
+        }
+    }
+
     /// Reset all Privacy settings to defaults
     func resetPrivacySettings() {
         excludedAppsString = SettingsDefaults.excludedApps

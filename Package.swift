@@ -30,6 +30,7 @@ let package = Package(
         .library(name: "CrashRecoverySupport", targets: ["CrashRecoverySupport"]),
         .executable(name: "Retrace", targets: ["Retrace"]),
         .executable(name: "RetraceCrashRecoveryHelper", targets: ["RetraceCrashRecoveryHelper"]),
+        .executable(name: "retrace-cli", targets: ["RetraceCLI"]),
         .executable(name: "TestMostRecentFrame", targets: ["TestMostRecentFrame"]),
         .executable(name: "QueryRewindApps", targets: ["QueryRewindApps"]),
     ],
@@ -261,6 +262,15 @@ let package = Package(
             sources: [
                 "main.swift"
             ]
+        ),
+        .executableTarget(
+            name: "RetraceCLI",
+            dependencies: [
+                "Shared",
+                "Database",
+                "App"
+            ],
+            path: "Sources/RetraceCLI"
         ),
 
         // MARK: - Test executable for getMostRecentFrameTimestamp

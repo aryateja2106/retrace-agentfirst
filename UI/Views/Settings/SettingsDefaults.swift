@@ -53,7 +53,7 @@ enum SettingsDefaults {
     static let automaticallyDownloadUpdates = false
 
     static let fontStyle: RetraceFontStyle = .default
-    static let colorTheme = "blue"
+    static let colorTheme = "monochrome"
     static let timelineColoredBorders = false
     static let scrubbingAnimationDuration: Double = 0.10
     static let scrollSensitivity: Double = 0.50
@@ -78,6 +78,12 @@ enum SettingsDefaults {
     static let maxStorageGB: Double = 50.0
     static let useRewindData = false
     static let rewindCutoffDate = ServiceContainer.defaultRewindCutoffDate()
+
+    static let dailyJournalEnabled = false
+    static let dailyJournalFolderPath = DailyJournalConfiguration.defaultJournalFolderPath()
+    static let dailyJournalOllamaBaseURL = "http://localhost:11434"
+    static let dailyJournalOllamaModel = "gemma4:e2b"
+    static let dailyJournalCadenceSeconds: Double = 3_600
 
     static let excludedApps = ""
     static let excludePrivateWindows = false

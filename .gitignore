@@ -71,6 +71,10 @@ UI/BuildMetadata.generated.swift
 !AGENTS.md
 !CONTRIBUTING.md
 !AI_ISSUE_TEMPLATE.md
+!FORK_CONTEXT.md
+!DESIGN_CONTEXT.md
+!CLI_CONTEXT.md
+!CLI/SKILL.md
 !*/README.md
 !*/AGENTS.md
 

@@ -37,9 +37,11 @@ Database/
 ├── Queries/
 │   ├── FrameQueries.swift     # Frame CRUD operations
 │   ├── SegmentQueries.swift   # Segment CRUD operations
-│   └── DocumentQueries.swift  # Document/FTS operations
+│   ├── DocumentQueries.swift  # Document/FTS operations
+│   └── ActivityContextQueries.swift # Read-only OCR context sampling for CLI/journal features
 └── Tests/
     ├── AsyncQueuePipelineTests.swift
+    ├── ActivityContextQueriesTests.swift
     ├── DatabaseManagerTests.swift
     ├── EdgeCaseTests.swift
     ├── FTSManagerTests.swift

@@ -185,6 +185,8 @@ extension SettingsView {
                             captureSettings
                         case .storage:
                             storageSettings
+                        case .context:
+                            contextSettings
                         case .privacy:
                             privacySettings
                         case .power:
