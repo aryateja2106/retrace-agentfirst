@@ -424,7 +424,7 @@ public struct SettingsView: View {
 
                 // Divider
                 Rectangle()
-                    .fill(Color.white.opacity(0.06))
+                    .fill(Color.retraceHairline)
                     .frame(width: 1)
 
                 // Content
@@ -490,7 +490,7 @@ public struct SettingsView: View {
                 HStack(spacing: 10) {
                     Image(systemName: settingsToastIsError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(settingsToastIsError ? .orange : .green)
+                        .foregroundColor(settingsToastIsError ? .retraceWarning : .retraceSuccess)
                     Text(message)
                         .font(.retraceCaption)
                         .foregroundColor(.retracePrimary)
@@ -500,7 +500,7 @@ public struct SettingsView: View {
                 .background(.ultraThinMaterial, in: Capsule())
                 .overlay(
                     Capsule()
-                        .stroke((settingsToastIsError ? Color.orange : Color.green).opacity(0.35), lineWidth: 1)
+                        .stroke((settingsToastIsError ? Color.retraceWarning : Color.retraceSuccess).opacity(0.35), lineWidth: 1)
                 )
                 .shadow(color: Color.black.opacity(0.18), radius: 16, x: 0, y: 10)
                 .padding(.top, 16)

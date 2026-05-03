@@ -74,7 +74,6 @@ struct AppUsageHardDriveView: View {
     }
 
     private func appBlock(item: TreemapItem) -> some View {
-        let appColor = Color.segmentColor(for: item.app.appBundleID)
         let isHovered = hoveredApp?.id == item.app.id
 
         return ZStack {
@@ -83,8 +82,8 @@ struct AppUsageHardDriveView: View {
                 .fill(
                     LinearGradient(
                         colors: [
-                            appColor.opacity(isHovered ? 0.6 : 0.35),
-                            appColor.opacity(isHovered ? 0.4 : 0.2)
+                            Color.white.opacity(isHovered ? 0.16 : 0.08),
+                            Color.white.opacity(isHovered ? 0.08 : 0.035)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -92,7 +91,7 @@ struct AppUsageHardDriveView: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .stroke(appColor.opacity(isHovered ? 0.9 : 0.5), lineWidth: isHovered ? 2 : 1)
+                        .stroke(isHovered ? Color.retraceHairlineFocus : Color.retraceHairline, lineWidth: isHovered ? 1.2 : 1)
                 )
 
             // App icon (scaled based on block size)
@@ -113,7 +112,7 @@ struct AppUsageHardDriveView: View {
         .frame(width: item.rect.width, height: item.rect.height)
         .contentShape(Rectangle())
         .scaleEffect(isHovered ? 1.02 : 1.0)
-        .shadow(color: isHovered ? appColor.opacity(0.4) : .clear, radius: 12, x: 0, y: 4)
+        .shadow(color: isHovered ? Color.black.opacity(0.32) : .clear, radius: 12, x: 0, y: 4)
         .zIndex(isHovered ? 100 : 0)
         .onHover { hovering in
             // Cancel any pending hover-off task
@@ -188,7 +187,7 @@ struct AppUsageHardDriveView: View {
                 HStack(spacing: 8) {
                     Text(formatDuration(app.duration))
                         .font(.retraceCaptionMedium)
-                        .foregroundStyle(LinearGradient.retraceAccentGradient)
+                        .foregroundColor(.retracePrimary)
 
                     Text("•")
                         .foregroundColor(.retraceSecondary.opacity(0.5))
@@ -211,10 +210,10 @@ struct AppUsageHardDriveView: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color.white.opacity(0.05))
+                .fill(Color.retraceSurfaceOverlay)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        .stroke(Color.retraceHairlineHover, lineWidth: 1)
                 )
         )
     }

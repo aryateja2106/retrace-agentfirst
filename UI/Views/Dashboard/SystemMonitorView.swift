@@ -178,11 +178,11 @@ public struct SystemMonitorView: View {
                 // Live indicator
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(Color.green)
+                        .fill(Color.retraceSuccess)
                         .frame(width: 8, height: 8)
                         .overlay(
                             Circle()
-                                .stroke(Color.green.opacity(0.5), lineWidth: 2)
+                                .stroke(Color.retraceSuccess.opacity(0.5), lineWidth: 2)
                                 .scaleEffect(viewModel.pulseScale)
                                 .opacity(viewModel.pulseOpacity)
                         )
@@ -278,7 +278,7 @@ public struct SystemMonitorView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "bolt.slash.fill")
                         .font(.retraceCaption)
-                        .foregroundColor(.orange)
+                        .foregroundColor(.retraceWarning)
                     Text("Processing paused by power settings — adjust them in ")
                         .font(.retraceCaption2)
                         .foregroundColor(.retraceSecondary)
@@ -296,7 +296,7 @@ public struct SystemMonitorView: View {
                     NotificationCenter.default.post(name: .openSettingsPowerOCRCard, object: nil)
                 }
                 .padding(12)
-                .background(Color.orange.opacity(0.05))
+                .background(Color.retraceWarning.opacity(0.05))
             }
 
             if !viewModel.ocrEnabled {
@@ -377,11 +377,11 @@ public struct SystemMonitorView: View {
                 HStack(alignment: .center, spacing: 12) {
                     ZStack {
                         Circle()
-                            .fill(Color.orange.opacity(0.25))
+                            .fill(Color.retraceWarning.opacity(0.25))
                             .frame(width: 30, height: 30)
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.orange)
+                            .foregroundColor(.retraceWarning)
                     }
 
                     VStack(alignment: .leading, spacing: 4) {
@@ -425,8 +425,8 @@ public struct SystemMonitorView: View {
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    Color.orange.opacity(0.24),
-                                    Color.orange.opacity(0.12)
+                                    Color.retraceWarning.opacity(0.24),
+                                    Color.retraceWarning.opacity(0.12)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -434,7 +434,7 @@ public struct SystemMonitorView: View {
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.orange.opacity(0.42), lineWidth: 1)
+                                .stroke(Color.retraceWarning.opacity(0.42), lineWidth: 1)
                         )
                 )
                 .padding(.horizontal, 8)
@@ -874,8 +874,8 @@ private struct ActivityMonitorCardModel {
     let etaText: String?
     let etaSuffixText: String?
     let completedTint: Color = .retraceAccent
-    let activeTint: Color = .green
-    let pendingTint: Color = .orange
+    let activeTint: Color = .retraceSuccess
+    let pendingTint: Color = .retraceWarning
     let backlogAxisLabel: String
     let historyWindowMinutes: Int
     let maxVisibleBacklogBars: Int
@@ -1739,7 +1739,7 @@ class SystemMonitorViewModel: ObservableObject {
         if !ocrEnabled {
             return .gray
         } else if isPausedForBattery {
-            return .orange
+            return .retraceWarning
         } else if ocrQueueDepth > 0 {
             return .retraceAccent
         } else {
@@ -1760,7 +1760,7 @@ class SystemMonitorViewModel: ObservableObject {
     }
 
     var rewriteStatusColor: Color {
-        rewriteProcessingCount > 0 ? .green : .gray
+        rewriteProcessingCount > 0 ? .retraceSuccess : .gray
     }
 
     var rewriteStatusBadgeText: String {

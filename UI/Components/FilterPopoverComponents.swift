@@ -761,7 +761,7 @@ private struct FilterModeButton: View {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(isSelected ? RetraceMenuStyle.actionBlue : (isHovered ? Color.white.opacity(0.05) : Color.clear))
             )
-            .foregroundColor(isSelected ? .white : RetraceMenuStyle.textColorMuted)
+            .foregroundColor(isSelected ? .retraceBackground : RetraceMenuStyle.textColorMuted)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
@@ -1619,7 +1619,7 @@ struct IncludeExcludeModeToggle: View {
             TogglePillButton(
                 title: "Exclude",
                 isSelected: mode == .exclude,
-                selectedTint: .orange.opacity(0.9)
+                selectedTint: .retraceWarning.opacity(0.9)
             ) {
                 mode = .exclude
             }
@@ -1677,7 +1677,7 @@ private struct MetadataTermChip: View {
     }
 
     private var iconTint: Color {
-        mode == .include ? .blue.opacity(0.88) : .orange.opacity(0.9)
+        mode == .include ? .retracePrimary.opacity(0.88) : .retraceWarning.opacity(0.9)
     }
 
     var body: some View {
@@ -3125,7 +3125,7 @@ public struct DateRangeFilterPopover: View {
                 if let parseError {
                     Text(parseError)
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.orange.opacity(0.9))
+                        .foregroundColor(.retraceWarning.opacity(0.9))
                         .padding(.horizontal, 2)
                 }
 
@@ -3186,7 +3186,7 @@ public struct DateRangeFilterPopover: View {
                         if let additionalError = additionalParseErrorMessage(for: rangeID) {
                             Text(additionalError)
                                 .font(.system(size: 10, weight: .medium))
-                                .foregroundColor(.orange.opacity(0.9))
+                                .foregroundColor(.retraceWarning.opacity(0.9))
                                 .padding(.horizontal, 2)
                         }
                     }

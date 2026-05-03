@@ -38,30 +38,12 @@ public class MilestoneCelebrationManager: ObservableObject {
 
         /// Glow color for subtle effects on UI elements
         public var glowColor: Color {
-            switch self {
-            case .blue:
-                return Color(red: 59/255, green: 130/255, blue: 246/255)
-            case .monochrome:
-                return Color.white.opacity(0.92)
-            case .gold:
-                return Color(red: 255/255, green: 215/255, blue: 0/255)
-            case .purple:
-                return Color(red: 180/255, green: 130/255, blue: 255/255)
-            }
+            Color.white.opacity(0.92)
         }
 
         /// Border color for timeline control buttons (subtle accent)
         public var controlBorderColor: Color {
-            switch self {
-            case .blue:
-                return Color(red: 59/255, green: 130/255, blue: 246/255).opacity(0.35)
-            case .monochrome:
-                return Color.white.opacity(0.28)
-            case .gold:
-                return Color(red: 255/255, green: 215/255, blue: 0/255).opacity(0.4)
-            case .purple:
-                return Color(red: 180/255, green: 130/255, blue: 255/255).opacity(0.5)
-            }
+            Color.white.opacity(0.28)
         }
     }
 
@@ -168,7 +150,7 @@ public class MilestoneCelebrationManager: ObservableObject {
            let theme = ColorTheme(rawValue: rawValue) {
             return theme
         }
-        return .blue
+        return .monochrome
     }
 
     /// Get the user's color theme preference
@@ -178,7 +160,7 @@ public class MilestoneCelebrationManager: ObservableObject {
            let theme = ColorTheme(rawValue: rawValue) {
             return theme
         }
-        return .blue
+        return .monochrome
     }
 
     /// Set the user's color theme preference

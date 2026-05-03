@@ -106,8 +106,8 @@ struct MiniLineGraphView: View {
                                 .fill(
                                     LinearGradient(
                                         colors: [
-                                            lineColor.opacity(0.3),
-                                            lineColor.opacity(0.05),
+                                            lineColor.opacity(0.18),
+                                            lineColor.opacity(0.04),
                                             lineColor.opacity(0.0)
                                         ],
                                         startPoint: .top,
@@ -121,7 +121,7 @@ struct MiniLineGraphView: View {
                             linePath(width: graphWidth, height: graphHeight)
                                 .stroke(
                                     lineColor,
-                                    style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
+                                    style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round)
                                 )
                         }
 
@@ -134,8 +134,8 @@ struct MiniLineGraphView: View {
 
                             Circle()
                                 .fill(lineColor)
-                                .frame(width: isHovered ? 10 : (isLast ? 6 : 4), height: isHovered ? 10 : (isLast ? 6 : 4))
-                                .opacity(isHovered || isLast ? 1.0 : 0.6)
+                                .frame(width: isHovered ? 8 : (isLast ? 5 : 3), height: isHovered ? 8 : (isLast ? 5 : 3))
+                                .opacity(isHovered || isLast ? 0.95 : 0.45)
                                 .position(x: x, y: y)
                                 .animation(.easeOut(duration: 0.15), value: isHovered)
                         }
@@ -185,7 +185,7 @@ struct MiniLineGraphView: View {
                         ForEach(Array(dataPoints.enumerated()), id: \.offset) { index, point in
                             Text(point.label)
                                 .font(.system(size: 8, weight: .medium, design: .monospaced))
-                                .foregroundColor(hoveredIndex == index ? lineColor : .retraceSecondary.opacity(0.6))
+                                .foregroundColor(hoveredIndex == index ? .retracePrimary : .retraceSecondary.opacity(0.55))
                                 .frame(maxWidth: .infinity)
                                 .animation(.easeOut(duration: 0.15), value: hoveredIndex)
                         }
@@ -239,7 +239,7 @@ struct MiniLineGraphView: View {
                 path.move(to: CGPoint(x: 0, y: topPadding))
                 path.addLine(to: CGPoint(x: 1000, y: topPadding))
             }
-            .stroke(Color.white.opacity(0.05), style: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
+            .stroke(Color.retraceHairline, style: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
 
             // Middle line (mid value)
             Path { path in
@@ -247,14 +247,14 @@ struct MiniLineGraphView: View {
                 path.move(to: CGPoint(x: 0, y: midY))
                 path.addLine(to: CGPoint(x: 1000, y: midY))
             }
-            .stroke(Color.white.opacity(0.03), style: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
+            .stroke(Color.retraceHairline.opacity(0.7), style: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
 
             // Bottom line (min/zero value)
             Path { path in
                 path.move(to: CGPoint(x: 0, y: height))
                 path.addLine(to: CGPoint(x: 1000, y: height))
             }
-            .stroke(Color.white.opacity(0.05), style: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
+            .stroke(Color.retraceHairline, style: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
         }
     }
 
@@ -275,14 +275,14 @@ struct MiniLineGraphView: View {
         VStack(alignment: hasBreakdown ? .leading : .center, spacing: hasBreakdown ? 3 : 2) {
             Text(tooltipContent.headline)
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(.retracePrimary)
 
             if hasBreakdown {
                 VStack(alignment: .leading, spacing: 2) {
                     ForEach(tooltipContent.details, id: \.self) { detail in
                         Text(detail)
                             .font(.system(size: 9, weight: .medium, design: .monospaced))
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(.retraceSecondary)
                     }
                 }
             }
@@ -292,10 +292,10 @@ struct MiniLineGraphView: View {
         .fixedSize()
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(Color.black.opacity(0.85))
+                .fill(Color.retraceSurfaceOverlay)
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
-                        .stroke(lineColor.opacity(0.5), lineWidth: 1)
+                        .stroke(Color.retraceHairlineHover, lineWidth: 1)
                 )
         )
         .position(
@@ -455,7 +455,7 @@ struct MiniLineGraphView_Previews: PreviewProvider {
                     DailyDataPoint(date: Date().addingTimeInterval(-1 * 86400), value: 18),
                     DailyDataPoint(date: Date(), value: 14)
                 ],
-                lineColor: .purple,
+                lineColor: .retraceTextSecondary,
                 showGradientFill: true
             )
             .frame(height: 80)
@@ -474,7 +474,7 @@ struct MiniLineGraphView_Previews: PreviewProvider {
                     DailyDataPoint(date: Date().addingTimeInterval(-1 * 86400), value: 2_900_000_000),
                     DailyDataPoint(date: Date(), value: 3_200_000_000)
                 ],
-                lineColor: .cyan,
+                lineColor: .retraceTextSecondary.opacity(0.85),
                 showGradientFill: true
             )
             .frame(height: 80)
@@ -493,7 +493,7 @@ struct MiniLineGraphView_Previews: PreviewProvider {
                     DailyDataPoint(date: Date().addingTimeInterval(-1 * 86400), value: 0),
                     DailyDataPoint(date: Date(), value: 0)
                 ],
-                lineColor: .blue
+                lineColor: .retraceTextSecondary.opacity(0.7)
             )
             .frame(height: 80)
             .padding()

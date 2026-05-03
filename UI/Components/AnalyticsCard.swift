@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Modern analytics card component with glassmorphism styling
+/// Modern analytics card component with matte monochrome styling
 public struct AnalyticsCard: View {
 
     // MARK: - Properties
@@ -50,15 +50,15 @@ public struct AnalyticsCard: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Icon with gradient background
+            // Icon with quiet graphite background
             ZStack {
-                Circle()
-                    .fill(gradient.opacity(0.2))
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.retraceControlFill)
                     .frame(width: 48, height: 48)
 
                 Image(systemName: icon)
                     .font(.retraceTitle3)
-                    .foregroundStyle(gradient)
+                    .foregroundColor(.retraceSecondary)
             }
 
             VStack(alignment: .leading, spacing: 6) {
@@ -88,11 +88,11 @@ public struct AnalyticsCard: View {
         .background(
             ZStack {
                 // Base background
-                Color.white.opacity(0.03)
+                Color.retraceSurface
 
                 // Subtle gradient overlay
                 LinearGradient(
-                    colors: [Color.white.opacity(0.02), Color.clear],
+                    colors: [Color.white.opacity(0.025), Color.clear],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -102,14 +102,7 @@ public struct AnalyticsCard: View {
         .overlay(
             RoundedRectangle(cornerRadius: 20)
                 .stroke(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.1),
-                            Color.white.opacity(0.05)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
+                    Color.retraceHairlineHover,
                     lineWidth: 1
                 )
         )

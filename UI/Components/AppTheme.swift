@@ -476,62 +476,60 @@ public enum TagColorStore {
 // MARK: - Colors
 
 extension Color {
+    // MARK: Monochrome Surface System
+    // Near-black graphite scale used by the fork's restrained macOS UI.
+    public static let retraceCanvas = Color(red: 8/255, green: 8/255, blue: 9/255)
+    public static let retraceSurface = Color(red: 13/255, green: 13/255, blue: 15/255)
+    public static let retraceSurfaceRaised = Color(red: 18/255, green: 18/255, blue: 20/255)
+    public static let retraceSurfaceOverlay = Color(red: 24/255, green: 24/255, blue: 27/255)
+    public static let retraceSurfaceField = Color(red: 28/255, green: 28/255, blue: 31/255)
+
+    public static let retraceTextPrimary = Color(red: 246/255, green: 246/255, blue: 244/255)
+    public static let retraceTextSecondary = Color(red: 168/255, green: 168/255, blue: 164/255)
+    public static let retraceTextTertiary = Color(red: 118/255, green: 118/255, blue: 114/255)
+
+    public static let retraceHairline = Color.white.opacity(0.08)
+    public static let retraceHairlineHover = Color.white.opacity(0.14)
+    public static let retraceHairlineFocus = Color.white.opacity(0.32)
+    public static let retraceControlFill = Color.white.opacity(0.045)
+    public static let retraceControlFillHover = Color.white.opacity(0.075)
+
     // MARK: Brand Colors (matching retrace-frontend design)
     // Fork theme background: near-black monochrome.
-    public static let retraceDeepBlue = Color(red: 9/255, green: 9/255, blue: 10/255)
+    public static let retraceDeepBlue = Color.retraceCanvas
 
     // Primary accent color - adapts based on user's color theme preference
     // Blue: Retrace accent color (lighter blue for better visibility)
     // Gold: Warm gold accent
     // Purple: Royal purple accent
     public static var retraceAccent: Color {
-        let theme = MilestoneCelebrationManager.getCurrentTheme()
-        switch theme {
-        case .blue:
-            return Color(red: 59/255, green: 130/255, blue: 246/255)  // #3B82F6 - lighter blue
-        case .monochrome:
-            return Color(red: 245/255, green: 245/255, blue: 245/255)
-        case .gold:
-            return Color(red: 255/255, green: 200/255, blue: 0/255)  // Gold
-        case .purple:
-            return Color(red: 160/255, green: 100/255, blue: 255/255)  // Purple
-        }
+        Color.retraceTextPrimary
     }
 
     // Original brand blue (for cases where we always want blue)
-    public static let retraceBrandBlue = Color(red: 11/255, green: 51/255, blue: 108/255)
+    public static let retraceBrandBlue = Color.retraceTextSecondary
 
     // Submit/action button accent - slightly deeper tones for filled buttons
     public static var retraceSubmitAccent: Color {
-        let theme = MilestoneCelebrationManager.getCurrentTheme()
-        switch theme {
-        case .blue:
-            return Color(red: 59/255, green: 130/255, blue: 246/255)
-        case .monochrome:
-            return Color(red: 232/255, green: 232/255, blue: 232/255)
-        case .gold:
-            return Color(red: 245/255, green: 180/255, blue: 0/255)
-        case .purple:
-            return Color(red: 148/255, green: 84/255, blue: 242/255)
-        }
+        Color(red: 226/255, green: 226/255, blue: 222/255)
     }
 
     // Card background
-    public static let retraceCard = Color(red: 16/255, green: 16/255, blue: 18/255)
+    public static let retraceCard = Color.retraceSurfaceRaised
 
     // Secondary surface
-    public static let retraceSecondaryColor = Color(red: 38/255, green: 38/255, blue: 42/255)
+    public static let retraceSecondaryColor = Color.retraceSurfaceOverlay
 
     // Foreground: hsl(210, 40%, 98%)
-    public static let retraceForeground = Color(red: 247/255, green: 249/255, blue: 252/255)
+    public static let retraceForeground = Color.retraceTextPrimary
 
     // Muted foreground
-    public static let retraceMutedForeground = Color(red: 166/255, green: 166/255, blue: 170/255)
+    public static let retraceMutedForeground = Color.retraceTextSecondary
 
     // State colors
-    public static let retraceDanger = Color(red: 220/255, green: 38/255, blue: 38/255)
-    public static let retraceSuccess = Color(red: 34/255, green: 197/255, blue: 94/255)
-    public static let retraceWarning = Color(red: 251/255, green: 146/255, blue: 60/255)
+    public static let retraceDanger = Color(red: 214/255, green: 92/255, blue: 92/255)
+    public static let retraceSuccess = Color(red: 190/255, green: 190/255, blue: 184/255)
+    public static let retraceWarning = Color(red: 202/255, green: 202/255, blue: 194/255)
 
     // MARK: Segment Colors (extracted from app icon)
     public static func segmentColor(for bundleID: String) -> Color {
@@ -546,13 +544,13 @@ extension Color {
     public static let retracePrimary = Color.retraceForeground
     public static let retraceSecondary = Color.retraceMutedForeground
 
-    public static let retraceBorder = Color.retraceSecondaryColor
-    public static let retraceHover = Color.retraceSecondaryColor.opacity(0.5)
+    public static let retraceBorder = Color.retraceHairline
+    public static let retraceHover = Color.retraceControlFillHover
 
     // MARK: Search Highlight
-    public static let retraceMatchHighlight = Color.yellow.opacity(0.4)
+    public static let retraceMatchHighlight = Color.white.opacity(0.22)
     public static let retraceBoundingBox = Color.retraceAccent
-    public static let retraceBoundingBoxSecondary = Color(red: 11/255, green: 51/255, blue: 108/255)  // #0b336c
+    public static let retraceBoundingBoxSecondary = Color.retraceHairlineFocus
 }
 
 // MARK: - Typography
@@ -717,19 +715,19 @@ extension CGFloat {
 
 extension View {
     public func retraceShadowLight() -> some View {
-        self.shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        self.shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
     }
 
     public func retraceShadowMedium() -> some View {
-        self.shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        self.shadow(color: .black.opacity(0.24), radius: 6, x: 0, y: 3)
     }
 
     public func retraceShadowHeavy() -> some View {
-        self.shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+        self.shadow(color: .black.opacity(0.32), radius: 14, x: 0, y: 8)
     }
 
     public func retraceGlow(color: Color = .retraceAccent, radius: CGFloat = 20) -> some View {
-        self.shadow(color: color.opacity(0.3), radius: radius, x: 0, y: 0)
+        self.shadow(color: color.opacity(0.14), radius: radius, x: 0, y: 0)
     }
 }
 
@@ -780,83 +778,32 @@ extension View {
 extension LinearGradient {
     // Accent gradient - adapts based on user's color theme preference
     public static var retraceAccentGradient: LinearGradient {
-        let theme = MilestoneCelebrationManager.getCurrentTheme()
-        switch theme {
-        case .blue:
-            return LinearGradient(
-                colors: [
-                    Color(red: 60/255, green: 130/255, blue: 220/255),   // Bright blue
-                    Color(red: 90/255, green: 160/255, blue: 240/255)    // Lighter blue
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        case .monochrome:
-            return LinearGradient(
-                colors: [
-                    Color.white.opacity(0.95),
-                    Color.white.opacity(0.55)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        case .gold:
-            return LinearGradient(
-                colors: [
-                    Color(red: 255/255, green: 215/255, blue: 0/255),    // Gold
-                    Color(red: 255/255, green: 180/255, blue: 0/255)     // Darker gold
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        case .purple:
-            return LinearGradient(
-                colors: [
-                    Color(red: 180/255, green: 130/255, blue: 255/255),  // Light purple
-                    Color(red: 138/255, green: 43/255, blue: 226/255)    // Blue violet
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
+        LinearGradient(
+            colors: [
+                Color.white.opacity(0.95),
+                Color.white.opacity(0.55)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 
-    // Original blue gradient (for cases where we always want blue)
-    public static let retraceBrandGradient = LinearGradient(
-        colors: [
-            Color(red: 60/255, green: 130/255, blue: 220/255),
-            Color(red: 90/255, green: 160/255, blue: 240/255)
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    // Legacy named gradients now resolve to neutral ramps in the fork theme.
+    public static var retraceBrandGradient: LinearGradient {
+        retraceAccentGradient
+    }
 
-    public static let retracePurpleGradient = LinearGradient(
-        colors: [
-            Color(red: 70/255, green: 140/255, blue: 230/255),   // Bright blue for visibility
-            Color(red: 100/255, green: 170/255, blue: 250/255)   // Lighter blue
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    public static var retracePurpleGradient: LinearGradient {
+        neutralRamp(opacity: 0.9)
+    }
 
-    public static let retraceGreenGradient = LinearGradient(
-        colors: [
-            Color(red: 34/255, green: 197/255, blue: 94/255),
-            Color(red: 16/255, green: 185/255, blue: 129/255)
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    public static var retraceGreenGradient: LinearGradient {
+        neutralRamp(opacity: 0.82)
+    }
 
-    public static let retraceOrangeGradient = LinearGradient(
-        colors: [
-            Color(red: 251/255, green: 146/255, blue: 60/255),
-            Color(red: 251/255, green: 191/255, blue: 36/255)
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    public static var retraceOrangeGradient: LinearGradient {
+        neutralRamp(opacity: 0.74)
+    }
 
     public static let retraceSubtleGradient = LinearGradient(
         colors: [
@@ -866,6 +813,17 @@ extension LinearGradient {
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
+
+    private static func neutralRamp(opacity: Double) -> LinearGradient {
+        LinearGradient(
+            colors: [
+                Color.white.opacity(opacity),
+                Color.white.opacity(max(0.28, opacity - 0.34))
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
 }
 
 // MARK: - Button Styles
@@ -876,7 +834,7 @@ public struct RetracePrimaryButtonStyle: ButtonStyle {
             .padding(.horizontal, .spacingM)
             .padding(.vertical, .spacingS)
             .background(Color.retraceAccent)
-            .foregroundColor(.white)
+            .foregroundColor(.retraceBackground)
             .cornerRadius(.cornerRadiusM)
             .opacity(configuration.isPressed ? 0.8 : 1.0)
     }
@@ -904,7 +862,7 @@ public struct RetraceDangerButtonStyle: ButtonStyle {
             .padding(.horizontal, .spacingM)
             .padding(.vertical, .spacingS)
             .background(Color.retraceDanger)
-            .foregroundColor(.white)
+            .foregroundColor(.retracePrimary)
             .cornerRadius(.cornerRadiusM)
             .opacity(configuration.isPressed ? 0.8 : 1.0)
     }
@@ -1126,13 +1084,13 @@ public struct RetraceMenuStyle {
     // MARK: - Container Styling
 
     /// Background color for all menus, popovers, and dialogs
-    public static let backgroundColor = Color(white: 0.1)
+    public static let backgroundColor = Color.retraceSurfaceOverlay
 
     /// Corner radius for all containers
     public static let cornerRadius: CGFloat = 12
 
     /// Border color
-    public static let borderColor = Color.white.opacity(0.15)
+    public static let borderColor = Color.retraceHairlineHover
 
     /// Border width
     public static let borderWidth: CGFloat = 1
@@ -1145,7 +1103,7 @@ public struct RetraceMenuStyle {
     // MARK: - Interactive Item Styling
 
     /// Hover background color for menu items
-    public static let itemHoverColor = Color.white.opacity(0.1)
+    public static let itemHoverColor = Color.retraceControlFillHover
 
     /// Corner radius for menu items
     public static let itemCornerRadius: CGFloat = 6
@@ -1189,16 +1147,16 @@ public struct RetraceMenuStyle {
     // MARK: - Colors
 
     /// Primary text color
-    public static let textColor = Color.white
+    public static let textColor = Color.retracePrimary
 
     /// Secondary text color (muted)
-    public static let textColorMuted = Color.white.opacity(0.7)
+    public static let textColorMuted = Color.retraceSecondary
 
     /// Destructive action color
-    public static let destructiveColor = Color.red.opacity(0.9)
+    public static let destructiveColor = Color.retraceDanger.opacity(0.9)
 
     /// Chevron color (for submenus)
-    public static let chevronColor = Color.white.opacity(0.4)
+    public static let chevronColor = Color.retraceTextTertiary
 
     /// Chevron size
     public static let chevronSize: CGFloat = 10
@@ -1210,7 +1168,7 @@ public struct RetraceMenuStyle {
 
     /// UI blue - desaturated, calmer blue for focus rings and subtle accents
     /// Same hue as brand blue but lower saturation for less visual noise
-    public static let uiBlue = Color(red: 0.4, green: 0.55, blue: 0.7)
+    public static let uiBlue = Color.retraceHairlineFocus
 
     /// Base accent color for filter control strokes (buttons and fields).
     /// Uses the lighter Retrace accent for consistent focus/hover/open outlines.
@@ -1236,7 +1194,7 @@ public struct RetraceMenuStyle {
     // MARK: - Search Field Styling (within menus)
 
     /// Search field background
-    public static let searchFieldBackground = Color.white.opacity(0.05)
+    public static let searchFieldBackground = Color.retraceSurfaceField
 
     /// Search field corner radius
     public static let searchFieldCornerRadius: CGFloat = 8
@@ -1481,7 +1439,7 @@ public struct RetraceMenuContainer: ViewModifier {
 
     private var borderColor: Color {
         guard showColoredBorders else {
-            return Color.white.opacity(0.15)
+            return RetraceMenuStyle.borderColor
         }
         let theme = MilestoneCelebrationManager.getCurrentTheme()
         return theme.controlBorderColor
@@ -1559,12 +1517,12 @@ public struct RetraceMenuSearchField: View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(RetraceMenuStyle.textColorMuted)
 
             TextField(placeholder, text: $text)
                 .textFieldStyle(.plain)
                 .font(RetraceMenuStyle.font)
-                .foregroundColor(.white)
+                .foregroundColor(RetraceMenuStyle.textColor)
                 .focused($isFocused)
                 .onSubmit {
                     onSubmit?()
@@ -1574,7 +1532,7 @@ public struct RetraceMenuSearchField: View {
                 Button(action: { text = "" }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(RetraceMenuStyle.textColorMuted.opacity(0.8))
                 }
                 .buttonStyle(.plain)
             }

@@ -477,9 +477,9 @@ public struct SpotlightSearchOverlay: View {
                     if viewModel.activeFilterCount > 0 {
                         Text("\(viewModel.activeFilterCount)")
                             .font(.system(size: 8, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(.retraceBackground)
                             .frame(width: 14, height: 14)
-                            .background(Color.red)
+                            .background(Color.retraceAccent)
                             .clipShape(Circle())
                             .offset(x: 4, y: -4)
                     }
@@ -876,7 +876,7 @@ public struct SpotlightSearchOverlay: View {
 
             if !filters.tagIDs.isEmpty {
                 if filters.tagFilterMode == .exclude {
-                    recentEntryMetadataToken(icon: "minus.circle.fill", text: "Tags", tint: .orange.opacity(0.9))
+                    recentEntryMetadataToken(icon: "minus.circle.fill", text: "Tags", tint: .retraceWarning.opacity(0.9))
                 }
                 ForEach(recentEntryTags(for: filters), id: \.id.value) { tag in
                     recentEntryTagBadge(tag)
@@ -902,7 +902,7 @@ public struct SpotlightSearchOverlay: View {
             }
 
             if !filters.windowNameTerms.isEmpty {
-                let tint: Color = filters.windowNameFilterMode == .exclude ? .orange.opacity(0.9) : RetraceMenuStyle.textColorMuted
+                let tint: Color = filters.windowNameFilterMode == .exclude ? .retraceWarning.opacity(0.9) : RetraceMenuStyle.textColorMuted
                 let icon = filters.windowNameFilterMode == .exclude ? "minus.circle.fill" : "rectangle.and.text.magnifyingglass"
                 ForEach(Array(filters.windowNameTerms.prefix(3)), id: \.self) { term in
                     recentEntryMetadataToken(icon: icon, text: "Title: \(term)", tint: tint)
@@ -913,7 +913,7 @@ public struct SpotlightSearchOverlay: View {
             }
 
             if !filters.browserUrlTerms.isEmpty {
-                let tint: Color = filters.browserUrlFilterMode == .exclude ? .orange.opacity(0.9) : RetraceMenuStyle.textColorMuted
+                let tint: Color = filters.browserUrlFilterMode == .exclude ? .retraceWarning.opacity(0.9) : RetraceMenuStyle.textColorMuted
                 let icon = filters.browserUrlFilterMode == .exclude ? "minus.circle.fill" : "link"
                 ForEach(Array(filters.browserUrlTerms.prefix(3)), id: \.self) { term in
                     recentEntryMetadataToken(icon: icon, text: "URL: \(term)", tint: tint)
@@ -928,14 +928,14 @@ public struct SpotlightSearchOverlay: View {
                     recentEntryMetadataToken(
                         icon: "minus.circle.fill",
                         text: excludedTerm,
-                        tint: .orange.opacity(0.9)
+                        tint: .retraceWarning.opacity(0.9)
                     )
                 }
                 if filters.excludedQueryTerms.count > 4 {
                     recentEntryMetadataToken(
                         icon: "ellipsis.circle",
                         text: "+\(filters.excludedQueryTerms.count - 4)",
-                        tint: .orange.opacity(0.9)
+                        tint: .retraceWarning.opacity(0.9)
                     )
                 }
             }
@@ -955,7 +955,7 @@ public struct SpotlightSearchOverlay: View {
             if filters.appFilterMode == .exclude {
                 Image(systemName: "minus.circle.fill")
                     .font(.system(size: 8, weight: .bold))
-                    .foregroundColor(.orange.opacity(0.95))
+                    .foregroundColor(.retraceWarning.opacity(0.95))
             }
 
             if bundleIDs.count == 1, let bundleID = bundleIDs.first {
@@ -1255,12 +1255,12 @@ public struct SpotlightSearchOverlay: View {
                     Text("\"All\" queries with app filters are slower")
                         .font(.retraceCaption2)
                 }
-                .foregroundColor(.yellow.opacity(0.8))
+                .foregroundColor(.retraceSecondary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.yellow.opacity(0.15))
+                        .fill(Color.retraceControlFill)
                 )
                 .padding(.top, 4)
             }
@@ -1506,9 +1506,8 @@ public struct SpotlightSearchOverlay: View {
             height: matchHeightInThumb + padding * 2
         )
 
-        // Draw yellow highlight box (matching the style used in SimpleTimelineView)
-        // Use explicit RGB to match SwiftUI's Color.yellow exactly
-        let highlightColor = NSColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 0.9)
+        // Draw a monochrome OCR highlight box matching the fork's timeline style.
+        let highlightColor = NSColor(calibratedWhite: 0.92, alpha: 0.85)
         let highlightPath = NSBezierPath(roundedRect: highlightRect, xRadius: 3, yRadius: 3)
         highlightColor.setStroke()
         highlightPath.lineWidth = 2
@@ -1984,10 +1983,10 @@ private struct GalleryResultCard: View {
                             // Source badge
                             Text(result.source == .native ? "Retrace" : "Rewind")
                                 .font(.retraceTinyBold)
-                                .foregroundColor(result.source == .native ? RetraceMenuStyle.actionBlue : .purple)
+                                .foregroundColor(.retracePrimary)
                                 .padding(.horizontal, 5)
                                 .padding(.vertical, 2)
-                                .background(result.source == .native ? RetraceMenuStyle.actionBlue.opacity(0.2) : Color.purple.opacity(0.2))
+                                .background(Color.retraceControlFill)
                                 .cornerRadius(3)
                         }
 
@@ -2003,7 +2002,7 @@ private struct GalleryResultCard: View {
 
                             Text(String(format: "relevance: %.0f%%", result.relevanceScore * 100))
                                 .font(.retraceMonoSmall)
-                                .foregroundColor(.yellow.opacity(0.7))
+                                .foregroundColor(.retraceSecondary)
                         }
                     }
 
@@ -2015,11 +2014,11 @@ private struct GalleryResultCard: View {
             }
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.white.opacity(0.05))
+                    .fill(Color.retraceSurface)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(isHovered ? Color.white.opacity(0.3) : Color.white.opacity(0.1), lineWidth: isHovered ? 2 : 1)
+                    .stroke(isHovered ? Color.retraceHairlineFocus : Color.retraceHairline, lineWidth: isHovered ? 1.5 : 1)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)

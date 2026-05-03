@@ -28,10 +28,11 @@ struct ConfettiView: View {
     @State private var currentTime: Date = Date()
 
     private let colors: [Color] = [
-        .red, .orange, .yellow, .green, .blue, .purple, .pink,
-        Color(red: 255/255, green: 215/255, blue: 0/255), // Gold
-        Color(red: 0/255, green: 255/255, blue: 127/255), // Spring green
-        Color(red: 255/255, green: 105/255, blue: 180/255) // Hot pink
+        .retracePrimary,
+        .retraceSecondary,
+        .retraceTextTertiary,
+        .white.opacity(0.72),
+        .white.opacity(0.56)
     ]
 
     private let animationDuration: Double = 2.5

@@ -24,7 +24,7 @@ extension SettingsView {
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(.retraceSecondary)
                         .frame(width: 28, height: 28)
-                        .background(Color.white.opacity(0.06))
+                        .background(Color.retraceControlFill)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
                 .buttonStyle(.plain)
@@ -64,12 +64,12 @@ extension SettingsView {
                     .foregroundColor(.retraceSecondary.opacity(0.5))
                     .padding(.horizontal, 5)
                     .padding(.vertical, 2)
-                    .background(Color.white.opacity(0.06))
+                    .background(Color.retraceControlFill)
                     .cornerRadius(4)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(Color.white.opacity(0.04))
+                .background(Color.retraceControlFill)
                 .cornerRadius(8)
             }
             .buttonStyle(.plain)
@@ -115,13 +115,13 @@ extension SettingsView {
                 #if DEBUG
                 Text("Debug Build")
                     .font(.system(size: 9))
-                    .foregroundColor(.orange.opacity(0.7))
+                    .foregroundColor(.retraceSecondary.opacity(0.7))
                 #endif
             }
             .frame(maxWidth: .infinity)
             .padding(.bottom, 20)
         }
-        .background(Color.white.opacity(0.02))
+        .background(Color.retraceSurface)
     }
 
     func sidebarButton(tab: SettingsTab) -> some View {
@@ -133,14 +133,14 @@ extension SettingsView {
                 // Icon with gradient for selected
                 ZStack {
                     if isSelected {
-                        Circle()
-                            .fill(tab.gradient.opacity(0.2))
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color.retraceControlFillHover)
                             .frame(width: 32, height: 32)
                     }
 
                     Image(systemName: tab.icon)
                         .font(.retraceCalloutMedium)
-                        .foregroundStyle(isSelected ? tab.gradient : LinearGradient(colors: [.retraceSecondary], startPoint: .top, endPoint: .bottom))
+                        .foregroundColor(isSelected ? .retracePrimary : .retraceSecondary)
                 }
                 .frame(width: 32, height: 32)
 
@@ -154,7 +154,7 @@ extension SettingsView {
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? Color.white.opacity(0.08) : (isHovered ? Color.white.opacity(0.04) : Color.clear))
+                    .fill(isSelected ? Color.retraceControlFillHover : (isHovered ? Color.retraceControlFill : Color.clear))
             )
         }
         .buttonStyle(.plain)
@@ -344,13 +344,13 @@ extension SettingsView {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 14) {
                 ZStack {
-                    Circle()
-                        .fill(shellViewModel.selectedTab.gradient.opacity(0.15))
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.retraceControlFill)
                         .frame(width: 44, height: 44)
 
                     Image(systemName: shellViewModel.selectedTab.icon)
                         .font(.retraceHeadline)
-                        .foregroundStyle(shellViewModel.selectedTab.gradient)
+                        .foregroundColor(.retraceSecondary)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -376,10 +376,10 @@ extension SettingsView {
                             Text("System Monitor")
                                 .font(.retraceCaption2)
                         }
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.retraceSecondary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(Color.white.opacity(0.08))
+                        .background(Color.retraceControlFill)
                         .cornerRadius(8)
                     }
                     .buttonStyle(.plain)
@@ -394,10 +394,10 @@ extension SettingsView {
                             Text("Reset to Defaults")
                                 .font(.retraceCaption2)
                         }
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.retraceSecondary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(Color.white.opacity(0.08))
+                        .background(Color.retraceControlFill)
                         .cornerRadius(8)
                     }
                     .buttonStyle(.plain)

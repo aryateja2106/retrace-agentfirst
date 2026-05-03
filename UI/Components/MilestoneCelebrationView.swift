@@ -428,48 +428,11 @@ struct MilestoneCelebrationView: View {
     }
 
     private var iconGradient: LinearGradient {
-        switch milestone {
-        case .tenHours, .hundredHours:
-            return LinearGradient(
-                colors: [.yellow, .orange],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        case .thousandHours:
-            return LinearGradient(
-                colors: [
-                    Color(red: 255/255, green: 215/255, blue: 0/255), // Gold
-                    Color(red: 255/255, green: 165/255, blue: 0/255), // Orange gold
-                    Color(red: 218/255, green: 165/255, blue: 32/255)  // Goldenrod
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        case .tenThousandHours:
-            // Rainbow gradient for the GOAT
-            return LinearGradient(
-                colors: [
-                    Color(red: 255/255, green: 0/255, blue: 128/255),   // Hot pink
-                    Color(red: 255/255, green: 215/255, blue: 0/255),   // Gold
-                    Color(red: 0/255, green: 255/255, blue: 128/255),   // Spring green
-                    Color(red: 0/255, green: 191/255, blue: 255/255),   // Deep sky blue
-                    Color(red: 148/255, green: 0/255, blue: 211/255)    // Violet
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        }
+        LinearGradient.retraceAccentGradient
     }
 
     private var glowColor: Color {
-        switch milestone {
-        case .tenHours, .hundredHours:
-            return .yellow
-        case .thousandHours:
-            return Color(red: 255/255, green: 215/255, blue: 0/255) // Gold
-        case .tenThousandHours:
-            return Color(red: 255/255, green: 0/255, blue: 128/255) // Hot pink
-        }
+        .retraceAccent
     }
 
     private var fallbackProfileImage: some View {

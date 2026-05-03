@@ -50,11 +50,11 @@ extension SettingsView {
         HStack(spacing: 14) {
                 ZStack {
                     Circle()
-                        .fill(Color.orange.opacity(0.2))
+                        .fill(Color.retraceWarning.opacity(0.18))
                         .frame(width: 44, height: 44)
                     Image(systemName: "bolt.circle.fill")
                         .font(.system(size: 24))
-                        .foregroundColor(.orange)
+                        .foregroundColor(.retraceWarning)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -71,10 +71,10 @@ extension SettingsView {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.orange.opacity(0.08))
+                    .fill(Color.retraceWarning.opacity(0.08))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color.orange.opacity(0.3), lineWidth: 1)
+                            .strokeBorder(Color.retraceWarning.opacity(0.3), lineWidth: 1)
                     )
             )
     }
@@ -100,7 +100,7 @@ extension SettingsView {
                     if !ocrEnabled {
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90")
-                                .foregroundColor(.orange)
+                                .foregroundColor(.retraceWarning)
                                 .font(.system(size: 13))
 
                             VStack(alignment: .leading, spacing: 6) {
@@ -148,7 +148,7 @@ extension SettingsView {
                         if ocrOnlyWhenPluggedIn {
                             HStack(spacing: 8) {
                                 Image(systemName: currentPowerSource == .ac ? "bolt.fill" : "battery.50")
-                                    .foregroundColor(currentPowerSource == .ac ? .green : .orange)
+                                    .foregroundColor(currentPowerSource == .ac ? .retraceSuccess : .retraceWarning)
                                     .font(.system(size: 14))
                                 Text(currentPowerSource == .ac ? "On AC power - processing OCR" : "On battery - OCR queued")
                                     .font(.retraceCaption2)
@@ -163,7 +163,7 @@ extension SettingsView {
                         if ocrPauseInLowPowerMode {
                             HStack(spacing: 8) {
                                 Image(systemName: isLowPowerModeEnabled ? "leaf.fill" : "leaf")
-                                    .foregroundColor(isLowPowerModeEnabled ? .orange : .green)
+                                    .foregroundColor(isLowPowerModeEnabled ? .retraceWarning : .retraceSuccess)
                                     .font(.system(size: 14))
                                 Text(isLowPowerModeEnabled ? "Low Power Mode is on - OCR queued" : "Low Power Mode is off - processing OCR")
                                     .font(.retraceCaption2)
@@ -352,7 +352,7 @@ extension SettingsView {
                                         // Include/Exclude indicator
                                         Text(ocrAppFilterMode == .onlyTheseApps ? "only" : "skip")
                                             .font(.system(size: 9, weight: .medium))
-                                            .foregroundColor(ocrAppFilterMode == .onlyTheseApps ? .green : .orange)
+                                            .foregroundColor(ocrAppFilterMode == .onlyTheseApps ? .retraceSuccess : .retraceWarning)
                                         Button(action: {
                                             removeOCRFilteredApp(app)
                                         }) {
@@ -412,7 +412,7 @@ extension SettingsView {
                             HStack(spacing: 6) {
                                 Image(systemName: ocrAppFilterMode == .onlyTheseApps ? "checkmark.circle" : "minus.circle")
                                     .font(.system(size: 11))
-                                    .foregroundColor(ocrAppFilterMode == .onlyTheseApps ? .green : .orange)
+                                    .foregroundColor(ocrAppFilterMode == .onlyTheseApps ? .retraceSuccess : .retraceWarning)
                                 Text(ocrAppFilterMode == .onlyTheseApps
                                      ? "OCR runs only for these apps"
                                      : "OCR skipped for these apps")
@@ -427,7 +427,7 @@ extension SettingsView {
     var powerTipsCard: some View {
         HStack(spacing: 12) {
             Image(systemName: "lightbulb.fill")
-                .foregroundColor(.yellow)
+                .foregroundColor(.retraceWarning)
                 .font(.system(size: 16))
 
             VStack(alignment: .leading, spacing: 4) {
@@ -441,7 +441,7 @@ extension SettingsView {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.yellow.opacity(0.08))
+        .background(Color.retraceWarning.opacity(0.08))
         .cornerRadius(10)
     }
 
@@ -450,7 +450,7 @@ extension SettingsView {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: isPluggedInMaxPriorityActive ? "bolt.fill" : "bolt")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(isPluggedInMaxPriorityActive ? .orange : .retraceSecondary)
+                .foregroundColor(isPluggedInMaxPriorityActive ? .retraceWarning : .retraceSecondary)
                 .frame(width: 18)
 
             VStack(alignment: .leading, spacing: 4) {
@@ -471,11 +471,11 @@ extension SettingsView {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(isPluggedInMaxPriorityActive ? Color.orange.opacity(0.12) : Color.retraceCard)
+                .fill(isPluggedInMaxPriorityActive ? Color.retraceWarning.opacity(0.12) : Color.retraceCard)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
                         .stroke(
-                            isPluggedInMaxPriorityActive ? Color.orange.opacity(0.35) : Color.retraceBorder,
+                            isPluggedInMaxPriorityActive ? Color.retraceWarning.opacity(0.35) : Color.retraceBorder,
                             lineWidth: 1
                         )
                 )
@@ -514,11 +514,11 @@ extension SettingsView {
 
     var processingLevelColor: Color {
         switch effectiveOCRProcessingLevel {
-        case 1: return .green
-        case 2: return .green
+        case 1: return .retraceSuccess
+        case 2: return .retraceSuccess
         case 3: return .retraceAccent
-        case 4: return .orange
-        case 5: return .red
+        case 4: return .retraceWarning
+        case 5: return .retraceDanger
         default: return .retraceAccent
         }
     }

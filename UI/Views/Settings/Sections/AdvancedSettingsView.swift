@@ -160,7 +160,7 @@ extension SettingsView {
             if let url {
                 Text(value)
                     .font(.system(size: 11, design: .monospaced))
-                    .foregroundColor(.blue.opacity(0.8))
+                    .foregroundColor(.retracePrimary.opacity(0.8))
                     .textSelection(.enabled)
                     .help(fullValue ?? value)
                     .onTapGesture { NSWorkspace.shared.open(url) }

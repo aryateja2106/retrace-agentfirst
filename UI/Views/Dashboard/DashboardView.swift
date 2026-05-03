@@ -1326,7 +1326,7 @@ public struct DashboardView: View {
                 value: formatScreenTimeFromDaily(viewModel.dailyScreenTimeData),
                 subtitle: activitySubtitle,
                 graphData: viewModel.dailyScreenTimeData.isEmpty ? nil : viewModel.dailyScreenTimeData,
-                graphColor: .blue,
+                graphColor: .retraceTextPrimary.opacity(0.86),
                 valueFormatter: { milliseconds in
                     let hours = Double(milliseconds) / 1000.0 / 3600.0
                     return String(format: "%.1fh", hours)
@@ -1338,7 +1338,7 @@ public struct DashboardView: View {
                 value: storageValue,
                 subtitle: storageSubtitle,
                 graphData: viewModel.dailyStorageData.isEmpty ? nil : viewModel.dailyStorageData,
-                graphColor: .cyan
+                graphColor: .retraceTextSecondary
             ),
             StatCardData(
                 icon: "timelapse",
@@ -1346,7 +1346,7 @@ public struct DashboardView: View {
                 value: "\(viewModel.timelineOpensThisWeek)",
                 subtitle: activitySubtitle,
                 graphData: viewModel.dailyTimelineOpensData.isEmpty ? nil : viewModel.dailyTimelineOpensData,
-                graphColor: .purple
+                graphColor: .retraceTextSecondary.opacity(0.88)
             ),
             StatCardData(
                 icon: "magnifyingglass",
@@ -1354,7 +1354,7 @@ public struct DashboardView: View {
                 value: "\(viewModel.searchesThisWeek)",
                 subtitle: activitySubtitle,
                 graphData: viewModel.dailySearchesData.isEmpty ? nil : viewModel.dailySearchesData,
-                graphColor: .orange
+                graphColor: .retraceTextSecondary.opacity(0.78)
             ),
             StatCardData(
                 icon: "doc.on.doc",
@@ -1362,7 +1362,7 @@ public struct DashboardView: View {
                 value: "\(viewModel.textCopiesThisWeek)",
                 subtitle: activitySubtitle,
                 graphData: viewModel.dailyTextCopiesData.isEmpty ? nil : viewModel.dailyTextCopiesData,
-                graphColor: .green
+                graphColor: .retraceTextSecondary.opacity(0.68)
             ),
         ]
     }
@@ -1378,15 +1378,15 @@ public struct DashboardView: View {
         valueFormatter: ((Int64) -> String)?,
         layoutSize: LayoutSize = .normal
     ) -> some View {
-        // Use a consistent muted color for all icons
+        // Use a consistent graphite icon treatment so the metrics read as one ledger.
         let iconColor = Color.retraceSecondary
 
         return VStack(spacing: 0) {
             HStack(spacing: layoutSize.iconSpacing) {
                 // Icon
                 ZStack {
-                    Circle()
-                        .fill(iconColor.opacity(0.10))
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.retraceControlFill)
                         .frame(width: layoutSize.iconCircleSize, height: layoutSize.iconCircleSize)
 
                     Image(systemName: icon)
@@ -1426,11 +1426,11 @@ public struct DashboardView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .background(Color.white.opacity(0.02))
+        .background(Color.retraceSurface)
         .cornerRadius(14)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(theme.controlBorderColor.opacity(0.6), lineWidth: 1)
+                .stroke(Color.retraceHairline, lineWidth: 1)
         )
     }
 
@@ -1484,11 +1484,11 @@ public struct DashboardView: View {
 
             appUsageSectionBody(layoutSize: appUsageLayout)
         }
-        .background(Color.white.opacity(0.03))
+                .background(Color.retraceSurfaceRaised)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(themeBorderColor.opacity(1.2), lineWidth: 1.2)
+                .stroke(Color.retraceHairlineHover, lineWidth: 1)
         )
     }
 
@@ -1541,99 +1541,30 @@ public struct DashboardView: View {
     }
 
     private var themeBorderColor: Color {
-        currentTheme.controlBorderColor
+        Color.retraceHairlineHover
     }
 
     /// Keeps the scroll fades aligned with the selected accent without changing
     /// the dashboard's actual background surface.
     private var themeScrollAffordanceColor: Color {
-        let baseColor = NSColor(themeBaseBackground).usingColorSpace(.sRGB) ?? NSColor.black
-        let accentColor = NSColor(currentTheme.glowColor).usingColorSpace(.sRGB) ?? baseColor
-
-        let tintStrength: CGFloat = 0.22
-        let darknessScale: CGFloat = 0.60
-
-        let red = ((baseColor.redComponent * (1 - tintStrength)) + (accentColor.redComponent * tintStrength)) * darknessScale
-        let green = ((baseColor.greenComponent * (1 - tintStrength)) + (accentColor.greenComponent * tintStrength)) * darknessScale
-        let blue = ((baseColor.blueComponent * (1 - tintStrength)) + (accentColor.blueComponent * tintStrength)) * darknessScale
-
-        return Color(
-            .sRGB,
-            red: Double(min(max(red, 0), 1)),
-            green: Double(min(max(green, 0), 1)),
-            blue: Double(min(max(blue, 0), 1)),
-            opacity: 1
-        )
+        Color.retraceBackground
     }
 
     /// Theme-aware base background color
     /// Gold theme uses a warmer, darker tone that complements gold better than blue
     private var themeBaseBackground: Color {
-        switch currentTheme {
-        case .gold:
-            // Warm dark brown/slate that complements gold
-            // HSL roughly: 30°, 20%, 5% - a very dark warm gray with slight brown undertone
-            return Color(red: 15/255, green: 12/255, blue: 8/255)
-        default:
-            // Default deep blue for all other themes
-            return Color.retraceBackground
-        }
+        Color.retraceBackground
     }
 
     /// Theme-aware ambient background with subtle glow effects
     private var themeAmbientBackground: some View {
-        let theme = currentTheme
-
-        // Use custom colors for better contrast against backgrounds
-        let ambientGlowColor: Color = {
-            switch theme {
-            case .blue:
-                // Deeper blue orb: #0e2a68
-                return Color(red: 14/255, green: 42/255, blue: 104/255)
-            case .monochrome:
-                return Color.white.opacity(0.85)
-            case .gold:
-                // Warm amber instead of pure gold
-                return Color(red: 255/255, green: 160/255, blue: 60/255)
-            case .purple:
-                return theme.glowColor
-            }
-        }()
-
-        // Adjust opacity per theme for best visual balance
-        // Blue gets moderate opacity - enough presence without being theatrical
-        let glowOpacity: Double = {
-            switch theme {
-            case .blue: return 0.3
-            case .monochrome: return 0.05
-            case .gold: return 0.05
-            case .purple: return 0.08
-            }
-        }()
-        let edgeGlowOpacity: Double = {
-            switch theme {
-            case .blue: return 0.6
-            case .monochrome: return 0.04
-            case .gold: return 0.04
-            case .purple: return 0.06
-            }
-        }()
-        let cornerGlowOpacity: Double = {
-            switch theme {
-            case .blue: return 0.5
-            case .monochrome: return 0.03
-            case .gold: return 0.03
-            case .purple: return 0.05
-            }
-        }()
-
         return GeometryReader { geometry in
             ZStack {
-                // Primary accent orb (top-left) - uses theme color
+                // Quiet ambient light keeps the dashboard from feeling flat without reintroducing color.
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [Color.retraceAccent.opacity(0.10), Color.clear],
+                            colors: [Color.white.opacity(0.035), Color.clear],
                             center: .center,
                             startRadius: 0,
                             endRadius: 300
@@ -1643,25 +1574,10 @@ public struct DashboardView: View {
                     .offset(x: -200, y: -100)
                     .blur(radius: 60)
 
-                // Secondary orb (top-left) - theme glow color
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [ambientGlowColor.opacity(glowOpacity), Color.clear],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 250
-                        )
-                    )
-                    .frame(width: 500, height: 500)
-                    .offset(x: -150, y: -50)
-                    .blur(radius: 50)
-
-                // Top edge glow - all themes get this now
                 Rectangle()
                     .fill(
                         LinearGradient(
-                            colors: [ambientGlowColor.opacity(edgeGlowOpacity), Color.clear],
+                            colors: [Color.white.opacity(0.025), Color.clear],
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -1671,11 +1587,10 @@ public struct DashboardView: View {
                     .position(x: geometry.size.width / 2, y: 0)
                     .blur(radius: 30)
 
-                // Bottom-right corner glow - all themes get this now
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [ambientGlowColor.opacity(cornerGlowOpacity), Color.clear],
+                            colors: [Color.white.opacity(0.02), Color.clear],
                             center: .center,
                             startRadius: 0,
                             endRadius: 400
@@ -2019,13 +1934,10 @@ public struct DashboardView: View {
             HStack(spacing: 16) {
                 Link(destination: URL(string: "https://retrace.to/l/haseab-twitter")!) {
                     HStack(spacing: 4) {
-                        Text("Made with")
-                            .foregroundColor(.retraceSecondary)
-                        Text("❤️")
-                        Text("by")
+                        Text("Retrace by")
                             .foregroundColor(.retraceSecondary)
                         Text("@haseab")
-                            .foregroundColor(Color(red: 74/255, green: 144/255, blue: 226/255))  // Bright blue for link
+                            .foregroundColor(isHoveringHaseab ? .retracePrimary : .retraceSecondary)
                             .scaleEffect(isHoveringHaseab ? 1.05 : 1.0)
                             .animation(.easeInOut(duration: 0.15), value: isHoveringHaseab)
                     }
@@ -2082,11 +1994,11 @@ public struct DashboardView: View {
                     .foregroundColor(.retraceSecondary)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 6)
-                    .background(Color.white.opacity(0.05))
+                    .background(Color.retraceControlFill)
                     .cornerRadius(8)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                            .stroke(Color.retraceHairline, lineWidth: 1)
                     )
                     .scaleEffect(isHoveringFeedback ? 1.05 : 1.0)
                     .animation(.easeInOut(duration: 0.15), value: isHoveringFeedback)
@@ -2210,7 +2122,7 @@ public struct DashboardView: View {
                         Text("Debug")
                     }
                     .font(.retraceCaption2Medium)
-                    .foregroundColor(.orange)
+                    .foregroundColor(.retraceSecondary)
                 }
                 .menuStyle(.borderlessButton)
                 .fixedSize()
@@ -2364,7 +2276,7 @@ private struct UnexpectedRecordingStopBanner: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "record.circle")
-                .foregroundColor(.orange)
+                .foregroundColor(.retraceWarning)
                 .font(.retraceTitle3)
 
             Text(messageText)
@@ -2381,7 +2293,7 @@ private struct UnexpectedRecordingStopBanner: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color.orange.opacity(0.9))
+                    .background(Color.retraceWarning.opacity(0.9))
                     .cornerRadius(6)
                     .buttonStyle(.plain)
             }
@@ -2401,7 +2313,7 @@ private struct UnexpectedRecordingStopBanner: View {
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                .stroke(Color.retraceWarning.opacity(0.3), lineWidth: 1)
         )
     }
 }
@@ -2428,7 +2340,7 @@ private struct CrashReportBanner: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "exclamationmark.arrow.trianglehead.2.clockwise.rotate.90")
-                .foregroundColor(.orange)
+                .foregroundColor(.retraceWarning)
                 .font(.retraceTitle3)
 
             Text(messageText)
@@ -2458,7 +2370,7 @@ private struct CrashReportBanner: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color.orange.opacity(0.9))
+                    .background(Color.retraceWarning.opacity(0.9))
                     .cornerRadius(6)
                     .buttonStyle(.plain)
             }
@@ -2478,7 +2390,7 @@ private struct CrashReportBanner: View {
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                .stroke(Color.retraceWarning.opacity(0.3), lineWidth: 1)
         )
     }
 }
@@ -2492,7 +2404,7 @@ private struct CrashRecoveryStatusBanner: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.circle.fill")
-                .foregroundColor(.orange)
+                .foregroundColor(.retraceWarning)
                 .font(.retraceTitle3)
 
             Text(state.messageText)
@@ -2524,7 +2436,7 @@ private struct CrashRecoveryStatusBanner: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color.orange.opacity(0.9))
+                    .background(Color.retraceWarning.opacity(0.9))
                     .cornerRadius(6)
                     .buttonStyle(.plain)
             }
@@ -2538,11 +2450,11 @@ private struct CrashRecoveryStatusBanner: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 9)
-        .background(Color.orange.opacity(0.12))
+        .background(Color.retraceWarning.opacity(0.12))
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                .stroke(Color.retraceWarning.opacity(0.3), lineWidth: 1)
         )
     }
 }
@@ -2563,7 +2475,7 @@ private struct WALFailureCrashBanner: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "externaldrive.badge.exclamationmark")
-                .foregroundColor(.orange)
+                .foregroundColor(.retraceWarning)
                 .font(.retraceTitle3)
 
             Text(messageText)
@@ -2594,7 +2506,7 @@ private struct WALFailureCrashBanner: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color.orange.opacity(0.9))
+                    .background(Color.retraceWarning.opacity(0.9))
                     .cornerRadius(6)
                     .buttonStyle(.plain)
             }
@@ -2614,7 +2526,7 @@ private struct WALFailureCrashBanner: View {
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                .stroke(Color.retraceWarning.opacity(0.3), lineWidth: 1)
         )
     }
 }
@@ -2624,7 +2536,7 @@ private struct StorageHealthBanner: View {
     let onDismiss: () -> Void
 
     private var accentColor: Color {
-        state.shouldStop ? .red : .orange
+        state.shouldStop ? .retraceDanger : .retraceWarning
     }
 
     var body: some View {
@@ -2651,7 +2563,7 @@ private struct StorageHealthBanner: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 9)
         .background(
-            (state.shouldStop ? Color.red : Color.orange).opacity(0.16)
+            (state.shouldStop ? Color.retraceDanger : Color.retraceWarning).opacity(0.16)
         )
         .cornerRadius(8)
         .overlay(
@@ -2719,7 +2631,7 @@ private struct MonitorButton: View {
             ZStack {
                 Image(systemName: "waveform.path.ecg")
                     .font(.retraceCalloutMedium)
-                    .foregroundColor(isProcessing ? .green : .retraceSecondary)
+                    .foregroundColor(isProcessing ? .retraceSuccess : .retraceSecondary)
                     .scaleEffect(isProcessing ? heartbeatScale : 1.0)
             }
             .padding(10)

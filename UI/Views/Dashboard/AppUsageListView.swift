@@ -322,11 +322,11 @@ struct AppUsageListView: View {
             .padding(.horizontal, 12)
             .background(
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(isHovering ? Color.white.opacity(0.06) : Color.white.opacity(0.03))
+                    .fill(isHovering ? Color.retraceControlFillHover : Color.retraceControlFill)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                    .stroke(Color.retraceHairline, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -414,10 +414,10 @@ struct AppUsageListView: View {
             GeometryReader { geometry in
                 ZStack(alignment: .trailing) {
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.white.opacity(0.03))
+                        .fill(Color.retraceControlFill)
 
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(appColor.opacity(0.5))
+                        .fill(Color.retraceTextSecondary.opacity(0.5))
                         .frame(width: max(geometry.size.width * window.percentage, 4))
                 }
             }
@@ -442,7 +442,7 @@ struct AppUsageListView: View {
         .padding(.leading, layoutSize.windowRowIndent - layoutSize.rankWidth - 14)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isHovered ? Color.white.opacity(0.03) : Color.clear)
+                .fill(isHovered ? Color.retraceControlFill : Color.clear)
         )
         .scaleEffect(isHovered ? 1.01 : 1.0)
         .animation(.easeInOut(duration: 0.15), value: isHovered)
@@ -529,10 +529,10 @@ struct AppUsageListView: View {
             let progressBarFillWidth = max(progressBarSlotWidth * window.percentage, 4)
             ZStack(alignment: .trailing) {
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(Color.white.opacity(0.03))
+                    .fill(Color.retraceControlFill)
 
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(appColor.opacity(0.5))
+                    .fill(Color.retraceTextSecondary.opacity(0.5))
                     .frame(width: progressBarFillWidth)
             }
             .frame(width: progressBarSlotWidth, height: progressBarSlotHeight)
@@ -556,7 +556,7 @@ struct AppUsageListView: View {
         .padding(.leading, layoutSize.windowRowIndent - layoutSize.rankWidth - 14)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isHovered || isExpanded ? Color.white.opacity(0.03) : Color.clear)
+                .fill(isHovered || isExpanded ? Color.retraceControlFill : Color.clear)
         )
         .scaleEffect(isHovered ? 1.01 : 1.0)
         .animation(.easeInOut(duration: 0.15), value: isHovered)
@@ -659,7 +659,7 @@ struct AppUsageListView: View {
 
                 // Sub-row marker to keep nested/tabbed hierarchy visible without a heavy card
                 Capsule()
-                    .fill(appColor.opacity(isHovered ? 0.75 : 0.35))
+                    .fill(Color.retraceTextSecondary.opacity(isHovered ? 0.75 : 0.35))
                     .frame(width: 2, height: 18)
 
                 // Tab title with URL subtitle
@@ -803,8 +803,6 @@ struct AppUsageListView: View {
     private func appUsageRow(index: Int, app: AppUsageData, layoutSize: AppUsageLayoutSize) -> some View {
         let isHovered = hoveredAppIndex == index
         let isExpanded = expandedAppBundleID == app.appBundleID
-        let appColor = Color.segmentColor(for: app.appBundleID)
-
         return HStack(spacing: layoutSize.rowSpacing) {
             // Expand/collapse chevron
             Image(systemName: "chevron.right")
@@ -836,17 +834,11 @@ struct AppUsageListView: View {
                 ZStack(alignment: .trailing) {
                     // Background
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.white.opacity(0.05))
+                        .fill(Color.retraceControlFill)
 
                     // Progress
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            LinearGradient(
-                                colors: [appColor.opacity(0.8), appColor.opacity(0.4)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
+                        .fill(Color.retraceTextSecondary.opacity(isHovered || isExpanded ? 0.78 : 0.52))
                         .frame(width: max(geometry.size.width * app.percentage, 8))
                 }
             }
@@ -868,7 +860,7 @@ struct AppUsageListView: View {
         .padding(.vertical, layoutSize.verticalPadding)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(isHovered || isExpanded ? Color.white.opacity(0.05) : Color.clear)
+                .fill(isHovered || isExpanded ? Color.retraceControlFillHover : Color.clear)
         )
         .scaleEffect(isHovered ? 1.01 : 1.0)
         .animation(.easeInOut(duration: 0.15), value: isHovered)

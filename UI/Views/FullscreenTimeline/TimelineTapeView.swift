@@ -172,7 +172,7 @@ public struct TimelineTapeView: View {
             let xOffset = layout.offsetForFrame(frameIndex) - pixelsPerFrame / 2
 
             Rectangle()
-                .fill(Color.blue)
+                .fill(Color.retraceAccent)
                 .frame(width: 2, height: tapeHeight + 16)
                 .offset(x: xOffset, y: -8)
         }
@@ -189,9 +189,9 @@ public struct TimelineTapeView: View {
         ForEach(boundaries, id: \.self) { frameIndex in
             let xOffset = layout.offsetForFrame(frameIndex) - pixelsPerFrame / 2
 
-            // Thick red line that protrudes above and below the tape
+            // Thick danger line that protrudes above and below the tape
             Rectangle()
-                .fill(Color.red)
+                .fill(Color.retraceDanger)
                 .frame(width: 3, height: tapeHeight + 16)
                 .offset(x: xOffset, y: -8)
         }
@@ -336,7 +336,7 @@ public struct TimelineTapeView: View {
 
             // Selection/current border overlay (on top of frame segments so border is fully visible)
             RoundedRectangle(cornerRadius: 4)
-                .stroke(isSelectedBlock ? Color.blue : (isCurrentBlock ? Color.white : Color.clear), lineWidth: isSelectedBlock ? 3 : 2)
+                .stroke(isSelectedBlock ? Color.retraceHairlineFocus : (isCurrentBlock ? Color.retracePrimary : Color.clear), lineWidth: isSelectedBlock ? 3 : 2)
                 .frame(width: blockWidth, height: tapeHeight)
                 .allowsHitTesting(false)
         }
@@ -1429,7 +1429,7 @@ struct FilterButton: View {
                         }
                     }
                     .frame(width: 16, height: 16)
-                    .background(Color.red)
+                    .background(Color.retraceDanger)
                     .clipShape(Circle())
                     .scaleEffect(isBadgeHovering ? 1.15 : 1.0)
                 }

@@ -398,7 +398,7 @@ extension SettingsView {
         fontStyle = SettingsDefaults.fontStyle
         RetraceFont.currentStyle = SettingsDefaults.fontStyle
         colorThemePreference = SettingsDefaults.colorTheme
-        MilestoneCelebrationManager.setColorThemePreference(.blue)
+        MilestoneCelebrationManager.setColorThemePreference(.monochrome)
         timelineColoredBorders = SettingsDefaults.timelineColoredBorders
         scrubbingAnimationDuration = SettingsDefaults.scrubbingAnimationDuration
         scrollSensitivity = SettingsDefaults.scrollSensitivity

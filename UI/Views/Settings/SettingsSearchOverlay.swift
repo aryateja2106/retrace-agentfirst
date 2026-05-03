@@ -52,7 +52,7 @@ extension SettingsView {
         if shellViewModel.showSettingsSearch {
             ZStack {
                 // Backdrop
-                Color.black.opacity(0.5)
+                Color.black.opacity(0.62)
                     .ignoresSafeArea()
                     .onTapGesture { dismissSettingsSearch() }
 
@@ -62,7 +62,7 @@ extension SettingsView {
                     HStack(spacing: 12) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 18))
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.retraceSecondary)
 
                         SettingsSearchField(
                             text: $shellViewModel.settingsSearchQuery,
@@ -72,17 +72,17 @@ extension SettingsView {
 
                         Text("esc")
                             .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.white.opacity(0.3))
+                            .foregroundColor(.retraceTextTertiary)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
-                            .background(Color.white.opacity(0.08))
+                            .background(Color.retraceControlFill)
                             .cornerRadius(4)
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)
 
                     Divider()
-                        .background(Color.white.opacity(0.1))
+                        .background(Color.retraceHairline)
 
                     // Results
                     let results = SettingsShellViewModel.searchResults(for: shellViewModel.settingsSearchQuery)
@@ -118,7 +118,7 @@ extension SettingsView {
                                         HStack(spacing: 6) {
                                             Image(systemName: entry.tab.icon)
                                                 .font(.system(size: 10))
-                                                .foregroundStyle(entry.tab.gradient)
+                                                .foregroundColor(.retraceSecondary)
                                             Text(entry.breadcrumb)
                                                 .font(.retraceCaption2)
                                                 .foregroundColor(.retraceSecondary)
@@ -136,7 +136,7 @@ extension SettingsView {
                                                     Image(systemName: "arrow.right")
                                                         .font(.system(size: 8, weight: .semibold))
                                                 }
-                                                .foregroundColor(.retraceAccent)
+                                                .foregroundColor(.retracePrimary)
                                             }
                                             .buttonStyle(.plain)
                                         }
@@ -154,11 +154,11 @@ extension SettingsView {
                 .frame(width: 600)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(.ultraThinMaterial)
+                        .fill(Color.retraceSurfaceOverlay)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        .stroke(Color.retraceHairlineHover, lineWidth: 1)
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(color: Color.black.opacity(0.5), radius: 20, y: 10)

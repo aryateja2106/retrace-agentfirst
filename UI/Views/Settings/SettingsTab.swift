@@ -40,16 +40,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
     }
 
     var gradient: LinearGradient {
-        switch self {
-        case .general: return .retraceAccentGradient
-        case .capture: return .retracePurpleGradient
-        case .storage: return .retraceOrangeGradient
-        case .context: return .retraceAccentGradient
-        case .privacy: return .retraceGreenGradient
-        case .power: return .retraceOrangeGradient
-        case .tags: return .retraceAccentGradient
-        case .advanced: return .retracePurpleGradient
-        }
+        .retraceAccentGradient
     }
 
     func resetAction(for view: SettingsView) -> (() -> Void)? {

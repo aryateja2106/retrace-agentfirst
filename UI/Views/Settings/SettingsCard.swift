@@ -87,11 +87,11 @@ struct ModernSettingsCard<Content: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.03))
+                .fill(Color.retraceSurface)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(dangerous ? Color.retraceDanger.opacity(0.3) : Color.white.opacity(0.06), lineWidth: 1)
+                .stroke(dangerous ? Color.retraceDanger.opacity(0.35) : Color.retraceHairline, lineWidth: 1)
         )
     }
 }
@@ -252,7 +252,7 @@ struct ModernPermissionRow: View {
                         Button(action: openSettingsAction) {
                             Text("Change")
                                 .font(.retraceCaption2Bold)
-                                .foregroundColor(.white)
+                                .foregroundColor(.retraceBackground)
                                 .padding(.vertical, 6)
                                 .frame(width: Self.grantedControlWidth)
                                 .background(Color.retraceAccent)
@@ -289,7 +289,7 @@ struct ModernPermissionRow: View {
                         Button(action: action) {
                             Text("Enable")
                                 .font(.retraceCaption2Bold)
-                                .foregroundColor(.white)
+                                .foregroundColor(.retraceBackground)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 6)
                                 .background(Color.retraceAccent)
@@ -304,7 +304,7 @@ struct ModernPermissionRow: View {
                                 .font(.retraceCaption2Medium)
                                 .foregroundColor(.retraceSecondary)
                                 .padding(6)
-                                .background(Color.white.opacity(0.05))
+                                .background(Color.retraceControlFill)
                                 .cornerRadius(6)
                         }
                         .buttonStyle(.plain)
@@ -331,11 +331,11 @@ struct ModernSlider: View {
 
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.white.opacity(0.08))
+                    .fill(Color.retraceControlFill)
                     .frame(height: 6)
 
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(LinearGradient.retraceAccentGradient)
+                    .fill(Color.retraceTextSecondary)
                     .frame(width: max(0, thumbPosition), height: 6)
 
                 Circle()
@@ -345,7 +345,7 @@ struct ModernSlider: View {
                         Circle()
                             .stroke(Color.white.opacity(0.3), lineWidth: 2)
                     )
-                    .shadow(color: Color.retraceAccent.opacity(0.5), radius: isDragging ? 6 : 4)
+                    .shadow(color: Color.white.opacity(0.16), radius: isDragging ? 6 : 4)
                     .offset(x: max(0, min(thumbPosition - 7, trackWidth - 14)))
             }
             .frame(height: 20)
@@ -478,7 +478,7 @@ struct ModernButton: View {
 
     private var foregroundColor: Color {
         switch style {
-        case .primary: return .white
+        case .primary: return .retraceBackground
         case .secondary: return .retracePrimary
         case .danger: return .retraceDanger
         }
@@ -487,7 +487,7 @@ struct ModernButton: View {
     private var backgroundColor: Color {
         switch style {
         case .primary: return .retraceAccent
-        case .secondary: return Color.white.opacity(0.05)
+        case .secondary: return Color.retraceControlFill
         case .danger: return Color.retraceDanger.opacity(0.1)
         }
     }
@@ -495,7 +495,7 @@ struct ModernButton: View {
     private var borderColor: Color {
         switch style {
         case .primary: return Color.clear
-        case .secondary: return Color.white.opacity(0.08)
+        case .secondary: return Color.retraceHairline
         case .danger: return Color.retraceDanger.opacity(0.3)
         }
     }
@@ -530,11 +530,11 @@ struct FontStylePicker: View {
                     .padding(.vertical, 12)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(selection == style ? Color.white.opacity(0.08) : Color.clear)
+                            .fill(selection == style ? Color.retraceControlFillHover : Color.clear)
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .stroke(selection == style ? Color.retraceAccent.opacity(0.5) : Color.clear, lineWidth: 1.5)
+                            .stroke(selection == style ? Color.retraceHairlineFocus : Color.clear, lineWidth: 1.5)
                     )
                     .contentShape(Rectangle())
                 }
@@ -542,7 +542,7 @@ struct FontStylePicker: View {
             }
         }
         .padding(6)
-        .background(Color.white.opacity(0.03))
+        .background(Color.retraceSurfaceRaised)
         .cornerRadius(12)
     }
 }
@@ -557,7 +557,7 @@ struct ColorThemePicker: View {
             }
         }
         .padding(6)
-        .background(Color.white.opacity(0.03))
+        .background(Color.retraceSurfaceRaised)
         .cornerRadius(12)
     }
 
@@ -570,7 +570,11 @@ struct ColorThemePicker: View {
         }) {
             VStack(spacing: 8) {
                 Circle()
-                    .fill(theme.glowColor)
+                    .fill(theme == .monochrome ? Color.retraceAccent : Color.retraceTextSecondary.opacity(0.7))
+                    .overlay(
+                        Circle()
+                            .stroke(Color.retraceHairlineHover, lineWidth: 1)
+                    )
                     .frame(width: 32, height: 32)
 
                 Text(theme.displayName)
@@ -581,11 +585,11 @@ struct ColorThemePicker: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? Color.white.opacity(0.08) : Color.clear)
+                    .fill(isSelected ? Color.retraceControlFillHover : Color.clear)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? theme.glowColor.opacity(0.5) : Color.clear, lineWidth: 1.5)
+                    .stroke(isSelected ? Color.retraceHairlineFocus : Color.clear, lineWidth: 1.5)
             )
             .contentShape(Rectangle())
         }
@@ -616,7 +620,7 @@ struct CaptureIntervalPicker: View {
             }
         }
         .padding(4)
-        .background(Color.white.opacity(0.05))
+        .background(Color.retraceControlFill)
         .cornerRadius(10)
     }
 
@@ -689,25 +693,25 @@ struct RetentionPolicyPicker: View {
 
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.white.opacity(0.08))
+                        .fill(Color.retraceControlFill)
                         .frame(width: trackWidth, height: 4)
                         .offset(x: horizontalInset)
 
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(LinearGradient.retraceAccentGradient)
+                        .fill(Color.retraceTextSecondary)
                         .frame(width: max(0, CGFloat(sliderIndex) * segmentWidth), height: 4)
                         .offset(x: horizontalInset)
 
                     HStack(spacing: 0) {
                         ForEach(0..<options.count, id: \.self) { index in
                             Circle()
-                                .fill(index <= Int(sliderIndex) ? Color.retraceAccent : Color.white.opacity(0.3))
+                                .fill(index <= Int(sliderIndex) ? Color.retraceAccent : Color.retraceTextTertiary)
                                 .frame(width: index == Int(sliderIndex) ? 14 : 8, height: index == Int(sliderIndex) ? 14 : 8)
                                 .overlay(
                                     Circle()
                                         .stroke(Color.white.opacity(0.2), lineWidth: index == Int(sliderIndex) ? 2 : 0)
                                 )
-                                .shadow(color: index == Int(sliderIndex) ? Color.retraceAccent.opacity(0.5) : .clear, radius: 4)
+                                .shadow(color: index == Int(sliderIndex) ? Color.white.opacity(0.14) : .clear, radius: 4)
                                 .frame(maxWidth: .infinity)
                         }
                     }

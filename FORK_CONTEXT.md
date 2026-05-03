@@ -16,7 +16,7 @@ This fork keeps Retrace's upstream data contract intact while adding Arya-specif
 - `Database/Queries/ActivityContextQueries.swift` adds bounded read-only context queries.
 - `App/DailyJournalManager.swift` adds low-impact collection, Ollama summarization, and markdown writing.
 - `UI/Views/Settings/Sections/ContextSettingsView.swift` adds opt-in context/journal settings.
-- `UI/Components/AppTheme.swift` and `UI/Components/MilestoneCelebrationManager.swift` add the monochrome theme option.
+- `UI/Components/AppTheme.swift` and `UI/Components/MilestoneCelebrationManager.swift` enforce the fork's monochrome token system across dashboard, settings, timeline/search chrome, menus, and milestone surfaces.
 
 ## Pulling Upstream
 

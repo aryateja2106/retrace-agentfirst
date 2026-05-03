@@ -345,12 +345,12 @@ struct ProcessCPUSummaryCard: View {
             .fill(
                 LinearGradient(
                     stops: [
-                        .init(color: Color.green.opacity(0.85), location: 0.00),
-                        .init(color: Color.green.opacity(0.85), location: 0.33),
-                        .init(color: Color.yellow.opacity(0.90), location: 0.33),
-                        .init(color: Color.yellow.opacity(0.90), location: 0.66),
-                        .init(color: Color.red.opacity(0.90), location: 0.66),
-                        .init(color: Color.red.opacity(0.90), location: 1.00)
+                        .init(color: Color.retraceTextTertiary.opacity(0.85), location: 0.00),
+                        .init(color: Color.retraceTextTertiary.opacity(0.85), location: 0.33),
+                        .init(color: Color.retraceWarning.opacity(0.80), location: 0.33),
+                        .init(color: Color.retraceWarning.opacity(0.80), location: 0.66),
+                        .init(color: Color.retraceDanger.opacity(0.82), location: 0.66),
+                        .init(color: Color.retraceDanger.opacity(0.82), location: 1.00)
                     ],
                     startPoint: .leading,
                     endPoint: .trailing

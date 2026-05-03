@@ -368,7 +368,7 @@ public struct SimpleTimelineView: View {
                 // Toast feedback overlay (centered, larger for errors)
                 if viewModel.toastMessage != nil {
                     let isErrorToast = viewModel.toastTone == .error
-                    let toastAccentColor = isErrorToast ? Color.red : Color.green
+                    let toastAccentColor = isErrorToast ? Color.retraceDanger : Color.retraceSuccess
 
                     VStack {
                         Spacer()
@@ -400,7 +400,7 @@ public struct SimpleTimelineView: View {
                         HStack(spacing: 10) {
                             Image(systemName: "trash.fill")
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.orange.opacity(0.95))
+                                .foregroundColor(.retraceWarning.opacity(0.95))
 
                             Text(undoMessage)
                                 .font(.system(size: 13, weight: .semibold))
@@ -1308,7 +1308,7 @@ public struct SimpleTimelineView: View {
     // MARK: - Error Overlay
 
     private func errorOverlay(_ message: String) -> some View {
-        let accentColor = Color.orange
+        let accentColor = Color.retraceWarning
 
         return HStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle.fill")
@@ -5506,7 +5506,7 @@ struct DeleteConfirmationDialog: View {
                         .frame(width: 240, height: 40)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(isHoveringDeleteFrame ? Color.red.opacity(0.7) : Color.red.opacity(0.5))
+                                .fill(isHoveringDeleteFrame ? Color.retraceDanger.opacity(0.7) : Color.retraceDanger.opacity(0.5))
                         )
                     }
                     .buttonStyle(.plain)
@@ -5528,7 +5528,7 @@ struct DeleteConfirmationDialog: View {
                         .frame(width: 240, height: 44)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(isHoveringDeleteSegment ? Color.red.opacity(0.9) : Color.red.opacity(0.7))
+                                .fill(isHoveringDeleteSegment ? Color.retraceDanger.opacity(0.9) : Color.retraceDanger.opacity(0.7))
                         )
                     }
                     .buttonStyle(.plain)
@@ -5666,7 +5666,7 @@ struct SearchHighlightOverlay: View {
                     ZStack {
                         ForEach(Array(highlightedRects.enumerated()), id: \.offset) { _, rect in
                             RoundedRectangle(cornerRadius: 3)
-                                .stroke(Color.yellow.opacity(0.9), lineWidth: 2)
+                                .stroke(Color.retraceAccent.opacity(0.85), lineWidth: 2)
                                 .frame(width: rect.width, height: rect.height)
                                 .scaleEffect(highlightScale)
                                 .position(x: rect.midX, y: rect.midY)
@@ -6014,7 +6014,7 @@ struct OCRDebugOverlay: View {
                 path.move(to: CGPoint(x: screenX, y: actualFrameRect.origin.y))
                 path.addLine(to: CGPoint(x: screenX, y: actualFrameRect.maxY))
 
-                context.stroke(path, with: .color(.cyan.opacity(0.3)), lineWidth: 0.5)
+                context.stroke(path, with: .color(.retraceSecondary.opacity(0.3)), lineWidth: 0.5)
             }
 
             // Draw horizontal lines
@@ -6028,7 +6028,7 @@ struct OCRDebugOverlay: View {
                 path.move(to: CGPoint(x: actualFrameRect.origin.x, y: screenY))
                 path.addLine(to: CGPoint(x: actualFrameRect.maxX, y: screenY))
 
-                context.stroke(path, with: .color(.cyan.opacity(0.3)), lineWidth: 0.5)
+                context.stroke(path, with: .color(.retraceSecondary.opacity(0.3)), lineWidth: 0.5)
             }
         }
     }
@@ -6050,7 +6050,7 @@ struct OCRDebugOverlay: View {
 
             // Draw new nodes on top (green, solid)
             ForEach(Array(nodes.new.enumerated()), id: \.offset) { _, node in
-                nodeBox(node: node, color: .green, isDashed: false, label: "+")
+                nodeBox(node: node, color: .retraceSuccess, isDashed: false, label: "+")
             }
 
             // Stats badge in top-right of frame area
@@ -6090,11 +6090,11 @@ struct OCRDebugOverlay: View {
     private func statsBadge(new: Int, removed: Int, unchanged: Int) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 4) {
-                Circle().fill(Color.green).frame(width: 8, height: 8)
+                Circle().fill(Color.retraceSuccess).frame(width: 8, height: 8)
                 Text("New: \(new)").font(.system(size: 10, weight: .medium, design: .monospaced))
             }
             HStack(spacing: 4) {
-                Circle().fill(Color.red).frame(width: 8, height: 8)
+                Circle().fill(Color.retraceDanger).frame(width: 8, height: 8)
                 Text("Removed: \(removed)").font(.system(size: 10, weight: .medium, design: .monospaced))
             }
             HStack(spacing: 4) {
@@ -6140,18 +6140,18 @@ struct DebugFrameIDBadge: View {
 
     private var renderedMediaColor: Color {
         if viewModel.currentFrameStillDisplayMode == .waitingFallback {
-            return viewModel.currentFrameStillUsesFreshCaptureSource ? .blue.opacity(0.9) : .orange.opacity(0.85)
+            return viewModel.currentFrameStillUsesFreshCaptureSource ? .retracePrimary.opacity(0.9) : .retraceWarning.opacity(0.85)
         }
 
         if viewModel.isInLiveMode {
-            return viewModel.liveScreenshot != nil ? .blue.opacity(0.9) : .white.opacity(0.5)
+            return viewModel.liveScreenshot != nil ? .retracePrimary.opacity(0.9) : .white.opacity(0.5)
         }
 
         switch viewModel.currentFrameMediaDisplayMode {
         case .still:
-            return viewModel.currentFrameStillUsesFreshCaptureSource ? .blue.opacity(0.9) : .green.opacity(0.85)
+            return viewModel.currentFrameStillUsesFreshCaptureSource ? .retracePrimary.opacity(0.9) : .retraceSuccess.opacity(0.85)
         case .decodedVideo:
-            return .cyan.opacity(0.9)
+            return .retraceSecondary.opacity(0.9)
         case .noContent:
             return .white.opacity(0.5)
         }
@@ -6167,10 +6167,10 @@ struct DebugFrameIDBadge: View {
 
     private var videoReencodeColor: Color {
         guard let videoInfo = viewModel.currentVideoInfo else {
-            return .blue.opacity(0.8)
+            return .retraceSecondary.opacity(0.8)
         }
 
-        return videoInfo.isVideoReencoded ? .green.opacity(0.85) : .white.opacity(0.75)
+        return videoInfo.isVideoReencoded ? .retraceSuccess.opacity(0.85) : .white.opacity(0.75)
     }
 
     private var bitrateText: String {
@@ -6212,7 +6212,7 @@ struct DebugFrameIDBadge: View {
             HStack(spacing: 6) {
                 Image(systemName: showCopiedFeedback ? "checkmark" : "doc.on.doc")
                     .font(.retraceTinyMedium)
-                    .foregroundColor(showCopiedFeedback ? .green : .white.opacity(0.7))
+                    .foregroundColor(showCopiedFeedback ? .retraceSuccess : .white.opacity(0.7))
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Frame ID")
@@ -6222,7 +6222,7 @@ struct DebugFrameIDBadge: View {
                     if let frame = viewModel.currentFrame {
                         Text(showCopiedFeedback ? "Copied!" : String(frame.id.value))
                             .font(.retraceMonoSmall)
-                            .foregroundColor(showCopiedFeedback ? .green : .white)
+                            .foregroundColor(showCopiedFeedback ? .retraceSuccess : .white)
                     } else {
                         Text("--")
                             .font(.retraceMonoSmall)
@@ -6231,13 +6231,13 @@ struct DebugFrameIDBadge: View {
 
                     Text("Memory JPEG: \(viewModel.currentFrameHasInMemoryJPEGCache ? "yes" : "no")")
                         .font(.retraceMonoSmall)
-                        .foregroundColor(viewModel.currentFrameHasInMemoryJPEGCache ? .green.opacity(0.85) : .white.opacity(0.7))
+                        .foregroundColor(viewModel.currentFrameHasInMemoryJPEGCache ? .retraceSuccess.opacity(0.85) : .white.opacity(0.7))
 
                     // Debug: Show video frame index being requested
                     if let videoInfo = viewModel.currentVideoInfo {
                         Text("VidIdx: \(videoInfo.frameIndex)")
                             .font(.retraceMonoSmall)
-                            .foregroundColor(.orange.opacity(0.8))
+                            .foregroundColor(.retraceWarning.opacity(0.8))
 
                         Text("Bitrate: \(bitrateText)")
                             .font(.retraceMonoSmall)
@@ -6267,10 +6267,10 @@ struct DebugFrameIDBadge: View {
                         Text("p=\(status) (\(statusText))")
                             .font(.retraceMonoSmall)
                             .foregroundColor(
-                                status == -1 ? .blue.opacity(0.8)
-                                : (status == 4 || status == 3 || status == 8) ? .red.opacity(0.8)
-                                : (status == 2 || status == 7) ? .green.opacity(0.8)
-                                : .yellow.opacity(0.8)
+                                status == -1 ? .retraceSecondary.opacity(0.8)
+                                : (status == 4 || status == 3 || status == 8) ? .retraceDanger.opacity(0.8)
+                                : (status == 2 || status == 7) ? .retraceSuccess.opacity(0.8)
+                                : .retraceWarning.opacity(0.8)
                             )
                     }
 
@@ -6333,7 +6333,7 @@ struct DebugBrowserURLWindow: View {
             HStack(spacing: 8) {
                 Image(systemName: "link")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.cyan.opacity(0.9))
+                    .foregroundColor(.retraceSecondary.opacity(0.9))
 
                 Text("Browser URL")
                     .font(.system(size: 12, weight: .semibold))
@@ -6394,7 +6394,7 @@ struct DebugBrowserURLWindow: View {
             ScrollView(.vertical, showsIndicators: true) {
                 Text(wrappedURLText)
                     .font(.system(size: 12, weight: .regular, design: .monospaced))
-                    .foregroundColor(hasURL ? .cyan.opacity(0.95) : .white.opacity(0.6))
+                    .foregroundColor(hasURL ? .retraceSecondary.opacity(0.95) : .white.opacity(0.6))
                     .lineSpacing(2)
                     .multilineTextAlignment(.leading)
                     .textSelection(.enabled)
@@ -6464,13 +6464,13 @@ struct OCRStatusIndicator: View {
         case .pending:
             return .gray
         case .queued:
-            return .orange
+            return .retraceWarning
         case .processing:
-            return .blue
+            return .retracePrimary
         case .rewriting:
-            return .orange
+            return .retraceWarning
         case .failed:
-            return .red
+            return .retraceDanger
         default:
             return .gray
         }
@@ -6644,17 +6644,17 @@ struct DeveloperActionsMenu: View {
             HStack(spacing: 4) {
                 Image(systemName: "ant.fill")
                     .font(.retraceTinyMedium)
-                    .foregroundColor(.orange)
+                    .foregroundColor(.retraceWarning)
                 Text("Dev")
                     .font(.retraceTinyMedium)
-                    .foregroundColor(.orange)
+                    .foregroundColor(.retraceWarning)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
             .timelineGlassSurface(
                 .chip,
                 cornerRadius: 8,
-                borderColor: isHovering ? Color.orange.opacity(0.5) : Color.white.opacity(0.15)
+                borderColor: isHovering ? Color.retraceWarning.opacity(0.5) : Color.white.opacity(0.15)
             )
         }
         .menuStyle(.borderlessButton)
@@ -7115,7 +7115,7 @@ private struct RedactionReasonBanner: View {
             } else {
                 Image(systemName: "eye.slash.fill")
                     .font(.retraceCaptionMedium)
-                    .foregroundColor(Color.orange.opacity(0.95))
+                    .foregroundColor(Color.retraceWarning.opacity(0.95))
             }
 
             Text("Redacted")
@@ -7135,7 +7135,7 @@ private struct RedactionReasonBanner: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
         .frame(maxWidth: 680)
-        .timelineGlassSurface(.banner, cornerRadius: 10, borderColor: Color.orange.opacity(0.35))
+        .timelineGlassSurface(.banner, cornerRadius: 10, borderColor: Color.retraceWarning.opacity(0.35))
         .allowsHitTesting(false)
         .help("Current frame is redacted")
     }
@@ -11995,7 +11995,7 @@ private struct TimelineMetadataTermChip: View {
     }
 
     private var iconTint: Color {
-        mode == .include ? .blue.opacity(0.88) : .orange.opacity(0.9)
+        mode == .include ? .retracePrimary.opacity(0.88) : .retraceWarning.opacity(0.9)
     }
 
     var body: some View {
@@ -12149,7 +12149,7 @@ struct CompactAppsFilterDropdown: View {
                             Image(systemName: "minus.circle.fill")
                                 .font(.system(size: 10))
                                 .frame(width: iconSize, height: iconSize)
-                                .foregroundColor(.orange)
+                                .foregroundColor(.retraceWarning)
                         }
 
                         if sortedApps.count == 1 {
@@ -12163,7 +12163,7 @@ struct CompactAppsFilterDropdown: View {
                                 .font(.system(size: 12))
                                 .foregroundColor(.white)
                                 .lineLimit(1)
-                                .strikethrough(isExcludeMode, color: .orange)
+                                .strikethrough(isExcludeMode, color: .retraceWarning)
                         } else if sortedApps.count > 1 {
                             // Multiple apps: show icons stacked
                             HStack(spacing: -4) {

@@ -692,7 +692,7 @@ private struct AppsFilterChip: View {
                     Image(systemName: "minus.circle.fill")
                         .font(.system(size: 9))
                         .frame(width: iconSize, height: iconSize)
-                        .foregroundColor(.orange)
+                        .foregroundColor(.retraceWarning)
                         .transition(.scale.combined(with: .opacity))
                 }
 
@@ -707,7 +707,7 @@ private struct AppsFilterChip: View {
                     Text(appName(for: bundleID))
                         .font(.system(size: 10.5, weight: .medium))
                         .lineLimit(1)
-                        .strikethrough(isExcludeMode, color: .orange)
+                        .strikethrough(isExcludeMode, color: .retraceWarning)
                         .transition(.opacity)
                 } else if sortedApps.count > 1 {
                     // Multiple apps: show icons
@@ -869,7 +869,7 @@ private struct TagsFilterChip: View {
                 if isExcludeMode {
                     Image(systemName: "minus.circle.fill")
                         .font(.system(size: 9))
-                        .foregroundColor(.orange)
+                        .foregroundColor(.retraceWarning)
                         .transition(.scale.combined(with: .opacity))
                 }
 
@@ -879,7 +879,7 @@ private struct TagsFilterChip: View {
                 Text(label)
                     .font(.system(size: 11, weight: .medium))
                     .lineLimit(1)
-                    .strikethrough(isExcludeMode, color: .orange)
+                    .strikethrough(isExcludeMode, color: .retraceWarning)
 
                 Image(systemName: "chevron.down")
                     .font(.system(size: 9, weight: .semibold))

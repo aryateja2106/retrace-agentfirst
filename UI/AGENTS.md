@@ -616,16 +616,17 @@ struct BoundingBoxOverlay: View {
 
 ```swift
 extension Color {
-    static let retraceAccent = Color.blue
-    static let retraceDanger = Color.red
-    static let retraceSuccess = Color.green
-    static let retraceWarning = Color.orange
+    static let retraceCanvas = Color(red: 8/255, green: 8/255, blue: 9/255)
+    static let retraceSurface = Color(red: 13/255, green: 13/255, blue: 15/255)
+    static let retraceSurfaceRaised = Color(red: 18/255, green: 18/255, blue: 20/255)
+    static let retraceAccent = Color(red: 246/255, green: 246/255, blue: 244/255)
+    static let retraceDanger = Color(red: 214/255, green: 92/255, blue: 92/255)
+    static let retraceSuccess = Color(red: 190/255, green: 190/255, blue: 184/255)
+    static let retraceWarning = Color(red: 202/255, green: 202/255, blue: 194/255)
 
-    // Session colors (hashed from bundle ID)
+    // App icons may keep their natural color; app chrome should stay monochrome.
     static func sessionColor(for bundleID: String) -> Color {
-        let hash = bundleID.hashValue
-        let hue = Double(abs(hash) % 360) / 360.0
-        return Color(hue: hue, saturation: 0.6, brightness: 0.8)
+        Color.retraceAccent.opacity(0.7)
     }
 }
 ```

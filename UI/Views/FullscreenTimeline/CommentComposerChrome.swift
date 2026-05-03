@@ -560,11 +560,11 @@ struct CommentTagPickerMenu: View {
                                 HStack(spacing: 10) {
                                     Image(systemName: "plus")
                                         .font(.system(size: 12, weight: .medium))
-                                        .foregroundStyle(LinearGradient.retraceAccentGradient)
+                                        .foregroundColor(.retracePrimary)
 
                                     Text("Create \"\(trimmedSearchText)\"")
                                         .font(.system(size: 13, weight: .medium))
-                                        .foregroundStyle(LinearGradient.retraceAccentGradient)
+                                        .foregroundColor(.retracePrimary)
 
                                     Spacer()
                                 }

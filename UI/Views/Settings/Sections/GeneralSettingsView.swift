@@ -284,7 +284,7 @@ extension SettingsView {
                         if colorThemePreference != SettingsDefaults.colorTheme {
                             Button(action: {
                                 colorThemePreference = SettingsDefaults.colorTheme
-                                MilestoneCelebrationManager.setColorThemePreference(.blue)
+                                MilestoneCelebrationManager.setColorThemePreference(.monochrome)
                             }) {
                                 HStack(spacing: 4) {
                                     Image(systemName: "arrow.counterclockwise")
@@ -301,7 +301,7 @@ extension SettingsView {
                     ColorThemePicker(
                         selection: Binding(
                             get: {
-                                MilestoneCelebrationManager.ColorTheme(rawValue: colorThemePreference) ?? .blue
+                                MilestoneCelebrationManager.ColorTheme(rawValue: colorThemePreference) ?? .monochrome
                             },
                             set: { newValue in
                                 colorThemePreference = newValue.rawValue

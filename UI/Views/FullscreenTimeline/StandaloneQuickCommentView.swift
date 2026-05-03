@@ -94,7 +94,7 @@ struct StandaloneQuickCommentView: View {
                     if let messageText = viewModel.messageText {
                         Text(messageText)
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(viewModel.messageIsError ? .orange : .retraceSecondary)
+                            .foregroundColor(viewModel.messageIsError ? .retraceWarning : .retraceSecondary)
                     }
                 }
                 .frame(width: contentWidth, alignment: .topLeading)
@@ -130,7 +130,7 @@ struct StandaloneQuickCommentView: View {
             if viewModel.isReadOnlyTarget {
                 Text("Rewind segments are read-only. Choose a live Retrace segment to comment or tag.")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.orange.opacity(0.92))
+                    .foregroundColor(.retraceWarning.opacity(0.92))
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

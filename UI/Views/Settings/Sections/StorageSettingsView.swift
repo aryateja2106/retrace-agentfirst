@@ -142,7 +142,7 @@ extension SettingsView {
                     if coordinatorWrapper.isRunning {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
+                                .foregroundColor(.retraceWarning)
                                 .font(.system(size: 12))
                             Text("Stop recording to change Retrace database location")
                                 .font(.retraceCaption)
@@ -150,7 +150,7 @@ extension SettingsView {
                         }
                         .padding(10)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.orange.opacity(0.1))
+                        .background(Color.retraceWarning.opacity(0.10))
                         .cornerRadius(8)
                     }
 
@@ -163,7 +163,7 @@ extension SettingsView {
                                         .font(.retraceCalloutMedium)
                                         .foregroundColor(.retracePrimary)
                                     PingDotView(
-                                        color: retraceDBAccessible ? .green : .orange,
+                                        color: retraceDBAccessible ? .retraceSuccess : .retraceWarning,
                                         size: 8,
                                         isAnimating: retraceDBAccessible
                                     )
@@ -171,13 +171,13 @@ extension SettingsView {
                                 HStack(spacing: 4) {
                                     Text(customRetraceDBLocation ?? AppPaths.defaultStorageRoot)
                                         .font(.retraceCaption2)
-                                        .foregroundColor(retraceDBAccessible ? .retraceSecondary : .orange)
+                                        .foregroundColor(retraceDBAccessible ? .retraceSecondary : .retraceWarning)
                                         .lineLimit(1)
                                         .truncationMode(.middle)
                                     if !retraceDBAccessible {
                                         Text("(not found)")
                                             .font(.retraceCaption2)
-                                            .foregroundColor(.orange)
+                                            .foregroundColor(.retraceWarning)
                                     }
                                 }
                             }
@@ -232,7 +232,7 @@ extension SettingsView {
                                             .font(.retraceCalloutMedium)
                                             .foregroundColor(.retracePrimary)
                                         PingDotView(
-                                            color: rewindDBAccessible ? .green : .orange,
+                                            color: rewindDBAccessible ? .retraceSuccess : .retraceWarning,
                                             size: 8,
                                             isAnimating: rewindDBAccessible
                                         )
@@ -240,13 +240,13 @@ extension SettingsView {
                                     HStack(spacing: 4) {
                                         Text(rewindFolderPath)
                                             .font(.retraceCaption2)
-                                            .foregroundColor(rewindDBAccessible ? .retraceSecondary : .orange)
+                                            .foregroundColor(rewindDBAccessible ? .retraceSecondary : .retraceWarning)
                                             .lineLimit(1)
                                             .truncationMode(.middle)
                                         if !rewindDBAccessible {
                                             Text("(not found)")
                                                 .font(.retraceCaption2)
-                                                .foregroundColor(.orange)
+                                                .foregroundColor(.retraceWarning)
                                         }
                                     }
                                 }
