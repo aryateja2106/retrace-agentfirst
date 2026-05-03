@@ -25,6 +25,7 @@ out/
 # IDE and editor files
 .idea/
 .vscode/
+.cursor/
 *.swp
 *.swo
 *~
@@ -64,6 +65,8 @@ UI/BuildMetadata.generated.swift
 
 # Local development workspace (personal files, experiments, notes)
 /local/
+/CLI-Anything/
+/.omc/
 
 # Markdown files (except key docs)
 *.md

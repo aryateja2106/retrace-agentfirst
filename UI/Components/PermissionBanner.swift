@@ -77,6 +77,7 @@ struct SystemSettingsOpener {
 
 // MARK: - Preview
 
+#if false  // Xcode-only #Preview macro; disabled for swift build (CLT lacks PreviewsMacros plugin)
 #Preview {
     VStack(spacing: 16) {
         PermissionBanner(
@@ -97,3 +98,4 @@ struct SystemSettingsOpener {
     }
     .frame(width: 500)
 }
+#endif

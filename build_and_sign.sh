@@ -101,6 +101,11 @@ for fw in Sparkle; do
     fi
 done
 
+# Copy app icon (CLT lacks actool to compile Assets.xcassets, so use repo's prebuilt .icns)
+if [ -f "AppIcon.icns" ]; then
+    cp "AppIcon.icns" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
+fi
+
 # Copy Info.plist with variable substitution (fixes $(MARKETING_VERSION) bug)
 sed -e "s/\$(MARKETING_VERSION)/$MARKETING_VERSION/g" \
     -e "s/\$(CURRENT_PROJECT_VERSION)/$BUILD_NUMBER/g" \
