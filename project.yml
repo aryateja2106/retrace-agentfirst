@@ -13,6 +13,7 @@ settings:
     Debug:
       SWIFT_COMPILATION_MODE: incremental
       SWIFT_WHOLE_MODULE_OPTIMIZATION: NO
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
       EMIT_FRONTEND_COMMAND_LINES: YES
       OTHER_SWIFT_FLAGS: "-Xfrontend -enable-implicit-dynamic"
       OTHER_LDFLAGS: "-Xlinker -export_dynamic"
@@ -42,6 +43,16 @@ targets:
           copyFiles:
             destination: wrapper
             subpath: Contents/Library/LaunchAgents
+      - path: UI/LaunchAgents/io.retrace.app.dev.crash-recovery.plist
+        buildPhase:
+          copyFiles:
+            destination: wrapper
+            subpath: Contents/Library/LaunchAgents
+      - path: UI/LaunchAgents/io.retrace.agentfirst.crash-recovery.plist
+        buildPhase:
+          copyFiles:
+            destination: wrapper
+            subpath: Contents/Library/LaunchAgents
     dependencies:
       - target: RetraceCrashRecoveryHelper
         embed: true
@@ -64,6 +75,7 @@ targets:
       - package: SwiftyChrono
     settings:
       base:
+        PRODUCT_NAME: Retrace
         PRODUCT_BUNDLE_IDENTIFIER: io.retrace.app
         INFOPLIST_FILE: UI/Info.plist
         MARKETING_VERSION: "0.8.7"
@@ -76,6 +88,13 @@ targets:
         CODE_SIGNING_ALLOWED: YES
         ENABLE_HARDENED_RUNTIME: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        Debug:
+          PRODUCT_NAME: "Retrace Dev"
+          PRODUCT_BUNDLE_IDENTIFIER: io.retrace.app.dev
+        Release:
+          PRODUCT_NAME: "Retrace Agentfirst"
+          PRODUCT_BUNDLE_IDENTIFIER: io.retrace.agentfirst
 
   RetraceCrashRecoveryHelper:
     type: tool
@@ -95,6 +114,11 @@ targets:
         DEVELOPMENT_TEAM: 5X5W7C3L9D
         CODE_SIGNING_REQUIRED: YES
         CODE_SIGNING_ALLOWED: YES
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: io.retrace.app.dev.crashrecoveryhelper
+        Release:
+          PRODUCT_BUNDLE_IDENTIFIER: io.retrace.agentfirst.crashrecoveryhelper
 
   CrashRecoverySupport:
     type: framework

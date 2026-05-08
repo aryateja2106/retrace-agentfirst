@@ -21,7 +21,9 @@ retrace-cli journal append --stdin --yes
 retrace-cli journal generate --hours 1 --dry-run --json
 retrace-cli recording status --json
 retrace-cli storage inspect --json
-retrace-cli ollama status --model gemma4:e2b --json
+retrace-cli storage audit --include-defaults --manifest ~/Desktop/retrace-recovery-manifest.json
+retrace-cli storage export --to ~/Retrace-Portable-Export --yes --json
+retrace-cli ollama status --model gemma4:e4b --json
 ```
 
 ## Design Contract
@@ -29,4 +31,6 @@ retrace-cli ollama status --model gemma4:e2b --json
 - Context commands open `retrace.db` through `SQLiteReadOnlyConnectionFactory`.
 - Context sampling is bounded by time range, frame limit, and text length.
 - Journal generation uses completed OCR text only, then writes markdown sections to the configured folder.
+- `storage audit` emits privacy-safe recovery manifests with file metadata, table counts, Rewind cutoff diagnostics, and no raw OCR/screenshot payloads.
+- `storage export` copies local databases, WAL/SHM sidecars, chunk folders, non-secret settings, a README, and `manifest.json`; it requires `--yes`.
 - MCP tools, if added later, should be thin wrappers over these commands rather than a broader data API.

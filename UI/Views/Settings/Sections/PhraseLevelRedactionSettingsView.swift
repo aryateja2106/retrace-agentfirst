@@ -68,10 +68,14 @@ extension SettingsView {
                                 .font(.retraceCaptionBold)
                                 .foregroundColor(.retraceSecondary)
 
-                            HStack(spacing: 10) {
-                                TextField("Type a phrase and press Return", text: $phraseLevelRedactionInput)
-                                    .textFieldStyle(.plain)
-                                    .font(.retraceCallout)
+                            HStack(alignment: .center, spacing: 10) {
+                                FocusableTextInput(
+                                    text: $phraseLevelRedactionInput,
+                                    placeholder: "Paste or type a phrase, then press Return",
+                                    font: .systemFont(ofSize: 15, weight: .regular),
+                                    onSubmit: addPhraseLevelRedactionPhrase
+                                )
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 9)
                                     .background(
@@ -82,9 +86,8 @@ extension SettingsView {
                                         RoundedRectangle(cornerRadius: 10)
                                             .stroke(Color.white.opacity(0.1), lineWidth: 1)
                                     )
-                                    .onSubmit {
-                                        addPhraseLevelRedactionPhrase()
-                                    }
+                                    .contentShape(Rectangle())
+                                    .accessibilityLabel("Redaction keyword or phrase input")
 
                                 Button("Add") {
                                     addPhraseLevelRedactionPhrase()
@@ -107,11 +110,10 @@ extension SettingsView {
                             ) {
                                 ForEach(phraseLevelRedactionPhrases, id: \.self) { phrase in
                                     HStack(spacing: 8) {
-                                        Text(phrase)
-                                            .font(.retraceCaption)
-                                            .foregroundColor(.retracePrimary)
-                                            .lineLimit(1)
-                                            .truncationMode(.tail)
+                                        SelectableRedactionPhraseText(text: phrase)
+                                            .frame(height: 18)
+                                            .help("Select text to copy")
+                                            .accessibilityLabel("Configured redaction keyword or phrase")
 
                                         Spacer(minLength: 0)
 
@@ -231,5 +233,44 @@ extension SettingsView {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(Color.white.opacity(0.09), lineWidth: 1)
         )
+    }
+}
+
+struct SelectableRedactionPhraseText: NSViewRepresentable {
+    let text: String
+
+    func makeNSView(context: Context) -> NSTextField {
+        Self.makeTextField(text: text)
+    }
+
+    func updateNSView(_ textField: NSTextField, context: Context) {
+        if textField.stringValue != text {
+            textField.stringValue = text
+        }
+        Self.configure(textField)
+    }
+
+    static func makeTextField(text: String) -> NSTextField {
+        let textField = NSTextField(labelWithString: text)
+        configure(textField)
+        return textField
+    }
+
+    private static func configure(_ textField: NSTextField) {
+        textField.font = .systemFont(ofSize: 13, weight: .regular)
+        textField.textColor = NSColor.white.withAlphaComponent(0.92)
+        textField.backgroundColor = .clear
+        textField.drawsBackground = false
+        textField.isBordered = false
+        textField.isBezeled = false
+        textField.isEditable = false
+        textField.isSelectable = true
+        textField.focusRingType = .none
+        textField.lineBreakMode = .byTruncatingTail
+        textField.maximumNumberOfLines = 1
+        textField.cell?.isScrollable = true
+        textField.cell?.wraps = false
+        textField.cell?.usesSingleLineMode = true
+        textField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     }
 }

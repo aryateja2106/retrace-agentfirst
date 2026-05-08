@@ -90,7 +90,9 @@ UI/
 ├── CrashRecoverySupport/
 │   └── CrashRecoverySupport.swift       # Shared crash-recovery constants, disconnect suppression, and XPC protocol
 ├── LaunchAgents/
-│   └── io.retrace.app.crash-recovery.plist # SMAppService launch-agent plist for crash recovery
+│   ├── io.retrace.app.crash-recovery.plist # Legacy upstream SMAppService launch-agent plist
+│   ├── io.retrace.app.dev.crash-recovery.plist # Debug/dev SMAppService launch-agent plist for crash recovery
+│   └── io.retrace.agentfirst.crash-recovery.plist # Branded release SMAppService launch-agent plist for crash recovery
 ├── Components/
 │   ├── MasterKeyRedactionFlowCoordinator.swift # Shared missing-master-key prompt/recovery coordinator
 │   ├── BoundingBoxOverlay.swift         # Text region highlighting

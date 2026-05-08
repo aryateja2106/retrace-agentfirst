@@ -81,8 +81,8 @@ enum SettingsDefaults {
 
     static let dailyJournalEnabled = false
     static let dailyJournalFolderPath = DailyJournalConfiguration.defaultJournalFolderPath()
-    static let dailyJournalOllamaBaseURL = "http://localhost:11434"
-    static let dailyJournalOllamaModel = "gemma4:e2b"
+    static let dailyJournalOllamaBaseURL = DailyJournalConfiguration.defaultOllamaBaseURLString
+    static let dailyJournalOllamaModel = DailyJournalConfiguration.defaultOllamaModel
     static let dailyJournalCadenceSeconds: Double = 3_600
 
     static let excludedApps = ""

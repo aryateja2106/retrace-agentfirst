@@ -49,7 +49,7 @@ public struct PauseReminderView: View {
                 Button(action: onResumeCapturing) {
                     Text("Resume Capturing")
                         .font(.retraceCaptionBold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.retraceOnAccent)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .background(Color.retraceAccent)

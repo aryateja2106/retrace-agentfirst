@@ -123,6 +123,10 @@ public struct SettingsView: View {
     @State var settingsToastIsError = false
     @State var settingsToastDismissTask: Task<Void, Never>?
     @State var rewindCutoffRefreshTask: Task<Void, Never>?
+    @State var isExportingPortableData = false
+    @State var portableExportPath: String?
+    @State var portableExportCopiedItemCount = 0
+    @State var portableExportWarningCount = 0
 
     // Retention exclusion settings - data from these won't be deleted during cleanup
     @AppStorage("retentionExcludedApps", store: settingsStore) var retentionExcludedAppsString = ""

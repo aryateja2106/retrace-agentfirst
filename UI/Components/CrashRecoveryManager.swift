@@ -379,6 +379,8 @@ private actor CrashRecoveryWorker {
             category: .app
         )
 
+        unregisterSupersededLaunchAgents()
+
         if needsRefresh {
             if service.status == .enabled || service.status == .requiresApproval {
                 do {
@@ -424,6 +426,28 @@ private actor CrashRecoveryWorker {
                 crashRecoveryTagged("[CrashRecovery] Launch agent requires approval in System Settings"),
                 category: .app
             )
+        }
+    }
+
+    private func unregisterSupersededLaunchAgents() {
+        for plistName in CrashRecoverySupport.supersededLaunchAgentPlistNames {
+            let legacyService = SMAppService.agent(plistName: plistName)
+            guard legacyService.status == .enabled || legacyService.status == .requiresApproval else {
+                continue
+            }
+
+            do {
+                try legacyService.unregister()
+                Log.info(
+                    crashRecoveryTagged("[CrashRecovery] Unregistered superseded launch agent \(plistName)"),
+                    category: .app
+                )
+            } catch {
+                Log.warning(
+                    crashRecoveryTagged("[CrashRecovery] Could not unregister superseded launch agent \(plistName): \(error)"),
+                    category: .app
+                )
+            }
         }
     }
 

@@ -103,13 +103,21 @@ public enum CrashRecoverySupport {
         }
     }
 
-    public static let launchAgentLabel = "io.retrace.app.crash-recovery"
-    public static let launchAgentPlistName = "io.retrace.app.crash-recovery.plist"
+    #if DEBUG
+    public static let launchAgentLabel = "io.retrace.app.dev.crash-recovery"
+    public static let launchAgentPlistName = "io.retrace.app.dev.crash-recovery.plist"
+    #else
+    public static let launchAgentLabel = "io.retrace.agentfirst.crash-recovery"
+    public static let launchAgentPlistName = "io.retrace.agentfirst.crash-recovery.plist"
+    #endif
+    public static let supersededLaunchAgentPlistNames = [
+        "io.retrace.app.crash-recovery.plist"
+    ].filter { $0 != launchAgentPlistName }
     public static let machServiceName = launchAgentLabel
     public static let crashRecoveryLaunchArgument = "--retrace-crash-recovery-relaunch"
     public static let crashRecoverySourceArgument = "--retrace-crash-recovery-source"
-    public static let registeredBuildKey = "crashRecoveryRegisteredBuild"
-    public static let registeredLaunchTargetPathKey = "crashRecoveryRegisteredLaunchTargetPath"
+    public static let registeredBuildKey = "\(launchAgentLabel).registeredBuild"
+    public static let registeredLaunchTargetPathKey = "\(launchAgentLabel).registeredLaunchTargetPath"
     public static let preferencesSuiteName = "io.retrace.app"
     public static let restartDebuggingLabelName = "restartDebugging"
     public static let restartDebuggingPendingMaxAgeSeconds: TimeInterval = 15 * 60

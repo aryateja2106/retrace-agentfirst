@@ -16,8 +16,8 @@
 set -e
 
 # Configuration
-APP_NAME="Retrace"
-BUNDLE_ID="io.retrace.app"
+APP_NAME="Retrace Agentfirst"
+BUNDLE_ID="io.retrace.agentfirst"
 BUILD_DIR="build/Release"
 RELEASES_DIR="releases"
 APPCAST_FILE="appcast.xml"
@@ -44,7 +44,7 @@ sync_swiftpm_resolution() {
 }
 
 echo -e "${BLUE}================================================${NC}"
-echo -e "${BLUE}  Retrace Release Builder${NC}"
+echo -e "${BLUE}  Retrace Agentfirst Release Builder${NC}"
 echo -e "${BLUE}================================================${NC}"
 echo ""
 

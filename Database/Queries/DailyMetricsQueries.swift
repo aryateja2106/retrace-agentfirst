@@ -120,6 +120,7 @@ public enum DailyMetricsQueries {
         case debugCrashTriggered = "debug_crash_triggered"
         case crashAutoRestart = "crash_auto_restart"  // metadata: JSON {source}
         case rewindCutoffDateUpdated = "rewind_cutoff_date_updated"  // metadata: JSON {cutoffTimestampMs}
+        case portableDataExport = "portable_data_export"  // metadata: JSON {action, source, copiedItemCount?, warningCount?}
 
         // Agent-first context and journal metrics
         case cliInvocation = "cli_invocation"  // metadata: JSON {command, outcome}

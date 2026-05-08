@@ -470,6 +470,46 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         target.populateMainAppMenu(appMenu, appName: appName)
         mainMenu.addItem(makeTopLevelMenu(appName, submenu: appMenu))
 
+        let editMenu = NSMenu(title: "Edit")
+        editMenu.addItem(
+            makeMenuItem(
+                "Cut",
+                action: #selector(NSText.cut(_:)),
+                keyEquivalent: "x",
+                modifiers: [.command],
+                target: nil
+            )
+        )
+        editMenu.addItem(
+            makeMenuItem(
+                "Copy",
+                action: #selector(NSText.copy(_:)),
+                keyEquivalent: "c",
+                modifiers: [.command],
+                target: nil
+            )
+        )
+        editMenu.addItem(
+            makeMenuItem(
+                "Paste",
+                action: #selector(NSText.paste(_:)),
+                keyEquivalent: "v",
+                modifiers: [.command],
+                target: nil
+            )
+        )
+        editMenu.addItem(.separator())
+        editMenu.addItem(
+            makeMenuItem(
+                "Select All",
+                action: #selector(NSText.selectAll(_:)),
+                keyEquivalent: "a",
+                modifiers: [.command],
+                target: nil
+            )
+        )
+        mainMenu.addItem(makeTopLevelMenu("Edit", submenu: editMenu))
+
         let recordingMenu = NSMenu(title: "Recording")
         recordingMenu.delegate = target
         target.populateMainMenuRecording(recordingMenu)

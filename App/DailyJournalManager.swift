@@ -92,6 +92,8 @@ public struct DailyJournalConfiguration: Sendable, Equatable {
     public static let ollamaBaseURLKey = "dailyJournalOllamaBaseURL"
     public static let ollamaModelKey = "dailyJournalOllamaModel"
     public static let cadenceSecondsKey = "dailyJournalCadenceSeconds"
+    public static let defaultOllamaBaseURLString = "http://127.0.0.1:11434"
+    public static let defaultOllamaModel = "gemma4:e4b"
 
     public var isEnabled: Bool
     public var journalFolder: URL
@@ -104,14 +106,14 @@ public struct DailyJournalConfiguration: Sendable, Equatable {
         from defaults: UserDefaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
     ) -> DailyJournalConfiguration {
         let folderPath = defaults.string(forKey: folderPathKey)
-        let baseURLString = defaults.string(forKey: ollamaBaseURLKey) ?? "http://localhost:11434"
-        let model = defaults.string(forKey: ollamaModelKey) ?? "gemma4:e2b"
+        let baseURLString = defaults.string(forKey: ollamaBaseURLKey) ?? defaultOllamaBaseURLString
+        let model = defaults.string(forKey: ollamaModelKey) ?? defaultOllamaModel
         let storedCadence = defaults.double(forKey: cadenceSecondsKey)
 
         return DailyJournalConfiguration(
             isEnabled: defaults.bool(forKey: enabledKey),
             journalFolder: URL(fileURLWithPath: (folderPath?.isEmpty == false ? folderPath! : defaultJournalFolderPath()), isDirectory: true),
-            ollamaBaseURL: URL(string: baseURLString) ?? URL(string: "http://localhost:11434")!,
+            ollamaBaseURL: URL(string: baseURLString) ?? URL(string: defaultOllamaBaseURLString)!,
             ollamaModel: model,
             cadenceSeconds: storedCadence > 0 ? max(900, storedCadence) : 3_600,
             collectionOptions: .default
@@ -143,9 +145,30 @@ public struct OllamaClient: JournalSummarizationProvider {
     private let baseURL: URL
     private let session: URLSession
 
-    public init(baseURL: URL, session: URLSession = .shared) {
-        self.baseURL = baseURL
+    public init(baseURL: URL) {
+        self.init(baseURL: baseURL, session: Self.makeDefaultSession())
+    }
+
+    public init(baseURL: URL, session: URLSession) {
+        self.baseURL = Self.normalizedLoopbackURL(baseURL)
         self.session = session
+    }
+
+    private static func makeDefaultSession() -> URLSession {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 180
+        configuration.timeoutIntervalForResource = 240
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        return URLSession(configuration: configuration)
+    }
+
+    private static func normalizedLoopbackURL(_ url: URL) -> URL {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              components.host?.lowercased() == "localhost" else {
+            return url
+        }
+        components.host = "127.0.0.1"
+        return components.url ?? url
     }
 
     public func status(model: String) async throws -> OllamaModelStatus {

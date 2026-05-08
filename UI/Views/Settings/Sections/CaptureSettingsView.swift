@@ -20,7 +20,7 @@ extension SettingsView {
         HStack(alignment: .center, spacing: 14) {
             Image(systemName: "externaldrive.fill")
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.retraceOnAccent)
                 .frame(width: 34, height: 34)
                 .background(Color.retraceAccent)
                 .clipShape(RoundedRectangle(cornerRadius: 10))

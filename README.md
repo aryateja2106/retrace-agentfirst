@@ -99,6 +99,26 @@ On first launch, grant:
 
 Retrace stores local data under `~/Library/Application Support/Retrace/` unless changed in Settings.
 
+## Installable Builds
+
+Release builds present as `Retrace Agentfirst.app` with bundle ID `io.retrace.agentfirst`; debug builds present as `Retrace Dev.app`.
+
+Build a signed release and DMG:
+
+```bash
+./scripts/create-release.sh 0.8.7
+./scripts/create-dmg.sh 0.8.7
+```
+
+After uploading the DMG, people can install by downloading the DMG, by a curl installer, or through a Homebrew cask template:
+
+```bash
+curl -fsSL https://example.com/install.sh | bash -s -- --url https://example.com/Retrace-Agentfirst-0.8.7-aarch64.dmg
+brew install --cask retrace-agentfirst
+```
+
+Update `packaging/homebrew/retrace-agentfirst.rb` with the real release URL and SHA256 before publishing the cask.
+
 ## CLI For Agents
 
 Build the CLI with the package:
@@ -112,10 +132,11 @@ Safe read examples:
 ```bash
 retrace-cli recording status --json
 retrace-cli storage inspect --json
+retrace-cli storage adopt --from ~/Retrace-Recovery/Retrace --yes --json
 retrace-cli context recent --hours 1 --json
 retrace-cli context search "pull request" --hours 24 --json
 retrace-cli journal today --json
-retrace-cli ollama status --model gemma4:e2b --json
+retrace-cli ollama status --model gemma4:e4b --json
 ```
 
 Write commands require explicit confirmation or dry-run:

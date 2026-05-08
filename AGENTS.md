@@ -12,11 +12,23 @@ Retrace Agentfirst is a local-first screen recording, search, time tracking, and
 
 - **Module-Specific Instructions**: Each module has its own `AGENTS.md` file in its directory
 - **Human Documentation**: [README.md](README.md), [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT.md), [CONTEXT.md](CONTEXT.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [AI_ISSUE_TEMPLATE.md](AI_ISSUE_TEMPLATE.md)
+- **Roadmap Documentation**: [docs/AGENT_ROADMAP_INDEX.md](docs/AGENT_ROADMAP_INDEX.md), [docs/PRODUCT_ROADMAP.md](docs/PRODUCT_ROADMAP.md), and [docs/future-ideas/](docs/future-ideas/)
 - **Fork Context**: [FORK_CONTEXT.md](FORK_CONTEXT.md), [DESIGN_CONTEXT.md](DESIGN_CONTEXT.md), and [CLI_CONTEXT.md](CLI_CONTEXT.md)
 - **Host Tool Pointers**: [CLAUDE.md](CLAUDE.md) and [SKILLS.md](SKILLS.md) are thin indexes back to the canonical docs
 - **Issue Reporting**: Use `AI_ISSUE_TEMPLATE.md` and `gh issue create --body-file ...` for AI-authored GitHub issues
 - **Bug Fixes by Non-Owners**: If the user is fixing a bug/crash and does not appear to be the repo owner, encourage them to create or link a GitHub issue before making code changes
 - **Design References**: `docs/screenshots/` and optional local design-reference notes are supporting material, not product policy
+
+---
+
+## Learned User Preferences
+
+- When implementing an attached plan with pre-created to-dos, leave the plan file untouched, reuse the existing to-dos, and move them in order.
+
+## Learned Workspace Facts
+
+- `Retrace` and `Retrace Dev` should remain usable side by side so production and development builds can be tested interchangeably.
+- Release builds present as `Retrace Agentfirst` with bundle ID `io.retrace.agentfirst`; debug builds present as `Retrace Dev` with bundle ID `io.retrace.app.dev`. Both intentionally keep shared storage/defaults/keychain compatibility with the upstream `io.retrace.app` data contract.
 
 ---
 
@@ -66,15 +78,21 @@ retrace/
 ├── CLI_CONTEXT.md               # Agent-facing retrace-cli contract and privacy rules
 ├── Package.swift                # Swift Package Manager configuration
 ├── docs/
+│   ├── AGENT_ROADMAP_INDEX.md   # Agent onboarding and roadmap index
+│   ├── PRODUCT_ROADMAP.md       # Full fork product roadmap and backlog seeds
+│   ├── future-ideas/            # Raw unprioritized product idea intake notes
 │   └── screenshots/             # Visual references for fork UI and app usage reminders
 ├── CLI/                         # Agent-readable local CLI skill
 │   └── SKILL.md                 # Safe retrace-cli commands and privacy rules
 ├── Sources/
 │   └── RetraceCLI/              # Agent-first local CLI executable
 │       └── main.swift
+├── packaging/
+│   └── homebrew/                # Homebrew cask template for public releases
 ├── scripts/                     # Build/release/validation scripts
-│   ├── release.sh               # End-to-end release automation
-│   ├── create-release.sh        # Release build + packaging helper
+│   ├── create-release.sh        # Release build and signed app export helper
+│   ├── create-dmg.sh            # DMG packager for Retrace Agentfirst.app
+│   ├── install.sh               # Curl-friendly DMG installer script template
 │   ├── check_no_nanoseconds_sleep.sh # Guardrail for Task.sleep(nanoseconds:)
 │   ├── validate_sleep_wake_stability.sh # Sleep/wake soak validation workflow
 │   └── validate_darkwake_watchdog.sh # Automated darkwake watchdog regression validation
@@ -170,6 +188,8 @@ retrace/
 │   ├── ModelManager.swift       # Model management
 │   ├── OnboardingManager.swift  # First-run onboarding flow
 │   ├── RetentionManager.swift   # Data retention policies
+│   ├── RecoveryDataAuditor.swift # Privacy-safe data source audit + database compatibility probes
+│   ├── PortableDataExporter.swift # Local portable export folder writer and manifest generator
 │   ├── DailyJournalManager.swift # Low-impact OCR context collection, Ollama summarization, and markdown journals
 │   └── Tests/
 │       ├── DailyJournalManagerTests.swift # Journal writer and prompt rendering coverage
@@ -505,4 +525,4 @@ Then check which path actually executes and fix the right code.
 
 ---
 
-_This file follows the AGENTS.md standard for AI agent guidance. Last updated: 2026-05-03_
+_This file follows the AGENTS.md standard for AI agent guidance. Last updated: 2026-05-07_

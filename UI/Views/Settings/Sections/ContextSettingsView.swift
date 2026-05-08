@@ -69,13 +69,13 @@ extension SettingsView {
                     settingsTextField(
                         title: "Ollama URL",
                         text: $dailyJournalOllamaBaseURL,
-                        placeholder: "http://localhost:11434"
+                        placeholder: DailyJournalConfiguration.defaultOllamaBaseURLString
                     )
 
                     settingsTextField(
                         title: "Model",
                         text: $dailyJournalOllamaModel,
-                        placeholder: "gemma4:e2b"
+                        placeholder: DailyJournalConfiguration.defaultOllamaModel
                     )
                 }
 

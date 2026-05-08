@@ -514,6 +514,9 @@ extension Color {
         Color(red: 226/255, green: 226/255, blue: 222/255)
     }
 
+    // Foreground for filled light accent controls.
+    public static let retraceOnAccent = Color.retraceCanvas
+
     // Card background
     public static let retraceCard = Color.retraceSurfaceRaised
 
@@ -834,7 +837,7 @@ public struct RetracePrimaryButtonStyle: ButtonStyle {
             .padding(.horizontal, .spacingM)
             .padding(.vertical, .spacingS)
             .background(Color.retraceAccent)
-            .foregroundColor(.retraceBackground)
+            .foregroundColor(.retraceOnAccent)
             .cornerRadius(.cornerRadiusM)
             .opacity(configuration.isPressed ? 0.8 : 1.0)
     }

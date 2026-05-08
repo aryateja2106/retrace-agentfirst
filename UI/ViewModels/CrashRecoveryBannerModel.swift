@@ -30,13 +30,16 @@ struct CrashRecoveryStatusBannerState: Equatable {
     }
 
     var messageText: String {
+        let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+            ?? Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String
+            ?? "Retrace Agentfirst"
         switch status {
         case .requiresApproval:
-            return "Automatic restart after crashes is off until you allow Retrace's background helper in System Settings > General > Login Items & Extensions > Allow in Background. After enabling it, return to Retrace and click Retry."
+            return "Automatic restart after crashes is off until you allow \(appName)'s background helper in System Settings > General > Login Items & Extensions > Allow in Background. After enabling it, return to \(appName) and click Retry."
         case .registrationFailed:
-            return "Automatic restart after crashes is off because Retrace couldn't register its background helper. Reinstall or replace this build, then click Retry."
+            return "Automatic restart after crashes is off because \(appName) couldn't register its background helper. Reinstall or replace this build, then click Retry."
         case .helperArmFailed:
-            return "Automatic restart after crashes is off because Retrace couldn't connect to its background helper after launch. Click Retry. If it keeps failing, replace this build."
+            return "Automatic restart after crashes is off because \(appName) couldn't connect to its background helper after launch. Click Retry. If it keeps failing, replace this build."
         }
     }
 

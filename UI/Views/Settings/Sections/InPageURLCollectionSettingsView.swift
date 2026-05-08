@@ -334,7 +334,7 @@ extension SettingsView {
                         Text(isTesting ? "Testing..." : "Test")
                             .font(.retraceCaption2Bold)
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.retraceOnAccent)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color.retraceAccent.opacity(0.85))
@@ -440,7 +440,7 @@ extension SettingsView {
                 }
             }
             .font(.retraceCaption2Bold)
-            .foregroundColor(.white)
+            .foregroundColor(.retraceOnAccent)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(Color.retraceAccent.opacity(0.75))

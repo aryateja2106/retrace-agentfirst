@@ -205,7 +205,7 @@ extension SettingsView {
                 }
             }
             .font(.retraceCaption2Bold)
-            .foregroundColor(.white)
+            .foregroundColor(.retraceOnAccent)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(Color.retraceAccent.opacity(0.75))

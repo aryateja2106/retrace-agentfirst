@@ -1139,20 +1139,20 @@ public struct FeedbackFormView: View {
             }) {
                 Text("Send Feedback")
                     .font(.retraceCalloutBold)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(viewModel.canSubmit ? Color.retraceAccent : Color.retraceAccent.opacity(0.4))
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(
-                            keyboardFocusTarget == .submit
-                                ? Color.white.opacity(0.85)
-                                : Color.clear,
-                            lineWidth: 1
-                        )
-                )
+                    .foregroundColor(.retraceOnAccent)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(viewModel.canSubmit ? Color.retraceAccent : Color.retraceAccent.opacity(0.4))
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(
+                                keyboardFocusTarget == .submit
+                                    ? Color.white.opacity(0.85)
+                                    : Color.clear,
+                                lineWidth: 1
+                            )
+                    )
             }
             .buttonStyle(.plain)
             .disabled(!viewModel.canSubmit)
@@ -1188,12 +1188,12 @@ public struct FeedbackFormView: View {
             }) {
                 HStack(spacing: 6) {
                     if viewModel.isExporting {
-                        SpinnerView(size: 12, lineWidth: 2, color: .white)
+                        SpinnerView(size: 12, lineWidth: 2, color: .retraceOnAccent)
                     }
                     Text(viewModel.isExporting ? "Preparing..." : "Download .json.gz")
                         .font(.system(size: 11, weight: .semibold))
                 }
-                .foregroundColor(.white)
+                .foregroundColor(.retraceOnAccent)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 9)
                 .background(viewModel.canExport ? Color.retraceAccent : Color.retraceAccent.opacity(0.4))
@@ -1293,12 +1293,12 @@ public struct FeedbackFormView: View {
                 Button(action: { Task { await viewModel.exportFeedbackReport() } }) {
                     HStack(spacing: 8) {
                         if viewModel.isExporting {
-                            SpinnerView(size: 14, lineWidth: 2, color: .white)
+                            SpinnerView(size: 14, lineWidth: 2, color: .retraceOnAccent)
                         }
                         Text(viewModel.isExporting ? "Preparing..." : "Download .json.gz")
                             .font(.retraceCalloutBold)
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.retraceOnAccent)
                     .frame(maxWidth: 220)
                     .padding(.vertical, 12)
                     .background(viewModel.canExport ? Color.retraceAccent : Color.retraceAccent.opacity(0.4))
@@ -1420,7 +1420,7 @@ public struct FeedbackFormView: View {
             Button(action: { dismiss() }) {
                 Text("Done")
                     .font(.retraceCalloutBold)
-                    .foregroundColor(.white)
+                    .foregroundColor(.retraceOnAccent)
                     .frame(maxWidth: 200)
                     .padding(.vertical, 12)
                     .background(Color.retraceAccent)
