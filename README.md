@@ -41,7 +41,7 @@ The canonical product constitution lives in [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT
 - Feedback export/submission flow with local diagnostics
 - Agent-facing `retrace-cli` for bounded context, journal, recording, storage, and Ollama checks
 - Local daily journal generation from already persisted OCR text
-- Voice MVP surface for local dictation: editable overlay and settings first; the actual transcription backend wiring is the next step if it is not present in the current build
+- Voice MVP surface for local dictation: a hands-free two-press overlay workflow (press once to draft, press again to apply custom words and copy) with settings first; the actual transcription backend wiring is the next step if it is not present in the current build
 - Markdown-folder-first notes that can live in an Obsidian vault or any local folder, with CLI access as an optional agent workflow rather than a required integration
 - Monochrome fork UI direction
 
@@ -54,7 +54,7 @@ The fork currently adds these surfaces on top of upstream:
 - `Database/Queries/ActivityContextQueries.swift` - bounded read-only context queries
 - `App/DailyJournalManager.swift` - local OCR-context collection, Ollama summarization, and markdown journals
 - `UI/Views/Settings/Sections/ContextSettingsView.swift` - opt-in context and journal settings
-- Voice surfaces - initial local dictation overlay/settings; transcription backend integration remains a follow-up when absent
+- Voice surfaces - initial local dictation overlay/settings with a two-press clipboard workflow; transcription backend integration remains a follow-up when absent
 - Obsidian/local notes direction - write portable markdown first, then let Obsidian or agents consume the folder
 - `DESIGN_CONTEXT.md` - monochrome UI direction
 - `FORK_CONTEXT.md` - upstream compatibility promises

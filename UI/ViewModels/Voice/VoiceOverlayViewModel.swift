@@ -155,6 +155,20 @@ final class VoiceOverlayViewModel: ObservableObject {
         metricRecorder(.transcriptCopied(characterCount: textToCopy.count, historyCount: history.count))
     }
 
+    @discardableResult
+    func finishDraftSessionAndCopy() -> Bool {
+        guard canCopyTranscript else {
+            cancel()
+            return false
+        }
+
+        applyCustomWords()
+        copyTranscriptToClipboard()
+        isDraftActive = false
+        defaults.removeObject(forKey: VoiceOverlayDefaults.lastDraftTranscript)
+        return true
+    }
+
     func cancel() {
         let hadTranscript = !trimmedTranscript.isEmpty
         isDraftActive = false

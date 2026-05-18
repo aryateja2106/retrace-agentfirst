@@ -71,17 +71,21 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
 }
 
 enum VoiceToggleMode: String, CaseIterable, Identifiable {
-    case holdToTalk = "Hold to Talk"
     case toggle = "Toggle"
+    case holdToTalk = "Hold to Talk"
+
+    static var allCases: [VoiceToggleMode] {
+        [.toggle]
+    }
 
     var id: String { rawValue }
 
     var description: String {
         switch self {
         case .holdToTalk:
-            return "Listen only while the shortcut is held"
+            return "Legacy setting; the shortcut now uses hands-free toggle"
         case .toggle:
-            return "Start and stop listening with each shortcut press"
+            return "Press once to start, press again to copy"
         }
     }
 }

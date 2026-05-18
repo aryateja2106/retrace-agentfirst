@@ -99,6 +99,49 @@ final class VoiceOverlayViewModelTests: XCTestCase {
         XCTAssertNil(defaults.data(forKey: VoiceOverlayDefaults.transcriptHistory))
     }
 
+    func testFinishDraftSessionAppliesCustomWordsCopiesAndEndsDraft() {
+        let defaults = makeDefaults()
+        defaults.set(true, forKey: VoiceOverlayDefaults.keepTranscriptHistory)
+        defaults.set(5, forKey: VoiceOverlayDefaults.transcriptHistoryLimit)
+        var copiedStrings: [String] = []
+        var events: [VoiceOverlayMetricEvent] = []
+        let viewModel = VoiceOverlayViewModel(
+            defaults: defaults,
+            clipboardWriter: { copiedStrings.append($0) },
+            metricRecorder: { events.append($0) }
+        )
+
+        viewModel.customWordsText = "cloud AI => Claude AI"
+        viewModel.startDraftSession()
+        viewModel.updateTranscript("Ask cloud AI about Retrace")
+
+        XCTAssertTrue(viewModel.finishDraftSessionAndCopy())
+
+        XCTAssertFalse(viewModel.isDraftActive)
+        XCTAssertEqual(viewModel.transcript, "Ask Claude AI about Retrace")
+        XCTAssertEqual(copiedStrings, ["Ask Claude AI about Retrace"])
+        XCTAssertEqual(viewModel.history.map(\.transcript), ["Ask Claude AI about Retrace"])
+        XCTAssertNil(defaults.string(forKey: VoiceOverlayDefaults.lastDraftTranscript))
+        XCTAssertTrue(events.contains(.customWordsApplied(replacementCount: 1)))
+        XCTAssertTrue(events.contains(.transcriptCopied(characterCount: 27, historyCount: 1)))
+    }
+
+    func testFinishDraftSessionWithoutTranscriptCancelsDraft() {
+        let defaults = makeDefaults()
+        var copiedStrings: [String] = []
+        let viewModel = VoiceOverlayViewModel(
+            defaults: defaults,
+            clipboardWriter: { copiedStrings.append($0) }
+        )
+
+        viewModel.startDraftSession()
+
+        XCTAssertFalse(viewModel.finishDraftSessionAndCopy())
+        XCTAssertFalse(viewModel.isDraftActive)
+        XCTAssertEqual(viewModel.transcript, "")
+        XCTAssertTrue(copiedStrings.isEmpty)
+    }
+
     private func makeDefaults() -> UserDefaults {
         let suiteName = "VoiceOverlayViewModelTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

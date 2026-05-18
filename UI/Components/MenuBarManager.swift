@@ -484,7 +484,7 @@ public class MenuBarManager: ObservableObject {
                 coordinator: coordinator,
                 shortcut: keyboardShortcutMetricIdentifier(for: voiceShortcut)
             )
-            VoiceOverlayWindowController.shared.toggle(source: "global_hotkey_voice")
+            VoiceOverlayWindowController.shared.handleGlobalShortcut(source: "global_hotkey_voice")
         }
     }
 

@@ -83,7 +83,7 @@ extension SettingsView {
                     .background(Color.retraceBorder)
 
                 settingsShortcutRecorderRow(
-                    label: "Voice Overlay",
+                    label: "Voice Dictation",
                     kind: .voice,
                     shortcut: $voiceShortcut,
                     isRecording: $isRecordingVoiceShortcut,

@@ -39,7 +39,7 @@ struct VoiceOverlayView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Voice")
                     .font(.headline)
-                Text(viewModel.isDraftActive ? "Draft transcript" : "Ready")
+                Text(viewModel.isDraftActive ? "Press shortcut again to copy" : "Ready")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -151,7 +151,7 @@ struct VoiceOverlayView: View {
             }
 
             Button("Copy") {
-                viewModel.copyTranscriptToClipboard()
+                viewModel.finishDraftSessionAndCopy()
             }
             .keyboardShortcut(.return, modifiers: [.command])
             .disabled(!viewModel.canCopyTranscript)

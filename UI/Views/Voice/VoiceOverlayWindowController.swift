@@ -31,6 +31,15 @@ final class VoiceOverlayWindowController: NSObject, NSWindowDelegate {
         }
     }
 
+    func handleGlobalShortcut(source: String) {
+        if isVisible {
+            _ = viewModel?.finishDraftSessionAndCopy()
+            hide()
+        } else {
+            show(source: source)
+        }
+    }
+
     func show(source: String) {
         let panel = ensureWindow(source: source)
         panel.center()

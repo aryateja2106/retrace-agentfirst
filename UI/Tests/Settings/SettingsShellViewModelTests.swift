@@ -40,6 +40,12 @@ final class SettingsShellViewModelTests: XCTestCase {
         XCTAssertEqual(SettingsTab.voice.icon, "waveform")
     }
 
+    func testVoiceDefaultsUseHandsFreeToggleMode() {
+        XCTAssertEqual(SettingsDefaults.voiceToggleMode, .toggle)
+        XCTAssertEqual(VoiceToggleMode.allCases, [.toggle])
+        XCTAssertTrue(VoiceToggleMode.toggle.description.contains("Press once"))
+    }
+
     func testSearchResultsIncludeVoiceSettingsSurfaces() {
         let dictationResults = SettingsShellViewModel.searchResults(for: "dictation")
         let clipboardResults = SettingsShellViewModel.searchResults(for: "clipboard")

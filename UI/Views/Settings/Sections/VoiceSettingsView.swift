@@ -16,7 +16,7 @@ extension SettingsView {
             VStack(alignment: .leading, spacing: 16) {
                 ModernToggleRow(
                     title: "Enable voice input",
-                    subtitle: "Enables the local overlay workflow. Audio transcription backend wiring is the next step.",
+                    subtitle: "Enables the local overlay workflow. Press the shortcut once to start and again to copy.",
                     isOn: $voiceEnabled
                 )
 
@@ -44,9 +44,14 @@ extension SettingsView {
                 Button {
                     VoiceOverlayWindowController.shared.show(source: "settings_voice_tab")
                 } label: {
-                    Label("Open Floating Overlay", systemImage: "rectangle.on.rectangle")
+                    Label("Start Floating Draft", systemImage: "rectangle.on.rectangle")
                 }
                 .buttonStyle(.borderedProminent)
+            }
+        }
+        .onAppear {
+            if voiceToggleMode != .toggle {
+                voiceToggleMode = .toggle
             }
         }
     }

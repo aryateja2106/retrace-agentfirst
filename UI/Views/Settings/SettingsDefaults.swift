@@ -89,7 +89,7 @@ enum SettingsDefaults {
     static let dailyJournalCadenceSeconds: Double = 3_600
 
     static let voiceEnabled = false
-    static let voiceToggleMode: VoiceToggleMode = .holdToTalk
+    static let voiceToggleMode: VoiceToggleMode = .toggle
     static let voiceOutputMode: VoiceOutputMode = .clipboard
     static let voiceShowFloatingOverlay = true
     static let voiceCustomWordsRaw = """
