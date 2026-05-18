@@ -36,7 +36,7 @@ extension FeedbackSubmission: Encodable {
                 description: "Manual export",
                 exportFormatVersion: 4,
                 generatedAt: generatedAt,
-                submissionEndpoint: "https://retrace.to/api/feedback",
+                submissionEndpoint: "https://github.com/aryateja2106/retrace-agentfirst/issues/new/choose",
                 launchSource: launchSource?.rawValue ?? FeedbackLaunchContext.Source.manual.rawValue,
                 screenshotFileName: screenshotFileName,
                 screenshotByteCount: screenshotData?.count

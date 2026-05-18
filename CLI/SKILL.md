@@ -7,6 +7,8 @@ description: Use the local Retrace CLI for private, agent-safe context access an
 
 Use `retrace-cli` when an agent needs local Retrace context. Prefer JSON output.
 
+Obsidian/local notes are markdown-folder-first. Use the CLI only as an optional helper for bounded reads, appends, and generation; do not require an Obsidian plugin or a running Obsidian app.
+
 ## Safe Read Commands
 
 ```bash
@@ -15,7 +17,7 @@ retrace-cli context search "query" --hours 24 --json
 retrace-cli journal today --json
 retrace-cli recording status --json
 retrace-cli storage inspect --json
-retrace-cli ollama status --model gemma4:e2b --json
+retrace-cli ollama status --model gemma4:e4b --json
 ```
 
 ## Write Commands
@@ -34,3 +36,5 @@ retrace-cli journal generate --hours 1 --yes --json
 - Do not request raw screenshots or video files.
 - Do not print secrets or full private paths in summaries.
 - Use `--dry-run` before generation when testing a new model or prompt.
+- Treat local model calls as explicit status or generation actions, not as a background service.
+- Voice is an initial local dictation overlay/settings surface; do not assume transcription output exists until the backend is wired in the current build.

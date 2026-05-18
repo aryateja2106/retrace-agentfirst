@@ -92,6 +92,16 @@ public struct DailyJournalConfiguration: Sendable, Equatable {
     public static let ollamaBaseURLKey = "dailyJournalOllamaBaseURL"
     public static let ollamaModelKey = "dailyJournalOllamaModel"
     public static let cadenceSecondsKey = "dailyJournalCadenceSeconds"
+    public static let defaultOllamaBaseURLString = "http://localhost:11434"
+    public static let defaultOllamaModel = "gemma4:e4b"
+    public static let preferredOllamaModels = [
+        "gemma4:e4b",
+        "gemma4",
+        "gemma4:e2b",
+        "qwen3:14b",
+        "qwen3:8b",
+        "llama3.2:3b"
+    ]
 
     public var isEnabled: Bool
     public var journalFolder: URL
@@ -104,18 +114,29 @@ public struct DailyJournalConfiguration: Sendable, Equatable {
         from defaults: UserDefaults = UserDefaults(suiteName: "io.retrace.app") ?? .standard
     ) -> DailyJournalConfiguration {
         let folderPath = defaults.string(forKey: folderPathKey)
-        let baseURLString = defaults.string(forKey: ollamaBaseURLKey) ?? "http://localhost:11434"
-        let model = defaults.string(forKey: ollamaModelKey) ?? "gemma4:e2b"
+        let baseURLString = defaults.string(forKey: ollamaBaseURLKey) ?? defaultOllamaBaseURLString
+        let model = defaults.string(forKey: ollamaModelKey) ?? defaultOllamaModel
         let storedCadence = defaults.double(forKey: cadenceSecondsKey)
 
         return DailyJournalConfiguration(
             isEnabled: defaults.bool(forKey: enabledKey),
             journalFolder: URL(fileURLWithPath: (folderPath?.isEmpty == false ? folderPath! : defaultJournalFolderPath()), isDirectory: true),
-            ollamaBaseURL: URL(string: baseURLString) ?? URL(string: "http://localhost:11434")!,
+            ollamaBaseURL: validOllamaBaseURL(baseURLString) ?? URL(string: defaultOllamaBaseURLString)!,
             ollamaModel: model,
             cadenceSeconds: storedCadence > 0 ? max(900, storedCadence) : 3_600,
             collectionOptions: .default
         )
+    }
+
+    public static func validOllamaBaseURL(_ raw: String) -> URL? {
+        let value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: value),
+              let scheme = url.scheme?.lowercased(),
+              ["http", "https"].contains(scheme),
+              url.host?.isEmpty == false else {
+            return nil
+        }
+        return url
     }
 
     public static func defaultJournalFolderPath() -> String {
@@ -132,6 +153,43 @@ public struct OllamaModelStatus: Codable, Sendable, Equatable {
     public let isReachable: Bool
     public let isModelInstalled: Bool
     public let installedModels: [String]
+    public let recommendedModel: String?
+    public let pullCommand: String
+
+    public init(
+        baseURL: String,
+        requestedModel: String,
+        isReachable: Bool,
+        isModelInstalled: Bool,
+        installedModels: [String],
+        recommendedModel: String?,
+        pullCommand: String
+    ) {
+        self.baseURL = baseURL
+        self.requestedModel = requestedModel
+        self.isReachable = isReachable
+        self.isModelInstalled = isModelInstalled
+        self.installedModels = installedModels
+        self.recommendedModel = recommendedModel
+        self.pullCommand = pullCommand
+    }
+}
+
+public enum OllamaClientError: LocalizedError, Sendable, Equatable {
+    case modelNotInstalled(model: String, installedModels: [String], recommendedModel: String?)
+
+    public var errorDescription: String? {
+        switch self {
+        case .modelNotInstalled(let model, let installedModels, let recommendedModel):
+            if let recommendedModel {
+                return "\(model) is not installed. Use \(recommendedModel), or run `ollama pull \(model)`."
+            }
+            if installedModels.isEmpty {
+                return "\(model) is not installed. Run `ollama pull \(model)`."
+            }
+            return "\(model) is not installed. Installed models: \(installedModels.joined(separator: ", "))."
+        }
+    }
 }
 
 public protocol JournalSummarizationProvider: Sendable {
@@ -154,16 +212,28 @@ public struct OllamaClient: JournalSummarizationProvider {
         try validateHTTP(response)
         let decoded = try JSONDecoder().decode(TagsResponse.self, from: data)
         let names = decoded.models.map(\.name).sorted()
+        let recommended = Self.recommendedModel(requestedModel: model, installedModels: names)
         return OllamaModelStatus(
             baseURL: baseURL.absoluteString,
             requestedModel: model,
             isReachable: true,
             isModelInstalled: names.contains(model),
-            installedModels: names
+            installedModels: names,
+            recommendedModel: recommended,
+            pullCommand: "ollama pull \(model)"
         )
     }
 
     public func summarize(prompt: String, model: String) async throws -> String {
+        let modelStatus = try await status(model: model)
+        guard modelStatus.isModelInstalled else {
+            throw OllamaClientError.modelNotInstalled(
+                model: model,
+                installedModels: modelStatus.installedModels,
+                recommendedModel: modelStatus.recommendedModel
+            )
+        }
+
         var request = URLRequest(url: baseURL.appendingPathComponent("api/chat"))
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -174,7 +244,15 @@ public struct OllamaClient: JournalSummarizationProvider {
                     Message(role: "system", content: JournalPromptRenderer.systemPrompt),
                     Message(role: "user", content: prompt)
                 ],
-                stream: false
+                stream: false,
+                think: false,
+                keepAlive: "2m",
+                options: RuntimeOptions(
+                    temperature: 0.2,
+                    topP: 0.9,
+                    numPredict: 700,
+                    numContext: 32_768
+                )
             )
         )
 
@@ -182,6 +260,16 @@ public struct OllamaClient: JournalSummarizationProvider {
         try validateHTTP(response)
         let decoded = try JSONDecoder().decode(ChatResponse.self, from: data)
         return decoded.message.content.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    public static func recommendedModel(requestedModel: String, installedModels: [String]) -> String? {
+        if installedModels.contains(requestedModel) {
+            return requestedModel
+        }
+        for candidate in DailyJournalConfiguration.preferredOllamaModels where installedModels.contains(candidate) {
+            return candidate
+        }
+        return installedModels.first
     }
 
     private func validateHTTP(_ response: URLResponse) throws {
@@ -203,6 +291,32 @@ public struct OllamaClient: JournalSummarizationProvider {
         let model: String
         let messages: [Message]
         let stream: Bool
+        let think: Bool
+        let keepAlive: String
+        let options: RuntimeOptions
+
+        enum CodingKeys: String, CodingKey {
+            case model
+            case messages
+            case stream
+            case think
+            case keepAlive = "keep_alive"
+            case options
+        }
+    }
+
+    private struct RuntimeOptions: Codable {
+        let temperature: Double
+        let topP: Double
+        let numPredict: Int
+        let numContext: Int
+
+        enum CodingKeys: String, CodingKey {
+            case temperature
+            case topP = "top_p"
+            case numPredict = "num_predict"
+            case numContext = "num_ctx"
+        }
     }
 
     private struct Message: Codable {
@@ -474,8 +588,36 @@ public actor DailyJournalManager {
         if dryRun {
             summary = prompt
         } else {
-            summary = try await OllamaClient(baseURL: configuration.ollamaBaseURL)
-                .summarize(prompt: prompt, model: configuration.ollamaModel)
+            do {
+                summary = try await OllamaClient(baseURL: configuration.ollamaBaseURL)
+                    .summarize(prompt: prompt, model: configuration.ollamaModel)
+            } catch let ollamaError as OllamaClientError {
+                let result = JournalGenerationResult(
+                    status: .failed,
+                    reason: ollamaError.localizedDescription,
+                    filePath: nil,
+                    startDate: startDate,
+                    endDate: digest.endDate
+                )
+                try? await recordMetric(.journalGenerationFailed, metadata: [
+                    "reason": reason,
+                    "error": result.reason ?? "ollama_error"
+                ])
+                return result
+            } catch let urlError as URLError {
+                let result = JournalGenerationResult(
+                    status: .failed,
+                    reason: "Could not reach Ollama at \(configuration.ollamaBaseURL.absoluteString). Start Ollama, then try again. \(urlError.localizedDescription)",
+                    filePath: nil,
+                    startDate: startDate,
+                    endDate: digest.endDate
+                )
+                try? await recordMetric(.journalGenerationFailed, metadata: [
+                    "reason": reason,
+                    "error": "ollama_unreachable"
+                ])
+                return result
+            }
         }
 
         if dryRun {

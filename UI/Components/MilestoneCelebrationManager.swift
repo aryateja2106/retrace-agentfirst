@@ -76,38 +76,38 @@ public class MilestoneCelebrationManager: ObservableObject {
             switch self {
             case .tenHours:
                 return """
-                You've just hit 10 hours of captured screen time - that's awesome! I'm glad you're finding Retrace useful.
+                You've just hit 10 hours of captured screen time. Retrace is starting to become a real memory layer for your Mac.
 
-                I'm excited for you to see how Retrace will help in small unexpected ways. 
+                The goal is simple: keep the useful context, skip the stale noise, and make your work searchable when you need it.
                 
-                Just remember: Anytime you're finding yourself wanting to search for something, Retrace will likely be useful!
+                Whenever you think "where did I see that?", this is the place to look.
                 """
 
             case .hundredHours:
                 return """
-                100 hours of screen time captured! I'm happy that you've made Retrace part of your daily workflow.
+                100 hours of screen context captured. This is exactly the kind of long-running memory Retrace Agentfirst is built for.
 
-                I really tried to make this product as useful as possible, and it's great it being put to use.
+                It should help you recover decisions, agent work, browser trails, and the small details that usually vanish.
 
-                If Retrace has saved you time or helped you remember something important, I'd be grateful for even a small contribution to help keep this project alive and growing!
+                Keep it local. Keep it useful. Keep building.
                 """
 
             case .thousandHours:
                 return """
-                ONE THOUSAND HOURS. You're officially a power user. The fact that Retrace has been running alongside you for this long is honestly really cool.
+                ONE THOUSAND HOURS. Retrace has been running beside real work long enough to become infrastructure.
 
-                I know how important it was for me to have something like this, so I'm glad it's been useful for you.
+                This is a serious local context archive now: searchable, private, and shaped around your workflow.
 
-                If Retrace has been an active part of your workflow, I'd be incredibly grateful for any support ❤️
+                Time to turn that memory into better agents, better recall, and fewer lost threads.
                 """
 
             case .tenThousandHours:
                 return """
-                I don't even know what to say. TEN THOUSAND HOURS. That means you've used this product for about 3 years or more. You've achieved screen mastery 👑
+                TEN THOUSAND HOURS. This Mac has a serious memory now.
 
-                Now that we've been acquainted for 3 years, please dm me. I wanna know your name. I wanna chat about what got into you to want to use this product for 3+ years.
+                At this point Retrace is not just a recorder. It is a personal archive for decisions, projects, agents, and the trails between them.
 
-                You dropped your crown, king 🫴👑
+                Keep building from the archive.
                 """
             }
         }
@@ -345,13 +345,13 @@ public class MilestoneCelebrationManager: ObservableObject {
         let urlString: String
         switch milestone {
         case .tenHours:
-            urlString = "https://retrace.to/l/support-retrace-10h"
+            urlString = "https://github.com/aryateja2106/retrace-agentfirst"
         case .hundredHours:
-            urlString = "https://retrace.to/l/support-retrace-100h"
+            urlString = "https://github.com/sponsors/haseab"
         case .thousandHours:
-            urlString = "https://retrace.to/l/support-retrace-1000h"
+            urlString = "https://github.com/aryateja2106/retrace-agentfirst/issues"
         case .tenThousandHours:
-            // No support link for 10k - they're the GOAT, we don't ask them for money
+            // No support link for 10k.
             return
         }
         if let url = URL(string: urlString) {
@@ -361,7 +361,7 @@ public class MilestoneCelebrationManager: ObservableObject {
 
     /// Open the Discord community invite link
     public func openDiscordLink() {
-        guard let url = URL(string: "https://retrace.to/l/retrace-discord") else { return }
+        guard let url = URL(string: "https://github.com/aryateja2106/retrace-agentfirst/discussions") else { return }
         NSWorkspace.shared.open(url)
     }
 

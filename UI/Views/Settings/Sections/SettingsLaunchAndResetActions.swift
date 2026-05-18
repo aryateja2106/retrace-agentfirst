@@ -133,6 +133,21 @@ extension SettingsView {
         }
     }
 
+    func recordInactiveCaptureUpdatedMetric() {
+        Task {
+            let metadata = Self.inPageURLMetricMetadata([
+                "enabled": inactiveIntervalCaptureEnabled,
+                "thresholdSeconds": inactiveCaptureThresholdSeconds,
+                "probeSeconds": inactiveCaptureProbeIntervalSeconds,
+                "source": "settings_capture_card"
+            ])
+            try? await coordinatorWrapper.coordinator.recordMetricEvent(
+                metricType: .inactiveCaptureUpdated,
+                metadata: metadata
+            )
+        }
+    }
+
     /// Apply theme preference
     func applyTheme(_ theme: ThemePreference) {
         switch theme {
@@ -218,6 +233,32 @@ extension SettingsView {
                 transform: { $0.updating(keepFramesOnMouseMovement: keepFramesEnabled) },
                 onSuccess: { _ in
                     showCompressionUpdateFeedback()
+                }
+            )
+        }
+    }
+
+    func updateInactiveCaptureSettings() {
+        let enabled = inactiveIntervalCaptureEnabled
+        let thresholdSeconds = inactiveCaptureThresholdSeconds
+        let probeSeconds = max(
+            inactiveCaptureProbeIntervalSeconds,
+            captureIntervalSeconds > 0 ? captureIntervalSeconds : 1
+        )
+        Task {
+            await applyCaptureConfigMutation(
+                successLog: "[SettingsView] Inactive capture updated enabled=\(enabled) threshold=\(thresholdSeconds)s probe=\(probeSeconds)s",
+                failureLog: "[SettingsView] Failed to update inactive capture settings",
+                transform: {
+                    $0.updating(
+                        inactiveIntervalCaptureEnabled: enabled,
+                        inactiveCaptureThresholdSeconds: thresholdSeconds,
+                        inactiveCaptureProbeIntervalSeconds: probeSeconds
+                    )
+                },
+                onSuccess: { _ in
+                    recordInactiveCaptureUpdatedMetric()
+                    showCaptureUpdateFeedback()
                 }
             )
         }
@@ -375,12 +416,14 @@ extension SettingsView {
         let recordingValue = SettingsShortcutKey(from: .defaultRecording)
         let systemMonitorValue = SettingsShortcutKey(from: .defaultSystemMonitor)
         let commentValue = SettingsShortcutKey(from: .defaultCommentCapture)
+        let voiceValue = SettingsShortcutKey(from: .defaultVoiceOverlay)
 
         timelineShortcut = timelineValue
         dashboardShortcut = dashboardValue
         recordingShortcut = recordingValue
         systemMonitorShortcut = systemMonitorValue
         commentShortcut = commentValue
+        voiceShortcut = voiceValue
         Task { await saveAllShortcuts() }
 
         // Startup
@@ -415,6 +458,9 @@ extension SettingsView {
         deduplicationThreshold = SettingsDefaults.deduplicationThreshold
         deleteDuplicateFrames = SettingsDefaults.deleteDuplicateFrames
         keepFramesOnMouseMovement = SettingsDefaults.keepFramesOnMouseMovement
+        inactiveIntervalCaptureEnabled = SettingsDefaults.inactiveIntervalCaptureEnabled
+        inactiveCaptureThresholdSeconds = SettingsDefaults.inactiveCaptureThresholdSeconds
+        inactiveCaptureProbeIntervalSeconds = SettingsDefaults.inactiveCaptureProbeIntervalSeconds
         captureOnWindowChange = SettingsDefaults.captureOnWindowChange
         isProgrammaticWindowChangeCaptureToggleChange = false
         captureOnMouseClick = SettingsDefaults.captureOnMouseClick
@@ -435,6 +481,9 @@ extension SettingsView {
                         adaptiveCaptureEnabled: true,
                         deduplicationThreshold: SettingsDefaults.deduplicationThreshold,
                         keepFramesOnMouseMovement: SettingsDefaults.keepFramesOnMouseMovement,
+                        inactiveIntervalCaptureEnabled: SettingsDefaults.inactiveIntervalCaptureEnabled,
+                        inactiveCaptureThresholdSeconds: SettingsDefaults.inactiveCaptureThresholdSeconds,
+                        inactiveCaptureProbeIntervalSeconds: SettingsDefaults.inactiveCaptureProbeIntervalSeconds,
                         captureOnWindowChange: SettingsDefaults.captureOnWindowChange,
                         captureOnMouseClick: SettingsDefaults.captureOnMouseClick
                     )
@@ -463,6 +512,17 @@ extension SettingsView {
         Task {
             await coordinatorWrapper.coordinator.refreshDailyJournalSchedule()
         }
+    }
+
+    /// Reset all Voice settings to defaults
+    func resetVoiceSettings() {
+        voiceEnabled = SettingsDefaults.voiceEnabled
+        voiceToggleMode = SettingsDefaults.voiceToggleMode
+        voiceOutputMode = SettingsDefaults.voiceOutputMode
+        voiceShowFloatingOverlay = SettingsDefaults.voiceShowFloatingOverlay
+        voiceCustomWordsRaw = SettingsDefaults.voiceCustomWordsRaw
+        voiceHistoryLimit = SettingsDefaults.voiceHistoryLimit
+        voiceUnloadModelAfterIdle = SettingsDefaults.voiceUnloadModelAfterIdle
     }
 
     /// Reset all Privacy settings to defaults

@@ -75,9 +75,11 @@ extension SettingsView {
                     settingsTextField(
                         title: "Model",
                         text: $dailyJournalOllamaModel,
-                        placeholder: "gemma4:e2b"
+                        placeholder: DailyJournalConfiguration.defaultOllamaModel
                     )
                 }
+
+                ollamaModelDiscoveryRow
 
                 Stepper(
                     "Cadence: \(Int(dailyJournalCadenceSeconds / 60)) minutes",
@@ -101,7 +103,65 @@ extension SettingsView {
                 integrationRow("Obsidian", "Write markdown into a chosen vault/folder first. Local REST/API integration stays opt-in and later.")
                 integrationRow("MCP", "Deferred until CLI commands and privacy boundaries settle. Future tools should map to the same safe CLI actions.")
                 integrationRow("Scanners", "Package and MCP scanner warnings remain backlog items, not background network services.")
-                integrationRow("Models", "Ollama text summarization ships first. MLX, LFM2.5-VL, and llama.cpp stay on the evaluation track.")
+                integrationRow("Models", "Ollama text summarization ships first. MLX and native VLM candidates stay on the evaluation track.")
+            }
+        }
+    }
+
+    private var ollamaModelDiscoveryRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if !dailyJournalInstalledModels.isEmpty {
+                Text("Installed models")
+                    .font(.retraceCaptionMedium)
+                    .foregroundColor(.retracePrimary)
+
+                FlowLayout(spacing: 8) {
+                    ForEach(dailyJournalInstalledModels, id: \.self) { model in
+                        Button {
+                            dailyJournalOllamaModel = model
+                            showSettingsToast("Using \(model)")
+                        } label: {
+                            Text(model)
+                                .font(.retraceCaptionMedium)
+                                .foregroundColor(model == dailyJournalOllamaModel ? .white : .retraceSecondary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(model == dailyJournalOllamaModel ? Color.retraceAccent : Color.white.opacity(0.06))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        .buttonStyle(.plain)
+                        .help("Use \(model) for journal summaries")
+                    }
+                }
+            }
+
+            if let recommended = dailyJournalRecommendedModel,
+               recommended != dailyJournalOllamaModel {
+                HStack(spacing: 10) {
+                    Text("Best installed match: \(recommended)")
+                        .font(.retraceCaption)
+                        .foregroundColor(.retraceSecondary)
+                    Button("Use Model") {
+                        dailyJournalOllamaModel = recommended
+                        showSettingsToast("Using \(recommended)")
+                    }
+                    .buttonStyle(.plain)
+                    .font(.retraceCaptionMedium)
+                    .foregroundColor(.retraceAccent)
+                }
+            }
+
+            if let pullCommand = dailyJournalPullCommand,
+               dailyJournalInstalledModels.isEmpty || !dailyJournalInstalledModels.contains(dailyJournalOllamaModel) {
+                Button {
+                    copyToClipboard(pullCommand, toast: "Pull command copied")
+                } label: {
+                    Label(pullCommand, systemImage: "terminal")
+                        .font(.retraceCaptionMedium)
+                        .foregroundColor(.retraceSecondary)
+                }
+                .buttonStyle(.plain)
+                .help("Copy Ollama pull command")
             }
         }
     }
@@ -117,7 +177,7 @@ extension SettingsView {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Button {
-                copyToClipboard(command)
+                copyToClipboard(command, toast: "Command copied")
             } label: {
                 Image(systemName: "doc.on.doc")
                     .font(.retraceCaptionMedium)
@@ -126,6 +186,7 @@ extension SettingsView {
             }
             .buttonStyle(.plain)
             .help("Copy command")
+            .accessibilityLabel("Copy command")
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
@@ -134,13 +195,15 @@ extension SettingsView {
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .contextMenu {
             Button("Copy Command") {
-                copyToClipboard(command)
+                copyToClipboard(command, toast: "Command copied")
             }
         }
     }
 
     private func journalStatusRow(_ message: String) -> some View {
         let path = journalStatusPath(from: message)
+        let copyValue = path.map(shellQuotedPath) ?? message
+        let copyToast = path == nil ? "Status copied" : "Journal path copied"
 
         return VStack(alignment: .leading, spacing: 6) {
             Text(path == nil ? "Status" : "Journal output")
@@ -157,7 +220,7 @@ extension SettingsView {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 Button {
-                    copyToClipboard(path.map(shellQuotedPath) ?? message)
+                    copyToClipboard(copyValue, toast: copyToast)
                 } label: {
                     Image(systemName: "doc.on.doc")
                         .font(.retraceCaptionMedium)
@@ -166,6 +229,7 @@ extension SettingsView {
                 }
                 .buttonStyle(.plain)
                 .help(path == nil ? "Copy status" : "Copy file path")
+                .accessibilityLabel(path == nil ? "Copy status" : "Copy journal file path")
 
                 if let path {
                     Button {
@@ -190,7 +254,7 @@ extension SettingsView {
             )
             .contextMenu {
                 Button(path == nil ? "Copy Status" : "Copy File Path") {
-                    copyToClipboard(path.map(shellQuotedPath) ?? message)
+                    copyToClipboard(copyValue, toast: copyToast)
                 }
                 if let path {
                     Button("Reveal in Finder") {
@@ -232,10 +296,13 @@ extension SettingsView {
         }
     }
 
-    private func copyToClipboard(_ value: String) {
+    private func copyToClipboard(_ value: String, toast: String) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.setString(value, forType: .string)
+        Task { @MainActor in
+            showSettingsToast(toast)
+        }
     }
 
     private func journalStatusPath(from message: String) -> String? {
@@ -277,16 +344,21 @@ extension SettingsView {
                 let status = try await coordinatorWrapper.coordinator.getOllamaJournalStatus()
                 await MainActor.run {
                     isCheckingOllama = false
-                    journalStatusIsError = !status.isModelInstalled
-                    journalStatusMessage = status.isModelInstalled
-                        ? "Ollama is reachable and \(status.requestedModel) is installed."
-                        : "Ollama is reachable, but \(status.requestedModel) is not installed."
+                    dailyJournalInstalledModels = status.installedModels
+                    dailyJournalRecommendedModel = status.recommendedModel
+                    dailyJournalPullCommand = status.pullCommand
+                    let presentation = ContextOllamaStatusPresentation.make(status: status)
+                    journalStatusIsError = presentation.isError
+                    journalStatusMessage = presentation.message
                 }
             } catch {
                 await MainActor.run {
                     isCheckingOllama = false
+                    dailyJournalInstalledModels = []
+                    dailyJournalRecommendedModel = nil
+                    dailyJournalPullCommand = "ollama pull \(dailyJournalOllamaModel)"
                     journalStatusIsError = true
-                    journalStatusMessage = "Could not reach Ollama at \(dailyJournalOllamaBaseURL)."
+                    journalStatusMessage = ContextOllamaStatusPresentation.makeFailure(baseURL: dailyJournalOllamaBaseURL).message
                 }
             }
         }
@@ -317,5 +389,38 @@ extension SettingsView {
                 }
             }
         }
+    }
+}
+
+struct ContextOllamaStatusPresentation: Equatable {
+    let message: String
+    let isError: Bool
+
+    static func make(status: OllamaModelStatus) -> ContextOllamaStatusPresentation {
+        if status.isModelInstalled {
+            return ContextOllamaStatusPresentation(
+                message: "Ollama is reachable and \(status.requestedModel) is installed.",
+                isError: false
+            )
+        }
+
+        if let recommended = status.recommendedModel {
+            return ContextOllamaStatusPresentation(
+                message: "Ollama is reachable, but \(status.requestedModel) is not installed. \(recommended) is available.",
+                isError: true
+            )
+        }
+
+        return ContextOllamaStatusPresentation(
+            message: "Ollama is reachable, but \(status.requestedModel) is not installed. Copy `\(status.pullCommand)` to install it.",
+            isError: true
+        )
+    }
+
+    static func makeFailure(baseURL: String) -> ContextOllamaStatusPresentation {
+        ContextOllamaStatusPresentation(
+            message: "Could not reach Ollama at \(baseURL). Start Ollama, then check again.",
+            isError: true
+        )
     }
 }

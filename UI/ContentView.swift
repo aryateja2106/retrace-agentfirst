@@ -150,6 +150,15 @@ public struct ContentView: View {
         }
 
         NotificationCenter.default.addObserver(
+            forName: .openSettingsVoice,
+            object: nil,
+            queue: .main
+        ) { _ in
+            selectedView = .settings
+            bringWindowToFront()
+        }
+
+        NotificationCenter.default.addObserver(
             forName: .openFeedback,
             object: nil,
             queue: .main

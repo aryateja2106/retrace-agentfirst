@@ -5,9 +5,9 @@ enum RetraceAboutPanel {
     struct Content {
         static let defaultWindowSize = NSSize(width: 480, height: 560)
         static let defaultDescriptionText =
-            "Retrace is an open source, local-first screen memory for macOS. It continuously captures what you see, extracts text with on-device OCR, and makes your screen history searchable without sending it to the cloud."
-        static let repositoryURL = URL(string: "https://github.com/haseab/retrace")!
-        static let creatorURL = URL(string: "https://retrace.to/l/haseab-twitter")!
+            "Retrace Agentfirst is Arya's local-first screen memory for macOS. It captures useful context, extracts text with on-device OCR, and makes your screen history searchable without sending it to the cloud."
+        static let repositoryURL = URL(string: "https://github.com/aryateja2106/retrace-agentfirst")!
+        static let creatorURL = URL(string: "https://github.com/aryateja2106")!
 
         let appName: String
         let versionText: String
@@ -128,7 +128,7 @@ private struct RetraceAboutPanelView: View {
                             url: content.repositoryURL
                         )
                         aboutLink(
-                            title: "@haseab on X",
+                            title: "Arya on GitHub",
                             systemImage: "person.crop.circle",
                             url: content.creatorURL
                         )

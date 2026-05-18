@@ -2,7 +2,7 @@
 
 Retrace Agentfirst is Arya's fork of [haseab/retrace](https://github.com/haseab/retrace): a local-first macOS timeline, time tracker, and agent context layer built from screen history.
 
-The upstream project gives you a searchable memory of what appeared on your screen. This fork keeps that core intact, then adds an agent-first direction: private CLI access, journal generation, project context, monochrome UI, and a product constitution for building personal software without turning the app into a heavy all-in-one platform.
+The upstream project gives you a searchable memory of what appeared on your screen. This fork keeps that core intact, then adds an agent-first direction: private CLI access, journal generation, project context, local dictation, markdown-first notes, monochrome UI, and a product constitution for building personal software without turning the app into a heavy all-in-one platform.
 
 > Status: early, local-first, and intentionally modular. Expect breaking changes while the fork finds its shape.
 
@@ -15,7 +15,7 @@ Retrace Agentfirst should help answer four questions:
 - Which project was that work for?
 - Can I find, summarize, and reuse the context later without sending private screen data to a cloud service?
 
-The app is not meant to replace every tool on the Mac. It should become a lightweight memory and automation layer that works well with native macOS utilities, terminal agents, Raycast-style launchers, and local models.
+The app is not meant to replace every tool on the Mac. It should become a lightweight memory and automation layer that works well with native macOS utilities, terminal agents, Raycast-style launchers, Obsidian-style markdown folders, and local models.
 
 ## Fork Principles
 
@@ -41,6 +41,8 @@ The canonical product constitution lives in [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT
 - Feedback export/submission flow with local diagnostics
 - Agent-facing `retrace-cli` for bounded context, journal, recording, storage, and Ollama checks
 - Local daily journal generation from already persisted OCR text
+- Voice MVP surface for local dictation: editable overlay and settings first; the actual transcription backend wiring is the next step if it is not present in the current build
+- Markdown-folder-first notes that can live in an Obsidian vault or any local folder, with CLI access as an optional agent workflow rather than a required integration
 - Monochrome fork UI direction
 
 ## Agentfirst Additions
@@ -52,6 +54,8 @@ The fork currently adds these surfaces on top of upstream:
 - `Database/Queries/ActivityContextQueries.swift` - bounded read-only context queries
 - `App/DailyJournalManager.swift` - local OCR-context collection, Ollama summarization, and markdown journals
 - `UI/Views/Settings/Sections/ContextSettingsView.swift` - opt-in context and journal settings
+- Voice surfaces - initial local dictation overlay/settings; transcription backend integration remains a follow-up when absent
+- Obsidian/local notes direction - write portable markdown first, then let Obsidian or agents consume the folder
 - `DESIGN_CONTEXT.md` - monochrome UI direction
 - `FORK_CONTEXT.md` - upstream compatibility promises
 - `CLI_CONTEXT.md` - CLI privacy and command contract
@@ -115,7 +119,7 @@ retrace-cli storage inspect --json
 retrace-cli context recent --hours 1 --json
 retrace-cli context search "pull request" --hours 24 --json
 retrace-cli journal today --json
-retrace-cli ollama status --model gemma4:e2b --json
+retrace-cli ollama status --model gemma4:e4b --json
 ```
 
 Write commands require explicit confirmation or dry-run:
@@ -134,6 +138,12 @@ Agent rules:
 
 See [CLI_CONTEXT.md](CLI_CONTEXT.md) and [CLI/SKILL.md](CLI/SKILL.md).
 
+## Obsidian And Local Models
+
+Retrace treats Obsidian as a markdown-folder workflow, not as a required plugin or service. Journals and notes should be ordinary local markdown files in a configured folder, so they can be opened from Obsidian, another editor, Finder, or the CLI.
+
+Local model use is explicit and bounded. Ollama checks and journal generation should stay opt-in, use dry-run paths while tuning prompts, and never imply cloud upload or a hidden background model server.
+
 ## Architecture
 
 ```text
@@ -150,10 +160,10 @@ Database
   SQLite tables + FTS5 search index
 
 App/UI
-  Timeline, dashboard, settings, feedback, context, journals
+  Timeline, dashboard, settings, feedback, context, journals, voice
 
 CLI
-  bounded local read/write workflows for agents
+  bounded local read/write workflows for agents, journals, and markdown notes
 ```
 
 Modules:
@@ -197,7 +207,8 @@ Near-term milestones are documented in [PRODUCT_CONTEXT.md](PRODUCT_CONTEXT.md).
 2. Clarify the product constitution and README.
 3. Demote noisy dashboard analytics and tighten metric privacy.
 4. Add Shottr-style screenshot essentials as a separate, privacy-gated module.
-5. Track human work and agent work with project/tag attribution.
+5. Ship the Voice MVP as local dictation UI first, then wire the transcription backend behind explicit settings.
+6. Track human work and agent work with project/tag attribution.
 
 ## Privacy And Security
 

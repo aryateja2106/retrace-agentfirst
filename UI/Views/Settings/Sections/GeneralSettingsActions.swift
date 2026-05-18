@@ -24,6 +24,8 @@ extension SettingsView {
             return SettingsShortcutKey(from: .defaultSystemMonitor)
         case .comment:
             return SettingsShortcutKey(from: .defaultCommentCapture)
+        case .voice:
+            return SettingsShortcutKey(from: .defaultVoiceOverlay)
         }
     }
 
@@ -47,6 +49,8 @@ extension SettingsView {
             return systemMonitorShortcut
         case .comment:
             return commentShortcut
+        case .voice:
+            return voiceShortcut
         }
     }
 
@@ -63,6 +67,8 @@ extension SettingsView {
             settingKey = "systemMonitorShortcutUsesDefault"
         case .comment:
             settingKey = "commentShortcutUsesDefault"
+        case .voice:
+            settingKey = "voiceShortcutUsesDefault"
         }
 
         DashboardViewModel.recordDeveloperSettingToggle(
@@ -280,6 +286,7 @@ extension SettingsView {
     private static let intervalOnlyBaselineHighGBAtTwoSeconds = 13.0
     static let deduplicationThresholdSliderStep = 0.0005
     private static let keepFramesOnMouseMovementStorageMultiplier = 1.15
+    private static let inactiveIntervalCaptureStorageMultiplier = 0.45
 
     // Empirical frame-keep curve for the similarity threshold slider, normalized so the
     // default 99.85% threshold remains the 1.0x storage baseline for the 2s timer-only
@@ -420,7 +427,8 @@ extension SettingsView {
         captureOnWindowChange: Bool,
         captureOnMouseClick: Bool,
         deduplicationThreshold: Double = CaptureConfig.defaultDeduplicationThreshold,
-        keepFramesOnMouseMovement: Bool = false
+        keepFramesOnMouseMovement: Bool = false,
+        inactiveIntervalCaptureEnabled: Bool = false
     ) -> String {
         let range = captureStorageEstimateRange(
             videoQuality: videoQuality,
@@ -428,7 +436,8 @@ extension SettingsView {
             captureOnWindowChange: captureOnWindowChange,
             captureOnMouseClick: captureOnMouseClick,
             deduplicationThreshold: deduplicationThreshold,
-            keepFramesOnMouseMovement: keepFramesOnMouseMovement
+            keepFramesOnMouseMovement: keepFramesOnMouseMovement,
+            inactiveIntervalCaptureEnabled: inactiveIntervalCaptureEnabled
         )
         return Self.formatStorageEstimate(range: range)
     }
@@ -439,10 +448,14 @@ extension SettingsView {
         captureOnWindowChange: Bool,
         captureOnMouseClick: Bool,
         deduplicationThreshold: Double = CaptureConfig.defaultDeduplicationThreshold,
-        keepFramesOnMouseMovement: Bool = false
+        keepFramesOnMouseMovement: Bool = false,
+        inactiveIntervalCaptureEnabled: Bool = false
     ) -> StorageEstimateRange {
         let qualityMultiplier = Self.videoQualityMultiplier(for: normalizedVideoQuality(videoQuality))
         let intervalMultiplier = Self.captureIntervalMultiplier(for: captureIntervalSeconds)
+        let effectiveIntervalMultiplier = inactiveIntervalCaptureEnabled
+            ? intervalMultiplier * Self.inactiveIntervalCaptureStorageMultiplier
+            : intervalMultiplier
         let deduplicationMultiplier = Self.deduplicationStorageMultiplier(
             for: deduplicationThreshold
         )
@@ -454,8 +467,8 @@ extension SettingsView {
             captureOnMouseClick: captureOnMouseClick
         )
 
-        let baselineLowGB = (intervalOnlyBaselineLowGBAtTwoSeconds * intervalMultiplier) + eventDrivenHeuristic.lowGB
-        let baselineHighGB = (intervalOnlyBaselineHighGBAtTwoSeconds * intervalMultiplier) + eventDrivenHeuristic.highGB
+        let baselineLowGB = (intervalOnlyBaselineLowGBAtTwoSeconds * effectiveIntervalMultiplier) + eventDrivenHeuristic.lowGB
+        let baselineHighGB = (intervalOnlyBaselineHighGBAtTwoSeconds * effectiveIntervalMultiplier) + eventDrivenHeuristic.highGB
         let lowGB = baselineLowGB * qualityMultiplier * deduplicationMultiplier * mouseMovementMultiplier
         let highGB = baselineHighGB * qualityMultiplier * deduplicationMultiplier * mouseMovementMultiplier
         return Self.sanitizedStorageEstimateRange(lowGB: lowGB, highGB: highGB)
@@ -470,7 +483,8 @@ extension SettingsView {
             captureOnWindowChange: captureOnWindowChange,
             captureOnMouseClick: captureOnMouseClick,
             deduplicationThreshold: deduplicationThreshold,
-            keepFramesOnMouseMovement: effectiveMousePositionStorageMultiplierEnabled
+            keepFramesOnMouseMovement: effectiveMousePositionStorageMultiplierEnabled,
+            inactiveIntervalCaptureEnabled: inactiveIntervalCaptureEnabled
         )
     }
 
@@ -485,7 +499,8 @@ extension SettingsView {
             captureOnWindowChange: captureOnWindowChange,
             captureOnMouseClick: captureOnMouseClick,
             deduplicationThreshold: deduplicationThreshold,
-            keepFramesOnMouseMovement: effectiveMousePositionStorageMultiplierEnabled
+            keepFramesOnMouseMovement: effectiveMousePositionStorageMultiplierEnabled,
+            inactiveIntervalCaptureEnabled: inactiveIntervalCaptureEnabled
         )
     }
 

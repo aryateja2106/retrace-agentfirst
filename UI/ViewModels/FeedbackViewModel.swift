@@ -27,27 +27,27 @@ enum FeedbackCompletionState: Equatable {
     case submitted
     case exported
 
-    private static let directChatURL = URL(string: "https://retrace.to/chat")!
+    private static let issueURL = URL(string: "https://github.com/aryateja2106/retrace-agentfirst/issues/new/choose")!
 
     var presentation: FeedbackCompletionPresentation {
         switch self {
         case .submitted:
             return FeedbackCompletionPresentation(
                 title: "Feedback Sent!",
-                detail: "Thanks for helping improve Retrace.",
-                callToActionTitle: "Need a faster response?",
-                linkTitle: "Chat with me on retrace.to",
-                linkURL: Self.directChatURL,
-                linkSymbolName: "message.fill"
+                detail: "Thanks for helping improve Retrace Agentfirst.",
+                callToActionTitle: "Need to add more context?",
+                linkTitle: "Open an issue on GitHub",
+                linkURL: Self.issueURL,
+                linkSymbolName: "exclamationmark.bubble.fill"
             )
         case .exported:
             return FeedbackCompletionPresentation(
                 title: "Download Complete",
-                detail: "Your report was saved. Use chat to choose whether to send it by email, Discord, or live chat.",
+                detail: "Your report was saved. Attach it to a GitHub issue when you want to share diagnostics.",
                 callToActionTitle: "Next Steps:",
-                linkTitle: "Choose a Channel to Send",
-                linkURL: Self.directChatURL,
-                linkSymbolName: "message.fill"
+                linkTitle: "Create a GitHub Issue",
+                linkURL: Self.issueURL,
+                linkSymbolName: "exclamationmark.bubble.fill"
             )
         }
     }

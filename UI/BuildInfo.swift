@@ -7,7 +7,7 @@ private enum EmbeddedBuildMetadata {
     static let gitCommitFull = "unknown"
     static let gitBranch = "unknown"
     static let buildDate = "unknown"
-    static let forkName = ""
+    static let forkName = "aryateja2106/retrace-agentfirst"
 }
 
 /// Build metadata used by UI version surfaces.

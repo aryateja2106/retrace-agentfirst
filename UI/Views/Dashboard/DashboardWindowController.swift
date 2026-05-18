@@ -491,9 +491,13 @@ struct DashboardContentView: View {
             }
         }
         .sheet(isPresented: $showFeedbackSheet) {
-            FeedbackFormView()
-                .environmentObject(coordinatorWrapper)
+            feedbackSheetContent
         }
+    }
+
+    private var feedbackSheetContent: some View {
+        FeedbackFormView()
+            .environmentObject(coordinatorWrapper)
     }
 
     @ViewBuilder

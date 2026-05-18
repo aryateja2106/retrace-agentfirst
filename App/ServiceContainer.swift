@@ -773,6 +773,9 @@ extension CaptureConfig {
         // Deduplication threshold - how similar frames must be to be considered duplicates
         let deduplicationThreshold = defaults.object(forKey: "deduplicationThreshold") as? Double ?? CaptureConfig.defaultDeduplicationThreshold
         let keepFramesOnMouseMovement = defaults.object(forKey: "keepFramesOnMouseMovement") as? Bool ?? true
+        let inactiveIntervalCaptureEnabled = defaults.object(forKey: "inactiveIntervalCaptureEnabled") as? Bool ?? true
+        let inactiveCaptureThresholdSeconds = defaults.object(forKey: "inactiveCaptureThresholdSeconds") as? Double ?? 300.0
+        let inactiveCaptureProbeIntervalSeconds = defaults.object(forKey: "inactiveCaptureProbeIntervalSeconds") as? Double ?? 30.0
         let enableCustomPatternWindowRedaction = defaults.object(forKey: "enableCustomPatternWindowRedaction") as? Bool ?? true
 
         // Parse excluded apps from settings (stored as JSON array of ExcludedAppInfo)
@@ -807,6 +810,9 @@ extension CaptureConfig {
             adaptiveCaptureEnabled: deleteDuplicateFrames, // Controlled by "Delete duplicate frames" setting
             deduplicationThreshold: deduplicationThreshold, // Controlled by "Similarity threshold" slider in settings
             keepFramesOnMouseMovement: keepFramesOnMouseMovement,
+            inactiveIntervalCaptureEnabled: inactiveIntervalCaptureEnabled,
+            inactiveCaptureThresholdSeconds: inactiveCaptureThresholdSeconds,
+            inactiveCaptureProbeIntervalSeconds: inactiveCaptureProbeIntervalSeconds,
             maxResolution: .uhd4K,
             excludedAppBundleIDs: excludedBundleIDs,
             excludePrivateWindows: excludePrivateWindows,

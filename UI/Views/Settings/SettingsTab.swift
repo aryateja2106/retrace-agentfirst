@@ -6,6 +6,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
     case capture = "Capture"
     case storage = "Data"
     case context = "Context"
+    case voice = "Voice"
     case privacy = "Privacy"
     case power = "Power"
     case tags = "Tags"
@@ -19,6 +20,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
         case .capture: return "video"
         case .storage: return "externaldrive"
         case .context: return "doc.text.magnifyingglass"
+        case .voice: return "waveform"
         case .privacy: return "lock.shield"
         case .power: return "bolt.fill"
         case .tags: return "tag"
@@ -32,6 +34,7 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
         case .capture: return "Frame rate, resolution, and display options"
         case .storage: return "Retention, rewind, and database locations"
         case .context: return "Agent CLI and local journal summaries"
+        case .voice: return "Dictation, output, and voice command preferences"
         case .privacy: return "Encryption, exclusions, and permissions"
         case .power: return "OCR processing and battery optimization"
         case .tags: return "Manage and delete tags"
@@ -53,6 +56,8 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
             return { view.resetStorageSettings() }
         case .context:
             return { view.resetContextSettings() }
+        case .voice:
+            return { view.resetVoiceSettings() }
         case .privacy:
             return { view.resetPrivacySettings() }
         case .power:
@@ -61,6 +66,35 @@ public enum SettingsTab: String, CaseIterable, Identifiable {
             return { view.resetAdvancedSettings() }
         case .tags:
             return nil
+        }
+    }
+}
+
+enum VoiceToggleMode: String, CaseIterable, Identifiable {
+    case holdToTalk = "Hold to Talk"
+    case toggle = "Toggle"
+
+    var id: String { rawValue }
+
+    var description: String {
+        switch self {
+        case .holdToTalk:
+            return "Listen only while the shortcut is held"
+        case .toggle:
+            return "Start and stop listening with each shortcut press"
+        }
+    }
+}
+
+enum VoiceOutputMode: String, CaseIterable, Identifiable {
+    case clipboard = "Clipboard"
+
+    var id: String { rawValue }
+
+    var description: String {
+        switch self {
+        case .clipboard:
+            return "Place transcribed text on the clipboard"
         }
     }
 }

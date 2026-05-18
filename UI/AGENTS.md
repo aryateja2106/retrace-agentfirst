@@ -2,7 +2,7 @@
 
 You are the **UI** agent responsible for building the SwiftUI interface for Retrace.
 
-**Status**: ✅ Fully implemented with modern SwiftUI design. Timeline, dashboard, search, settings, onboarding, feedback, and bundled crash-recovery helper integration all working. Global hotkeys functional (Cmd+Shift+T for timeline, Cmd+Shift+D for dashboard). Menu bar integration complete. Automatic move-to-Applications prompting has been removed. **Apple Silicon required**. Audio transcription UI not implemented (planned for future release).
+**Status**: ✅ Fully implemented with modern SwiftUI design. Timeline, dashboard, search, settings, onboarding, feedback, voice overlay MVP, and bundled crash-recovery helper integration all working. Global hotkeys functional and editable for timeline, dashboard, recording, comments, system monitor, and voice overlay. Menu bar integration complete. Automatic move-to-Applications prompting has been removed. **Apple Silicon required**. Full audio transcription backend wiring remains planned for a future release.
 
 ## Your Directory
 
@@ -10,12 +10,14 @@ You are the **UI** agent responsible for building the SwiftUI interface for Retr
 UI/
 ├── Assets.xcassets/
 │   ├── AppIcon.appiconset/             # App icon assets
-│   ├── CreatorProfile.imageset/        # Creator profile image shown in onboarding/milestones
 │   ├── InPageURLInstructions.imageset/ # Settings screenshot for Chromium browser in-page URL setup
 │   ├── SafariInPageURLMenu.imageset/   # Safari screenshot: open Develop > Developer Settings
 │   ├── SafariInPageURLToggle.imageset/ # Safari screenshot: enable Allow JavaScript from Apple Events
 │   └── SafariInPageURLAllow.imageset/  # Safari screenshot: confirmation dialog with Allow button
 ├── Views/
+│   ├── Voice/
+│   │   ├── VoiceOverlayView.swift       # Editable floating transcript overlay
+│   │   └── VoiceOverlayWindowController.swift # Floating voice panel, shortcut/menu routing, metrics bridge
 │   ├── Timeline/
 │   │   ├── TimelineView.swift           # Main timeline scrubber
 │   │   ├── TimelineBar.swift            # Horizontal scrollable bar
@@ -73,6 +75,7 @@ UI/
 │           ├── InPageURLVerificationScriptActions.swift
 │           ├── StorageSettingsView.swift
 │           ├── ContextSettingsView.swift
+│           ├── VoiceSettingsView.swift
 │           ├── ExportDataSettingsView.swift
 │           ├── PrivacySettingsView.swift
 │           ├── PrivacyMasterKeyActions.swift
@@ -110,6 +113,8 @@ UI/
 │   ├── RetraceAboutPanel.swift          # Custom About panel content and window factory used by the app menu
 │   └── UIMemoryEstimators.swift         # Shared UI memory-estimation helpers for telemetry
 ├── ViewModels/
+│   ├── Voice/
+│   │   └── VoiceOverlayViewModel.swift  # Editable transcript draft, custom words, clipboard, and history state
 │   ├── SimpleTimelineViewModel.swift    # Fullscreen timeline state, caching, playback, filters, OCR overlays
 │   ├── SearchViewModel.swift
 │   ├── DashboardViewModel.swift
@@ -134,6 +139,7 @@ UI/
 │       ├── TagsSettingsViewModel.swift
 │       └── AdvancedSettingsViewModel.swift
 └── Tests/
+    ├── Voice/                            # Voice overlay view-model tests
     ├── BuildInfoAndUpdaterTests.swift    # Build metadata formatting + updater version fallback tests
     ├── CommentComposerTargetContextTests.swift # Comment-target utilities and quick-comment persisted-preview source coverage
     ├── CrashRecoverySupportTests.swift   # Crash-recovery bundle resolution and registration policy coverage
@@ -411,7 +417,7 @@ struct BoundingBoxOverlay: View {
 │  │ Status: Ready to import                      │  │
 │  └─────────────────────────────────────────────┘  │
 │                                                     │
-│  Made with ♥ by @haseab • x.com/haseab_            │
+│  Retrace Agentfirst                                │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -483,11 +489,6 @@ struct BoundingBoxOverlay: View {
 - Shows frames imported, deduplicated
 - Error handling (show failed videos)
 - "Import Complete" notification
-
-**Support Link**:
-- Small footer: "Made with ♥ by @haseab"
-- Links to: `https://x.com/haseab_`
-- Opens in default browser
 
 ### 5. Settings View
 

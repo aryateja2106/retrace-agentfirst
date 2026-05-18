@@ -67,6 +67,7 @@ UI/BuildMetadata.generated.swift
 /local/
 /CLI-Anything/
 /.omc/
+/.superpowers/
 
 # Markdown files (except key docs)
 *.md

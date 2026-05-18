@@ -120,7 +120,7 @@ XCODE_BUILDINFO_ARGS=(
     "INFOPLIST_KEY_RetraceBuildDate=${BUILD_DATE}"
     "INFOPLIST_KEY_RetraceBuildConfig=release"
     "INFOPLIST_KEY_RetraceIsDevBuild=NO"
-    "INFOPLIST_KEY_RetraceForkName="
+    "INFOPLIST_KEY_RetraceForkName=aryateja2106/retrace-agentfirst"
 )
 
 echo "  Prepared v${VERSION} build ${BUILD_NUMBER} commit ${GIT_COMMIT}"

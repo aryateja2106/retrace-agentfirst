@@ -97,6 +97,7 @@ public enum DailyMetricsQueries {
         case mouseClickCapture = "mouse_click_capture"
         case mouseClickCaptureToggle = "mouse_click_capture_toggle"
         case captureIntervalUpdated = "capture_interval_updated"  // metadata: JSON {seconds, mode, source}
+        case inactiveCaptureUpdated = "inactive_capture_updated"  // metadata: JSON {enabled, thresholdSeconds, probeSeconds, source}
         case videoQualityUpdated = "video_quality_updated"
         case inPageURLPermissionProbe = "in_page_url_permission_probe"
         case inPageURLVerification = "in_page_url_verification"
@@ -131,6 +132,9 @@ public enum DailyMetricsQueries {
         case journalFolderChanged = "journal_folder_changed"  // metadata: JSON {source}
         case journalManualAppend = "journal_manual_append"  // metadata: JSON {source, bytes}
         case journalManualGenerate = "journal_manual_generate"  // metadata: JSON {source, dryRun}
+        case voiceOverlayOpened = "voice_overlay_opened"  // metadata: JSON {source}
+        case voiceTranscriptCopied = "voice_transcript_copied"  // metadata: JSON {source, charCount}
+        case voiceTranscriptCancelled = "voice_transcript_cancelled"  // metadata: JSON {source}
 
         // Delete actions
         case frameDeleted = "frame_deleted"

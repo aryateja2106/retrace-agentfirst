@@ -1174,7 +1174,7 @@ public struct FeedbackFormView: View {
                     .font(.retraceCaptionBold)
                     .foregroundColor(.retracePrimary)
 
-                Text("Download the report as a .json.gz file and email it to support@retrace.to. If you attached an image, Retrace saves it next to the gzipped JSON file.")
+                Text("Download the report as a .json.gz file and attach it to a GitHub issue. If you attached an image, Retrace saves it next to the gzipped JSON file.")
                     .font(.system(size: 10))
                     .foregroundColor(.retraceSecondary.opacity(0.78))
                     .fixedSize(horizontal: false, vertical: true)

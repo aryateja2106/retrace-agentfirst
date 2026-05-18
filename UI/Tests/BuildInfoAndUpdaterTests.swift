@@ -62,18 +62,18 @@ final class BuildInfoFormattingTests: XCTestCase {
 
     func testCommitURLRequiresCommitAndFork() {
         XCTAssertEqual(
-            BuildInfo.makeCommitURL(gitCommitFull: "abcdef1234", forkName: "haseab/retrace")?.absoluteString,
-            "https://github.com/haseab/retrace/commit/abcdef1234"
+            BuildInfo.makeCommitURL(gitCommitFull: "abcdef1234", forkName: "aryateja2106/retrace-agentfirst")?.absoluteString,
+            "https://github.com/aryateja2106/retrace-agentfirst/commit/abcdef1234"
         )
         XCTAssertEqual(
-            BuildInfo.makeCommitURL(gitCommitFull: "abcdef1234", forkName: "git@github.com:haseab/retrace")?.absoluteString,
-            "https://github.com/haseab/retrace/commit/abcdef1234"
+            BuildInfo.makeCommitURL(gitCommitFull: "abcdef1234", forkName: "git@github.com:aryateja2106/retrace-agentfirst")?.absoluteString,
+            "https://github.com/aryateja2106/retrace-agentfirst/commit/abcdef1234"
         )
         XCTAssertEqual(
-            BuildInfo.makeCommitURL(gitCommitFull: "abcdef1234", forkName: "https://github.com/haseab/retrace.git")?.absoluteString,
-            "https://github.com/haseab/retrace/commit/abcdef1234"
+            BuildInfo.makeCommitURL(gitCommitFull: "abcdef1234", forkName: "https://github.com/aryateja2106/retrace-agentfirst.git")?.absoluteString,
+            "https://github.com/aryateja2106/retrace-agentfirst/commit/abcdef1234"
         )
-        XCTAssertNil(BuildInfo.makeCommitURL(gitCommitFull: "unknown", forkName: "haseab/retrace"))
+        XCTAssertNil(BuildInfo.makeCommitURL(gitCommitFull: "unknown", forkName: "aryateja2106/retrace-agentfirst"))
         XCTAssertNil(BuildInfo.makeCommitURL(gitCommitFull: "abcdef1234", forkName: ""))
     }
 }

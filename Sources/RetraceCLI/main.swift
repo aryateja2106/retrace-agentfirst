@@ -207,14 +207,24 @@ private struct Command {
             throw CLIError("unknown ollama command. Try retrace-cli ollama status --json", exitCode: 64)
         }
         let options = Options(Array(args.dropFirst()))
-        let baseURL = URL(string: options.string("base-url", defaultValue: "http://localhost:11434"))!
-        let model = options.string("model", defaultValue: "gemma4:e2b")
+        guard let baseURL = DailyJournalConfiguration.validOllamaBaseURL(
+            options.string("base-url", defaultValue: DailyJournalConfiguration.defaultOllamaBaseURLString)
+        ) else {
+            throw CLIError("invalid --base-url", exitCode: 64)
+        }
+        let model = options.string("model", defaultValue: DailyJournalConfiguration.defaultOllamaModel)
         let status = try await OllamaClient(baseURL: baseURL).status(model: model)
         if options.flag("json") || args.contains("--json") {
             try printJSON(status)
         } else {
             print("reachable: \(status.isReachable)")
             print("model-installed: \(status.isModelInstalled)")
+            if let recommendedModel = status.recommendedModel, recommendedModel != model {
+                print("recommended-model: \(recommendedModel)")
+            }
+            if !status.isModelInstalled {
+                print("install: \(status.pullCommand)")
+            }
             print("models: \(status.installedModels.joined(separator: ", "))")
         }
     }
@@ -265,8 +275,12 @@ private struct Command {
         if options.flag("dry-run") {
             summary = prompt
         } else {
-            let baseURL = URL(string: options.string("base-url", defaultValue: "http://localhost:11434"))!
-            let model = options.string("model", defaultValue: "gemma4:e2b")
+            guard let baseURL = DailyJournalConfiguration.validOllamaBaseURL(
+                options.string("base-url", defaultValue: DailyJournalConfiguration.defaultOllamaBaseURLString)
+            ) else {
+                throw CLIError("invalid --base-url", exitCode: 64)
+            }
+            let model = options.string("model", defaultValue: DailyJournalConfiguration.defaultOllamaModel)
             summary = try await OllamaClient(baseURL: baseURL).summarize(prompt: prompt, model: model)
         }
 
@@ -370,7 +384,7 @@ private struct Command {
       journal generate --from ISO8601 --to ISO8601 --dry-run --json
       recording status [--json]
       storage inspect [--json]
-      ollama status [--model gemma4:e2b] [--json]
+      ollama status [--model \(DailyJournalConfiguration.defaultOllamaModel)] [--json]
 
     Privacy:
       No localhost API or MCP server is started. Read commands use a read-only SQLite connection.

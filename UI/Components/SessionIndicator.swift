@@ -212,7 +212,7 @@ struct SessionIndicator_Previews: PreviewProvider {
                     startDate: Date().addingTimeInterval(-3600),
                     endDate: Date().addingTimeInterval(-1800),
                     windowName: "GitHub - retrace/main",
-                    browserUrl: "https://github.com/haseab/retrace"
+                    browserUrl: "https://github.com/aryateja2106/retrace-agentfirst"
                 ),
                 width: 150,
                 isSelected: false

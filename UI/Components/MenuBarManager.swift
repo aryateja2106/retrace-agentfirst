@@ -39,6 +39,7 @@ public class MenuBarManager: ObservableObject {
     private var recordingShortcut: ShortcutConfig = .defaultRecording
     private var systemMonitorShortcut: ShortcutConfig = .defaultSystemMonitor
     private var commentShortcut: ShortcutConfig = .defaultCommentCapture
+    private var voiceShortcut: ShortcutConfig = .defaultVoiceOverlay
 
     /// Timer for icon fill animation
     private var iconAnimationTimer: Timer?
@@ -254,8 +255,9 @@ public class MenuBarManager: ObservableObject {
         recordingShortcut = await onboardingManager.recordingShortcut
         systemMonitorShortcut = await onboardingManager.systemMonitorShortcut
         commentShortcut = await onboardingManager.commentShortcut
+        voiceShortcut = await onboardingManager.voiceShortcut
         Log.info(
-            "[MenuBarManager] Loaded shortcuts - Timeline: \(timelineShortcut.displayString), Dashboard: \(dashboardShortcut.displayString), Recording: \(recordingShortcut.displayString), Monitor: \(systemMonitorShortcut.displayString), Comment: \(commentShortcut.displayString)",
+            "[MenuBarManager] Loaded shortcuts - Timeline: \(timelineShortcut.displayString), Dashboard: \(dashboardShortcut.displayString), Recording: \(recordingShortcut.displayString), Monitor: \(systemMonitorShortcut.displayString), Comment: \(commentShortcut.displayString), Voice: \(voiceShortcut.displayString)",
             category: .ui
         )
     }
@@ -285,6 +287,7 @@ public class MenuBarManager: ObservableObject {
     private func configureWindowControllers() {
         TimelineWindowController.shared.configure(coordinator: coordinator)
         StandaloneCommentComposerWindowController.shared.configure(coordinator: coordinator)
+        VoiceOverlayWindowController.shared.configure(coordinator: coordinator)
     }
 
     /// Setup notifications for timeline open/close
@@ -419,6 +422,16 @@ public class MenuBarManager: ObservableObject {
                 self?.openCommentComposerFromHotkey()
             }
         }
+
+        // Register voice overlay global hotkey (skip if cleared)
+        if !voiceShortcut.key.isEmpty {
+            HotkeyManager.shared.registerHotkey(
+                key: voiceShortcut.key,
+                modifiers: voiceShortcut.modifiers.nsModifiers
+            ) { [weak self] in
+                self?.toggleVoiceOverlayFromHotkey()
+            }
+        }
     }
 
     /// Toggle the fullscreen timeline overlay
@@ -462,6 +475,16 @@ public class MenuBarManager: ObservableObject {
             StandaloneCommentComposerWindowController.shared.openCommentComposerAtCurrentMoment(
                 source: source
             )
+        }
+    }
+
+    private func toggleVoiceOverlayFromHotkey() {
+        Task { @MainActor in
+            DashboardViewModel.recordKeyboardShortcut(
+                coordinator: coordinator,
+                shortcut: keyboardShortcutMetricIdentifier(for: voiceShortcut)
+            )
+            VoiceOverlayWindowController.shared.toggle(source: "global_hotkey_voice")
         }
     }
 
@@ -1169,6 +1192,17 @@ public class MenuBarManager: ObservableObject {
         monitorItem.image = NSImage(systemSymbolName: primaryActions.monitor.imageSystemName, accessibilityDescription: nil)
         menu.addItem(monitorItem)
 
+        let voiceItem = NSMenuItem(
+            title: "Voice Overlay",
+            action: #selector(openVoiceOverlayFromMenu),
+            keyEquivalent: voiceShortcut.key.isEmpty ? "" : voiceShortcut.menuKeyEquivalent
+        )
+        if !voiceShortcut.key.isEmpty {
+            voiceItem.keyEquivalentModifierMask = voiceShortcut.modifiers.nsModifiers
+        }
+        voiceItem.image = NSImage(systemSymbolName: "waveform", accessibilityDescription: nil)
+        menu.addItem(voiceItem)
+
         menu.addItem(NSMenuItem.separator())
 
         // Recording controls
@@ -1459,6 +1493,12 @@ public class MenuBarManager: ObservableObject {
     @objc private func openSystemMonitor() {
         Task { @MainActor in
             LaunchMenuRouting.showSystemMonitor()
+        }
+    }
+
+    @objc private func openVoiceOverlayFromMenu() {
+        Task { @MainActor in
+            VoiceOverlayWindowController.shared.show(source: "menu_bar_menu")
         }
     }
 
@@ -1799,6 +1839,7 @@ extension Notification.Name {
     static let openSettingsPowerOCRCard = Notification.Name("openSettingsPowerOCRCard")
     static let openSettingsPowerOCRPriority = Notification.Name("openSettingsPowerOCRPriority")
     static let openSettingsTimelineScrollOrientation = Notification.Name("openSettingsTimelineScrollOrientation")
+    static let openSettingsVoice = Notification.Name("openSettingsVoice")
     static let openFeedback = Notification.Name("openFeedback")
     static let openSystemMonitor = Notification.Name("openSystemMonitor")
     static let toggleSystemMonitor = Notification.Name("toggleSystemMonitor")

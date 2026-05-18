@@ -713,6 +713,73 @@ final class CaptureTriggerSchedulingTests: XCTestCase {
         XCTAssertEqual(finalCollectedFrameCount, 2)
     }
 
+    func testInactiveIntervalCaptureUsesProbeIntervalUntilScreenChanges() async throws {
+        let duplicate = makeFrame(displayID: 18, pixelValue: 10)
+        let changedFrame = makeFrame(displayID: 18, pixelValue: 80)
+        let backend = FakeScreenCaptureBackend(
+            frames: [
+                duplicate,
+                duplicate,
+                duplicate,
+                changedFrame,
+                makeFrame(displayID: 18, pixelValue: 100)
+            ]
+        )
+        let displayMonitor = FakeDisplayMonitor(activeDisplayID: 18, hasPermission: true)
+        let displaySwitchMonitor = FakeDisplaySwitchMonitor()
+        let mouseClickMonitor = FakeMouseClickMonitor(startResult: true)
+        let collector = FrameCollector()
+        let manager = makeManager(
+            backend: backend,
+            displayMonitor: displayMonitor,
+            displaySwitchMonitor: displaySwitchMonitor,
+            mouseClickMonitor: mouseClickMonitor,
+            schedulingConfiguration: CaptureSchedulingConfiguration(
+                minimumInterCaptureInterval: 0.005,
+                mouseClickSettleDelay: 0.005,
+                windowChangeSettleDelay: 0.005,
+                startWithImmediateIntervalCapture: true
+            )
+        )
+
+        try await manager.startCapture(
+            config: testConfig(
+                captureIntervalSeconds: 0.03,
+                inactiveIntervalCaptureEnabled: true,
+                inactiveCaptureThresholdSeconds: 0.04,
+                inactiveCaptureProbeIntervalSeconds: 0.20
+            )
+        )
+        let stream = await manager.frameStream
+        let streamTask = collectFrames(from: stream, into: collector)
+        defer {
+            streamTask.cancel()
+            Task { try? await manager.stopCapture() }
+        }
+
+        try await sleep(milliseconds: 90)
+        let captureCountDuringInactiveProbeWindow = await backend.captureCount()
+        let collectedDuringInactiveProbeWindow = await collector.count()
+        XCTAssertEqual(captureCountDuringInactiveProbeWindow, 3)
+        XCTAssertEqual(collectedDuringInactiveProbeWindow, 1)
+
+        try await sleep(milliseconds: 75)
+        let captureCountBeforeProbeFires = await backend.captureCount()
+        XCTAssertEqual(captureCountBeforeProbeFires, 3)
+
+        try await sleep(milliseconds: 130)
+        let captureCountAfterScreenChangeProbe = await backend.captureCount()
+        let collectedAfterScreenChangeProbe = await collector.count()
+        XCTAssertEqual(captureCountAfterScreenChangeProbe, 4)
+        XCTAssertEqual(collectedAfterScreenChangeProbe, 2)
+
+        try await sleep(milliseconds: 45)
+        let finalCaptureCount = await backend.captureCount()
+        let finalCollectedFrameCount = await collector.count()
+        XCTAssertGreaterThanOrEqual(finalCaptureCount, 5)
+        XCTAssertGreaterThanOrEqual(finalCollectedFrameCount, 3)
+    }
+
     private func makeManager(
         backend: FakeScreenCaptureBackend,
         displayMonitor: FakeDisplayMonitor,
@@ -747,13 +814,19 @@ final class CaptureTriggerSchedulingTests: XCTestCase {
     private func testConfig(
         captureIntervalSeconds: Double = 1.0,
         captureOnWindowChange: Bool = true,
-        captureOnMouseClick: Bool = true
+        captureOnMouseClick: Bool = true,
+        inactiveIntervalCaptureEnabled: Bool = false,
+        inactiveCaptureThresholdSeconds: Double = 300,
+        inactiveCaptureProbeIntervalSeconds: Double = 30
     ) -> CaptureConfig {
         CaptureConfig(
             captureIntervalSeconds: captureIntervalSeconds,
             adaptiveCaptureEnabled: true,
             deduplicationThreshold: CaptureConfig.defaultDeduplicationThreshold,
             keepFramesOnMouseMovement: false,
+            inactiveIntervalCaptureEnabled: inactiveIntervalCaptureEnabled,
+            inactiveCaptureThresholdSeconds: inactiveCaptureThresholdSeconds,
+            inactiveCaptureProbeIntervalSeconds: inactiveCaptureProbeIntervalSeconds,
             maxResolution: .hd1080,
             excludedAppBundleIDs: [],
             excludePrivateWindows: false,

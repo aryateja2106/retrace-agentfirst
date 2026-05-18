@@ -28,7 +28,7 @@ public final class FeedbackService: @unchecked Sendable {
     static let diagnosticsLogLimit = 1_000
     static let submissionDiagnosticsLogLimit = 10_000
     static let groupedFeedbackLogLimitPerFamily = 2_000
-    static let feedbackEndpoint = URL(string: "https://retrace.to/api/feedback")!
+    static let feedbackEndpoint = URL(string: "https://github.com/aryateja2106/retrace-agentfirst/issues/new/choose")!
 
     private init() {}
 

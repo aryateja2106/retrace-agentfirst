@@ -170,6 +170,61 @@ extension SettingsView {
                         payload: ["enabled": enabled]
                     )
                 }
+
+                Divider()
+                    .background(Color.white.opacity(0.1))
+
+                ModernToggleRow(
+                    title: "Pause interval capture when inactive",
+                    subtitle: "After the screen stays unchanged, slow interval screenshots to lightweight probes. Window changes and clicks still capture immediately.",
+                    isOn: $inactiveIntervalCaptureEnabled
+                )
+                .onChange(of: inactiveIntervalCaptureEnabled) { _ in
+                    updateInactiveCaptureSettings()
+                }
+
+                if inactiveIntervalCaptureEnabled {
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack {
+                            Text("Inactive after")
+                                .font(.retraceCalloutMedium)
+                                .foregroundColor(.retracePrimary)
+                            Spacer()
+                            Text(InactiveCaptureThresholdPicker.intervalLabel(inactiveCaptureThresholdSeconds))
+                                .font(.retraceCalloutBold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.retraceAccent.opacity(0.3))
+                                .cornerRadius(8)
+                        }
+
+                        InactiveCaptureThresholdPicker(selectedSeconds: $inactiveCaptureThresholdSeconds)
+                            .onChange(of: inactiveCaptureThresholdSeconds) { _ in
+                                updateInactiveCaptureSettings()
+                            }
+
+                        HStack {
+                            Text("Probe every")
+                                .font(.retraceCalloutMedium)
+                                .foregroundColor(.retracePrimary)
+                            Spacer()
+                            Text(InactiveCaptureProbeIntervalPicker.intervalLabel(inactiveCaptureProbeIntervalSeconds))
+                                .font(.retraceCalloutBold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.retraceAccent.opacity(0.3))
+                                .cornerRadius(8)
+                        }
+
+                        InactiveCaptureProbeIntervalPicker(selectedSeconds: $inactiveCaptureProbeIntervalSeconds)
+                            .onChange(of: inactiveCaptureProbeIntervalSeconds) { _ in
+                                updateInactiveCaptureSettings()
+                            }
+                    }
+                    .padding(.top, 2)
+                }
             }
         }
     }

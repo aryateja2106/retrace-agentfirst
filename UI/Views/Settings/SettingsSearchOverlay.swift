@@ -28,6 +28,10 @@ extension SettingsView {
         case "storage.databaseLocations": databaseLocationsCard
         case "storage.retentionPolicy": retentionPolicyCard
         case "exportData.comingSoon": comingSoonCard
+        case "voice.activation": voiceActivationCard
+        case "voice.output": voiceOutputCard
+        case "voice.customWords": voiceVocabularyCard
+        case "voice.modelLifecycle": voiceModelCard
         case "privacy.excludedApps": appLevelRedactionCard
         case "privacy.frameRedaction": windowLevelRedactionCard
         case "privacy.phraseRedaction": phraseLevelRedactionCard

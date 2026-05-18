@@ -66,22 +66,22 @@ final class FeedbackSubmissionProgressTests: XCTestCase {
         let presentation = FeedbackCompletionState.submitted.presentation
 
         XCTAssertEqual(presentation.title, "Feedback Sent!")
-        XCTAssertEqual(presentation.detail, "Thanks for helping improve Retrace.")
-        XCTAssertEqual(presentation.callToActionTitle, "Need a faster response?")
-        XCTAssertEqual(presentation.linkTitle, "Chat with me on retrace.to")
-        XCTAssertEqual(presentation.linkURL, URL(string: "https://retrace.to/chat"))
-        XCTAssertEqual(presentation.linkSymbolName, "message.fill")
+        XCTAssertEqual(presentation.detail, "Thanks for helping improve Retrace Agentfirst.")
+        XCTAssertEqual(presentation.callToActionTitle, "Need to add more context?")
+        XCTAssertEqual(presentation.linkTitle, "Open an issue on GitHub")
+        XCTAssertEqual(presentation.linkURL, URL(string: "https://github.com/aryateja2106/retrace-agentfirst/issues/new/choose"))
+        XCTAssertEqual(presentation.linkSymbolName, "exclamationmark.bubble.fill")
     }
 
     func testExportedCompletionUsesDirectChatSuccessPresentation() {
         let presentation = FeedbackCompletionState.exported.presentation
 
         XCTAssertEqual(presentation.title, "Download Complete")
-        XCTAssertTrue(presentation.detail.contains("email, Discord, or live chat"))
+        XCTAssertTrue(presentation.detail.contains("Attach it to a GitHub issue"))
         XCTAssertEqual(presentation.callToActionTitle, "Next Steps:")
-        XCTAssertEqual(presentation.linkTitle, "Choose a Channel to Send")
-        XCTAssertEqual(presentation.linkURL, URL(string: "https://retrace.to/chat"))
-        XCTAssertEqual(presentation.linkSymbolName, "message.fill")
+        XCTAssertEqual(presentation.linkTitle, "Create a GitHub Issue")
+        XCTAssertEqual(presentation.linkURL, URL(string: "https://github.com/aryateja2106/retrace-agentfirst/issues/new/choose"))
+        XCTAssertEqual(presentation.linkSymbolName, "exclamationmark.bubble.fill")
     }
 
     @MainActor

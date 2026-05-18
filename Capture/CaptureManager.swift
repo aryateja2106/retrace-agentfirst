@@ -177,6 +177,7 @@ public actor CaptureManager: CaptureProtocol {
 
     private var currentConfig: CaptureConfig
     private var lastKeptFrame: CapturedFrame?
+    private var lastKeptFrameObservedAt: Date?
     private var lastKeptMousePosition: CGPoint?
     private var _isCapturing = false
 
@@ -317,6 +318,7 @@ public actor CaptureManager: CaptureProtocol {
         _frameStream = nil
 
         lastKeptFrame = nil
+        lastKeptFrameObservedAt = nil
         lastKeptMousePosition = nil
         lastAcceptedWindowChangeSignature = nil
         updateCaptureMemoryLedger(currentFrameBytes: 0)
@@ -398,6 +400,7 @@ public actor CaptureManager: CaptureProtocol {
         deferredDisplaySyncTask?.cancel()
         deferredDisplaySyncTask = nil
         lastKeptFrame = nil
+        lastKeptFrameObservedAt = nil
         lastKeptMousePosition = nil
         lastAcceptedWindowChangeSignature = nil
         updateCaptureMemoryLedger(currentFrameBytes: 0)
@@ -736,11 +739,30 @@ public actor CaptureManager: CaptureProtocol {
 
         let capture = PendingCapture(
             trigger: .interval,
-            fireTime: referenceTime.addingTimeInterval(currentConfig.captureIntervalSeconds),
+            fireTime: referenceTime.addingTimeInterval(intervalCaptureDelay(from: referenceTime)),
             windowChangeEvent: nil,
             windowChangeSignature: nil
         )
         enqueueCapture(capture, bypassRefractoryDrop: true)
+    }
+
+    private func intervalCaptureDelay(from referenceTime: Date) -> TimeInterval {
+        let normalInterval = currentConfig.captureIntervalSeconds
+        guard currentConfig.inactiveIntervalCaptureEnabled else {
+            return normalInterval
+        }
+        guard currentConfig.inactiveCaptureThresholdSeconds > 0,
+              currentConfig.inactiveCaptureProbeIntervalSeconds > normalInterval,
+              let lastKeptFrameObservedAt else {
+            return normalInterval
+        }
+
+        let quietSeconds = referenceTime.timeIntervalSince(lastKeptFrameObservedAt)
+        guard quietSeconds >= currentConfig.inactiveCaptureThresholdSeconds else {
+            return normalInterval
+        }
+
+        return currentConfig.inactiveCaptureProbeIntervalSeconds
     }
 
     private func waitForExpectedAppMatch(
@@ -869,6 +891,7 @@ public actor CaptureManager: CaptureProtocol {
 
             if shouldKeep {
                 lastKeptFrame = frame
+                lastKeptFrameObservedAt = now()
                 lastKeptMousePosition = currentMousePosition
                 let enrichedFrame = await enrichFrameMetadata(frame, trigger: trigger)
                 dedupedFrameContinuation?.yield(enrichedFrame)
@@ -933,6 +956,7 @@ public actor CaptureManager: CaptureProtocol {
                 lastFrameTime: enrichedFrame.timestamp
             )
             lastKeptFrame = frame
+            lastKeptFrameObservedAt = now()
             lastKeptMousePosition = currentMousePosition
 
             if trigger == .mouseClick {

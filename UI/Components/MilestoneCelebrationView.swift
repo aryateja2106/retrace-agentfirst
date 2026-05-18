@@ -211,11 +211,11 @@ struct MilestoneCelebrationView: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Haseab")
+                Text("Arya Teja")
                     .font(.retraceHeadline)
                     .foregroundColor(.retracePrimary)
 
-                Text("Creator of Retrace")
+                Text("Building Retrace Agentfirst from SF")
                     .font(.retraceCaption)
                     .foregroundColor(.retraceSecondary)
             }
@@ -281,35 +281,10 @@ struct MilestoneCelebrationView: View {
                 .buttonStyle(.plain)
                 .padding(24)
             case .maybeLaterAndSupport:
-                HStack(spacing: 16) {
-                    // Dismiss button
-                    Button(action: onMaybeLater) {
-                        Text("Maybe Later")
-                            .font(.retraceCalloutMedium)
-                            .foregroundColor(.retraceSecondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Color.retraceSecondaryBackground)
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.retraceBorder, lineWidth: 1)
-                            )
-                    }
-                    .buttonStyle(.plain)
-
-                    // Support button
-                    Button(action: {
-                        onSupport()
-                        onDismiss()
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "heart.fill")
-                                .foregroundColor(.white)
-                            Text("Support Retrace")
-                                .font(.retraceCalloutMedium)
-                                .foregroundColor(.white)
-                        }
+                Button(action: onDismiss) {
+                    Text("Continue")
+                        .font(.retraceCalloutMedium)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(
@@ -320,9 +295,8 @@ struct MilestoneCelebrationView: View {
                             )
                         )
                         .cornerRadius(8)
-                    }
-                    .buttonStyle(.plain)
                 }
+                .buttonStyle(.plain)
                 .padding(24)
             }
         }
@@ -440,7 +414,7 @@ struct MilestoneCelebrationView: View {
             .fill(Color.retraceAccent.opacity(0.3))
             .frame(width: 40, height: 40)
             .overlay(
-                Text("H")
+                Text("A")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.retraceAccent)
             )
@@ -448,90 +422,17 @@ struct MilestoneCelebrationView: View {
 
     private func ensureCreatorProfileImageLoaded(reason: String) {
         guard creatorProfileImage == nil else { return }
-        creatorProfileImage = resolveCreatorProfileImage(logContext: "[MilestoneCelebrationView] \(reason)")
+        Log.debug("[MilestoneCelebrationView] \(reason) using Agentfirst profile placeholder", category: .ui)
     }
 
-    private func resolveCreatorProfileImage(logContext: String) -> NSImage? {
-        let imageName = NSImage.Name("CreatorProfile")
-
-        if let image = NSImage(named: imageName) {
-            Log.info("\(logContext) Loaded CreatorProfile via NSImage(named:)", category: .ui)
-            return image
-        }
-
-        if let image = Bundle.main.image(forResource: imageName) {
-            Log.info("\(logContext) Loaded CreatorProfile via Bundle.main.image(forResource:)", category: .ui)
-            return image
-        }
-
-#if SWIFT_PACKAGE
-        if let image = Bundle.module.image(forResource: imageName) {
-            Log.info("\(logContext) Loaded CreatorProfile via Bundle.module.image(forResource:)", category: .ui)
-            return image
-        }
-#endif
-
-        let fileManager = FileManager.default
-        let resourcePath = Bundle.main.resourcePath ?? ""
-        let bundleCandidates: [(label: String, path: String)] = [
-            ("bundle/CreatorProfile.png", "\(resourcePath)/CreatorProfile.png"),
-            ("bundle/haseab.png", "\(resourcePath)/haseab.png"),
-            ("bundle/Assets.xcassets/CreatorProfile.imageset/haseab.png", "\(resourcePath)/Assets.xcassets/CreatorProfile.imageset/haseab.png")
-        ]
-
-        for candidate in bundleCandidates where fileManager.fileExists(atPath: candidate.path) {
-            if let image = NSImage(contentsOfFile: candidate.path) {
-                Log.warning("\(logContext) Loaded creator profile via file fallback \(candidate.label)", category: .ui)
-                return image
-            }
-        }
-
-#if SWIFT_PACKAGE
-        let moduleResourcePath = Bundle.module.resourcePath ?? ""
-        let moduleCandidates: [(label: String, path: String)] = [
-            ("module/CreatorProfile.png", "\(moduleResourcePath)/CreatorProfile.png"),
-            ("module/haseab.png", "\(moduleResourcePath)/haseab.png"),
-            ("module/Assets.xcassets/CreatorProfile.imageset/haseab.png", "\(moduleResourcePath)/Assets.xcassets/CreatorProfile.imageset/haseab.png")
-        ]
-        for candidate in moduleCandidates where fileManager.fileExists(atPath: candidate.path) {
-            if let image = NSImage(contentsOfFile: candidate.path) {
-                Log.warning("\(logContext) Loaded creator profile via SwiftPM module file fallback \(candidate.label)", category: .ui)
-                return image
-            }
-        }
-#endif
-
-        let debugWorkingTreePath = "\(fileManager.currentDirectoryPath)/UI/Assets.xcassets/CreatorProfile.imageset/haseab.png"
-        if fileManager.fileExists(atPath: debugWorkingTreePath),
-           let image = NSImage(contentsOfFile: debugWorkingTreePath) {
-            Log.warning("\(logContext) Loaded creator profile via working-tree fallback path", category: .ui)
-            return image
-        }
-
-        let bundleID = Bundle.main.bundleIdentifier ?? "nil"
-        let bundlePath = Bundle.main.bundlePath
-        let hasAssetsCar = fileManager.fileExists(atPath: "\(resourcePath)/Assets.car")
-        let candidateSummary = bundleCandidates
-            .map { "\($0.label)=\(fileManager.fileExists(atPath: $0.path) ? "exists" : "missing")" }
-            .joined(separator: ",")
-
-        Log.error(
-            "\(logContext) CreatorProfile missing. bundleID=\(bundleID), bundlePath=\(bundlePath), hasAssetsCar=\(hasAssetsCar), fileCandidates=\(candidateSummary)",
-            category: .ui
-        )
-        return nil
-    }
 }
 
 struct DiscordFollowupView: View {
     let onJoin: () -> Void
     let onMaybeLater: () -> Void
 
-    @StateObject private var statsModel = DiscordInviteStatsModel()
-    private let refreshTimer = Timer.publish(every: 45, on: .main, in: .common).autoconnect()
-
-    private let discordPurple = Color(red: 88/255, green: 101/255, blue: 242/255)
-    private let discordDeepPurple = Color(red: 64/255, green: 78/255, blue: 237/255)
+    private let accentStart = Color(red: 53/255, green: 93/255, blue: 77/255)
+    private let accentEnd = Color(red: 44/255, green: 72/255, blue: 112/255)
     private let cardBackground = Color(red: 16/255, green: 20/255, blue: 36/255)
 
     var body: some View {
@@ -554,20 +455,12 @@ struct DiscordFollowupView: View {
                 )
         )
         .shadow(color: .black.opacity(0.45), radius: 24, x: 0, y: 12)
-        .task {
-            await statsModel.refresh()
-        }
-        .onReceive(refreshTimer) { _ in
-            Task {
-                await statsModel.refresh()
-            }
-        }
     }
 
     private var heroSection: some View {
         ZStack {
             LinearGradient(
-                colors: [discordPurple, discordDeepPurple],
+                colors: [accentStart, accentEnd],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -584,15 +477,20 @@ struct DiscordFollowupView: View {
 
             VStack(spacing: 10) {
                 HStack(spacing: 10) {
-                    DiscordBrandMark(size: 56)
+                    Image(systemName: "exclamationmark.bubble.fill")
+                        .font(.system(size: 25, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 56, height: 56)
+                        .background(Color.white.opacity(0.16))
+                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
                     RetraceBrandMark(size: 56)
                 }
 
-                Text("Join the Retrace Discord")
+                Text("Open Retrace Agentfirst on GitHub")
                     .font(.retraceTitle3)
                     .foregroundColor(.white)
 
-                Text("All the power users are hanging out here!")
+                Text("Track issues, shape features, and keep the fork moving in the open.")
                     .font(.retraceCaption)
                     .foregroundColor(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
@@ -623,37 +521,26 @@ struct DiscordFollowupView: View {
 
             Button(action: onJoin) {
                 HStack(spacing: 8) {
-                    DiscordBrandMark(size: 18, showsBackground: false)
-                    Text("Join Discord")
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 13, weight: .bold))
+                    Text("Open GitHub")
                         .font(.retraceCalloutMedium)
                         .foregroundColor(.white)
-
-                    if let onlineLabel = onlineShortLabel {
-                        Text("• \(onlineLabel)")
-                            .font(.retraceCaptionMedium)
-                            .foregroundColor(.white.opacity(0.9))
-                            .monospacedDigit()
-                    }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
                 .background(
                     LinearGradient(
-                        colors: [discordPurple, discordDeepPurple],
+                        colors: [accentStart, accentEnd],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
                 )
                 .cornerRadius(9)
-                .shadow(color: discordPurple.opacity(0.45), radius: 14, x: 0, y: 8)
+                .shadow(color: accentEnd.opacity(0.45), radius: 14, x: 0, y: 8)
             }
             .buttonStyle(.plain)
         }
-    }
-
-    private var onlineShortLabel: String? {
-        guard let stats = statsModel.stats else { return nil }
-        return "\(stats.onlineCount.formatted(.number.grouping(.automatic))) online"
     }
 }
 
@@ -792,8 +679,8 @@ private final class DiscordInviteStatsModel: ObservableObject {
     private var inviteCode: String?
     private var isRefreshing = false
 
-    private static let shortInviteURL = URL(string: "https://retrace.to/l/retrace-discord")!
-    private static let fallbackInviteCode = "retrace-discord"
+    private static let shortInviteURL = URL(string: "https://github.com/aryateja2106/retrace-agentfirst/discussions")!
+    private static let fallbackInviteCode = "retrace-agentfirst"
 
     func refresh() async {
         guard !isRefreshing else { return }

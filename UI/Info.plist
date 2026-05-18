@@ -50,6 +50,10 @@
     <key>NSScreenCaptureUsageDescription</key>
     <string>Retrace needs screen recording permission to capture your screen history. All data stays local and encrypted on your Mac.</string>
 
+    <!-- Privacy - Microphone Usage Description -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Retrace needs microphone permission only when you start local voice dictation. Audio stays on your Mac unless you explicitly export it.</string>
+
     <!-- Privacy - Accessibility Usage Description -->
     <key>NSAppleEventsUsageDescription</key>
     <string>Retrace needs Automation permission to extract the browser url. If you're getting this notice, you're likely using an application that doesn't support url extraction via accessibility APIs, so URL Extraction needs to be done via Apple Script. All data stays local and encrypted on your Mac.</string>
@@ -76,7 +80,7 @@
     <!-- Sparkle Auto-Update Configuration -->
     <!-- IMPORTANT: Replace SUFeedURL with your actual appcast URL before release -->
     <key>SUFeedURL</key>
-    <string>https://retrace.to/appcast.xml</string>
+    <string>https://raw.githubusercontent.com/aryateja2106/retrace-agentfirst/main/appcast.xml</string>
 
     <!-- Enable automatic update checks -->
     <key>SUEnableAutomaticChecks</key>

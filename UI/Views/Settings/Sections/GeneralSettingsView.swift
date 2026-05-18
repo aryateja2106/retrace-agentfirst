@@ -32,7 +32,7 @@ extension SettingsView {
                     kind: .timeline,
                     shortcut: $timelineShortcut,
                     isRecording: $isRecordingTimelineShortcut,
-                    otherShortcuts: [dashboardShortcut, recordingShortcut, systemMonitorShortcut, commentShortcut]
+                    otherShortcuts: [dashboardShortcut, recordingShortcut, systemMonitorShortcut, commentShortcut, voiceShortcut]
                 )
 
                 Divider()
@@ -43,7 +43,7 @@ extension SettingsView {
                     kind: .dashboard,
                     shortcut: $dashboardShortcut,
                     isRecording: $isRecordingDashboardShortcut,
-                    otherShortcuts: [timelineShortcut, recordingShortcut, systemMonitorShortcut, commentShortcut]
+                    otherShortcuts: [timelineShortcut, recordingShortcut, systemMonitorShortcut, commentShortcut, voiceShortcut]
                 )
 
                 Divider()
@@ -54,7 +54,7 @@ extension SettingsView {
                     kind: .recording,
                     shortcut: $recordingShortcut,
                     isRecording: $isRecordingRecordingShortcut,
-                    otherShortcuts: [timelineShortcut, dashboardShortcut, systemMonitorShortcut, commentShortcut]
+                    otherShortcuts: [timelineShortcut, dashboardShortcut, systemMonitorShortcut, commentShortcut, voiceShortcut]
                 )
 
                 Divider()
@@ -65,7 +65,7 @@ extension SettingsView {
                     kind: .systemMonitor,
                     shortcut: $systemMonitorShortcut,
                     isRecording: $isRecordingSystemMonitorShortcut,
-                    otherShortcuts: [timelineShortcut, dashboardShortcut, recordingShortcut, commentShortcut]
+                    otherShortcuts: [timelineShortcut, dashboardShortcut, recordingShortcut, commentShortcut, voiceShortcut]
                 )
 
                 Divider()
@@ -76,7 +76,18 @@ extension SettingsView {
                     kind: .comment,
                     shortcut: $commentShortcut,
                     isRecording: $isRecordingCommentShortcut,
-                    otherShortcuts: [timelineShortcut, dashboardShortcut, recordingShortcut, systemMonitorShortcut]
+                    otherShortcuts: [timelineShortcut, dashboardShortcut, recordingShortcut, systemMonitorShortcut, voiceShortcut]
+                )
+
+                Divider()
+                    .background(Color.retraceBorder)
+
+                settingsShortcutRecorderRow(
+                    label: "Voice Overlay",
+                    kind: .voice,
+                    shortcut: $voiceShortcut,
+                    isRecording: $isRecordingVoiceShortcut,
+                    otherShortcuts: [timelineShortcut, dashboardShortcut, recordingShortcut, systemMonitorShortcut, commentShortcut]
                 )
 
                 if let error = shortcutError {
@@ -95,12 +106,13 @@ extension SettingsView {
         .contentShape(Rectangle())
         .onTapGesture {
             // Cancel recording if user clicks outside
-            if isRecordingTimelineShortcut || isRecordingDashboardShortcut || isRecordingRecordingShortcut || isRecordingSystemMonitorShortcut || isRecordingCommentShortcut {
+            if isRecordingTimelineShortcut || isRecordingDashboardShortcut || isRecordingRecordingShortcut || isRecordingSystemMonitorShortcut || isRecordingCommentShortcut || isRecordingVoiceShortcut {
                 isRecordingTimelineShortcut = false
                 isRecordingDashboardShortcut = false
                 isRecordingRecordingShortcut = false
                 isRecordingSystemMonitorShortcut = false
                 isRecordingCommentShortcut = false
+                isRecordingVoiceShortcut = false
                 recordingTimeoutTask?.cancel()
             }
         }
@@ -132,10 +144,12 @@ extension SettingsView {
                     }
                     .font(.retraceCalloutMedium)
                     .foregroundColor(.retracePrimary)
+                    .textSelection(.enabled)
                     if BuildInfo.isDevBuild && BuildInfo.buildDate != "unknown" {
                         Text("Built \(BuildInfo.buildDate)")
                             .font(.retraceCaption2)
                             .foregroundColor(.retraceSecondary.opacity(0.7))
+                            .textSelection(.enabled)
                     }
                 }
                 Spacer()
@@ -570,6 +584,7 @@ extension SettingsView {
                 isRecordingRecordingShortcut = false
                 isRecordingSystemMonitorShortcut = false
                 isRecordingCommentShortcut = false
+                isRecordingVoiceShortcut = false
                 shortcutError = nil
                 recordingTimeoutTask?.cancel()
 
@@ -700,18 +715,21 @@ extension SettingsView {
         let recording = await onboardingManager.recordingShortcut
         let systemMonitor = await onboardingManager.systemMonitorShortcut
         let comment = await onboardingManager.commentShortcut
+        let voice = await onboardingManager.voiceShortcut
 
         let timelineValue = SettingsShortcutKey(from: timeline)
         let dashboardValue = SettingsShortcutKey(from: dashboard)
         let recordingValue = SettingsShortcutKey(from: recording)
         let systemMonitorValue = SettingsShortcutKey(from: systemMonitor)
         let commentValue = SettingsShortcutKey(from: comment)
+        let voiceValue = SettingsShortcutKey(from: voice)
 
         timelineShortcut = timelineValue
         dashboardShortcut = dashboardValue
         recordingShortcut = recordingValue
         systemMonitorShortcut = systemMonitorValue
         commentShortcut = commentValue
+        voiceShortcut = voiceValue
     }
 
     func saveShortcut(_ kind: ManagedShortcutKind) async {
@@ -726,6 +744,8 @@ extension SettingsView {
             await onboardingManager.setSystemMonitorShortcut(systemMonitorShortcut.toConfig)
         case .comment:
             await onboardingManager.setCommentShortcut(commentShortcut.toConfig)
+        case .voice:
+            await onboardingManager.setVoiceShortcut(voiceShortcut.toConfig)
         }
 
         recordShortcutDefaultStateMetric(for: kind)
@@ -738,6 +758,7 @@ extension SettingsView {
         await onboardingManager.setRecordingShortcut(recordingShortcut.toConfig)
         await onboardingManager.setSystemMonitorShortcut(systemMonitorShortcut.toConfig)
         await onboardingManager.setCommentShortcut(commentShortcut.toConfig)
+        await onboardingManager.setVoiceShortcut(voiceShortcut.toConfig)
         MenuBarManager.shared?.reloadShortcuts()
     }
 

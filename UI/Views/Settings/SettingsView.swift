@@ -18,6 +18,7 @@ public struct SettingsView: View {
         case recording
         case systemMonitor
         case comment
+        case voice
     }
 
     struct StorageEstimateRange: Equatable {
@@ -80,6 +81,8 @@ public struct SettingsView: View {
     @State var isRecordingSystemMonitorShortcut = false
     @State var commentShortcut = SettingsShortcutKey(from: .defaultCommentCapture)
     @State var isRecordingCommentShortcut = false
+    @State var voiceShortcut = SettingsShortcutKey(from: .defaultVoiceOverlay)
+    @State var isRecordingVoiceShortcut = false
     @State var shortcutError: String? = nil
     @State var recordingTimeoutTask: Task<Void, Never>? = nil
 
@@ -94,6 +97,9 @@ public struct SettingsView: View {
     @AppStorage("deleteDuplicateFrames", store: settingsStore) var deleteDuplicateFrames: Bool = SettingsDefaults.deleteDuplicateFrames
     @AppStorage("deduplicationThreshold", store: settingsStore) var deduplicationThreshold: Double = SettingsDefaults.deduplicationThreshold
     @AppStorage("keepFramesOnMouseMovement", store: settingsStore) var keepFramesOnMouseMovement = SettingsDefaults.keepFramesOnMouseMovement
+    @AppStorage("inactiveIntervalCaptureEnabled", store: settingsStore) var inactiveIntervalCaptureEnabled = SettingsDefaults.inactiveIntervalCaptureEnabled
+    @AppStorage("inactiveCaptureThresholdSeconds", store: settingsStore) var inactiveCaptureThresholdSeconds = SettingsDefaults.inactiveCaptureThresholdSeconds
+    @AppStorage("inactiveCaptureProbeIntervalSeconds", store: settingsStore) var inactiveCaptureProbeIntervalSeconds = SettingsDefaults.inactiveCaptureProbeIntervalSeconds
     @AppStorage("captureOnWindowChange", store: settingsStore) var captureOnWindowChange: Bool = SettingsDefaults.captureOnWindowChange
     @AppStorage("captureOnMouseClick", store: settingsStore) var captureOnMouseClick: Bool = SettingsDefaults.captureOnMouseClick
     @AppStorage("collectInPageURLsExperimental", store: settingsStore) var collectInPageURLsExperimental: Bool = SettingsDefaults.collectInPageURLsExperimental
@@ -149,6 +155,18 @@ public struct SettingsView: View {
     @State var isCheckingOllama = false
     @State var journalStatusMessage: String?
     @State var journalStatusIsError = false
+    @State var dailyJournalInstalledModels: [String] = []
+    @State var dailyJournalRecommendedModel: String?
+    @State var dailyJournalPullCommand: String?
+
+    // MARK: Voice Settings
+    @AppStorage("voiceEnabled", store: settingsStore) var voiceEnabled = SettingsDefaults.voiceEnabled
+    @AppStorage("voiceToggleMode", store: settingsStore) var voiceToggleMode: VoiceToggleMode = SettingsDefaults.voiceToggleMode
+    @AppStorage("voiceOutputMode", store: settingsStore) var voiceOutputMode: VoiceOutputMode = SettingsDefaults.voiceOutputMode
+    @AppStorage("voiceShowFloatingOverlay", store: settingsStore) var voiceShowFloatingOverlay = SettingsDefaults.voiceShowFloatingOverlay
+    @AppStorage("voiceCustomWordsRaw", store: settingsStore) var voiceCustomWordsRaw = SettingsDefaults.voiceCustomWordsRaw
+    @AppStorage("voiceHistoryLimit", store: settingsStore) var voiceHistoryLimit = SettingsDefaults.voiceHistoryLimit
+    @AppStorage("voiceUnloadModelAfterIdle", store: settingsStore) var voiceUnloadModelAfterIdle = SettingsDefaults.voiceUnloadModelAfterIdle
 
     // Track the Retrace DB path the app was launched with (to know if restart is needed)
     @State var launchedWithRetraceDBPath: String?
@@ -534,6 +552,10 @@ public struct SettingsView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .openSettingsTags)) { _ in
                 shellViewModel.selectedTab = .tags
+                shellViewModel.pendingScrollTargetID = nil
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openSettingsVoice)) { _ in
+                shellViewModel.selectedTab = .voice
                 shellViewModel.pendingScrollTargetID = nil
             }
             .onReceive(NotificationCenter.default.publisher(for: .openSettingsPauseReminderInterval)) { _ in

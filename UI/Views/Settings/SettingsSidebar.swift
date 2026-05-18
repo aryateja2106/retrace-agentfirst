@@ -187,6 +187,8 @@ extension SettingsView {
                             storageSettings
                         case .context:
                             contextSettings
+                        case .voice:
+                            voiceSettings
                         case .privacy:
                             privacySettings
                         case .power:

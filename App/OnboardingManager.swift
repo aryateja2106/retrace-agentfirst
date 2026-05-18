@@ -20,6 +20,7 @@ public actor OnboardingManager {
     private static let recordingShortcutKey = "recordingShortcutConfig"
     private static let systemMonitorShortcutKey = "systemMonitorShortcutConfig"
     private static let commentShortcutKey = "commentShortcutConfig"
+    private static let voiceShortcutKey = "voiceShortcutConfig"
     private static let hasRewindDataKey = "hasRewindData"
     private static let rewindMigrationCompletedKey = "rewindMigrationCompleted"
 
@@ -91,6 +92,14 @@ public actor OnboardingManager {
         Self.loadShortcutConfig(
             forKey: Self.commentShortcutKey,
             fallback: .defaultCommentCapture
+        )
+    }
+
+    /// Voice overlay shortcut configuration (key + modifiers)
+    public var voiceShortcut: ShortcutConfig {
+        Self.loadShortcutConfig(
+            forKey: Self.voiceShortcutKey,
+            fallback: .defaultVoiceOverlay
         )
     }
 
@@ -182,6 +191,14 @@ public actor OnboardingManager {
         }
     }
 
+    /// Set voice overlay shortcut (full config with key + modifiers)
+    public func setVoiceShortcut(_ config: ShortcutConfig) {
+        if let data = try? JSONEncoder().encode(config) {
+            settingsDefaults.set(data, forKey: Self.voiceShortcutKey)
+            Log.info("Voice shortcut set to: \(config.displayString)", category: .app)
+        }
+    }
+
     // MARK: - Rewind Data
 
     public func setHasRewindData(_ hasData: Bool) {
@@ -206,6 +223,7 @@ public actor OnboardingManager {
         settingsDefaults.removeObject(forKey: Self.recordingShortcutKey)
         settingsDefaults.removeObject(forKey: Self.systemMonitorShortcutKey)
         settingsDefaults.removeObject(forKey: Self.commentShortcutKey)
+        settingsDefaults.removeObject(forKey: Self.voiceShortcutKey)
         settingsDefaults.removeObject(forKey: Self.hasRewindDataKey)
         settingsDefaults.removeObject(forKey: Self.rewindMigrationCompletedKey)
         Log.info("Onboarding state reset", category: .app)

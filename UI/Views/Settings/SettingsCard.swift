@@ -635,6 +635,76 @@ struct CaptureIntervalPicker: View {
     }
 }
 
+struct InactiveCaptureThresholdPicker: View {
+    @Binding var selectedSeconds: Double
+    static let intervals: [Double] = [60, 300, 600, 900, 1800]
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(Self.intervals, id: \.self) { interval in
+                Text(Self.intervalLabel(interval))
+                    .font(selectedSeconds == interval ? .retraceCalloutBold : .retraceCalloutMedium)
+                    .foregroundColor(selectedSeconds == interval ? .retracePrimary : .retraceSecondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(selectedSeconds == interval ? Color.white.opacity(0.1) : Color.clear)
+                    )
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedSeconds = interval
+                    }
+            }
+        }
+        .padding(4)
+        .background(Color.retraceControlFill)
+        .cornerRadius(10)
+    }
+
+    static func intervalLabel(_ seconds: Double) -> String {
+        if seconds < 60 {
+            return "\(Int(seconds))s"
+        }
+        return "\(Int(seconds / 60))m"
+    }
+}
+
+struct InactiveCaptureProbeIntervalPicker: View {
+    @Binding var selectedSeconds: Double
+    static let intervals: [Double] = [15, 30, 60, 120, 300]
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(Self.intervals, id: \.self) { interval in
+                Text(Self.intervalLabel(interval))
+                    .font(selectedSeconds == interval ? .retraceCalloutBold : .retraceCalloutMedium)
+                    .foregroundColor(selectedSeconds == interval ? .retracePrimary : .retraceSecondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(selectedSeconds == interval ? Color.white.opacity(0.1) : Color.clear)
+                    )
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedSeconds = interval
+                    }
+            }
+        }
+        .padding(4)
+        .background(Color.retraceControlFill)
+        .cornerRadius(10)
+    }
+
+    static func intervalLabel(_ seconds: Double) -> String {
+        if seconds < 60 {
+            return "\(Int(seconds))s"
+        }
+        return "\(Int(seconds / 60))m"
+    }
+}
+
 struct PauseReminderDelayPicker: View {
     @Binding var selectedMinutes: Double
 

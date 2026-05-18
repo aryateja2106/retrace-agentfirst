@@ -98,6 +98,12 @@ public struct ShortcutConfig: Codable, Sendable, Equatable {
         key: "C",
         modifiers: [.command, .shift]
     )
+
+    /// Default voice overlay shortcut: Cmd+Option+\
+    public static let defaultVoiceOverlay = ShortcutConfig(
+        key: "\\",
+        modifiers: [.command, .option]
+    )
 }
 
 // MARK: - Capture Configuration
@@ -122,6 +128,16 @@ public struct CaptureConfig: Codable, Sendable {
     /// Keep frames (do not deduplicate) when the mouse pointer moved between captures.
     /// Useful when cursor movement should remain visible in timeline playback.
     public let keepFramesOnMouseMovement: Bool
+
+    /// Whether interval capture should slow down after the screen has been unchanged.
+    /// Event-driven capture still runs immediately for window changes and mouse clicks.
+    public let inactiveIntervalCaptureEnabled: Bool
+
+    /// Seconds without a kept frame before interval capture switches to the inactive probe interval.
+    public let inactiveCaptureThresholdSeconds: Double
+
+    /// Probe interval while the screen appears inactive. A changed probe frame resumes normal interval capture.
+    public let inactiveCaptureProbeIntervalSeconds: Double
 
     /// Maximum resolution to capture (will downscale if screen is larger)
     public let maxResolution: Resolution
@@ -166,6 +182,9 @@ public struct CaptureConfig: Codable, Sendable {
         adaptiveCaptureEnabled: Bool = true,
         deduplicationThreshold: Double = CaptureConfig.defaultDeduplicationThreshold,
         keepFramesOnMouseMovement: Bool = true,
+        inactiveIntervalCaptureEnabled: Bool = true,
+        inactiveCaptureThresholdSeconds: Double = 300.0,
+        inactiveCaptureProbeIntervalSeconds: Double = 30.0,
         maxResolution: Resolution = .uhd4K,
         excludedAppBundleIDs: Set<String> = [],
         excludePrivateWindows: Bool = true,
@@ -181,6 +200,9 @@ public struct CaptureConfig: Codable, Sendable {
         self.adaptiveCaptureEnabled = adaptiveCaptureEnabled
         self.deduplicationThreshold = deduplicationThreshold
         self.keepFramesOnMouseMovement = keepFramesOnMouseMovement
+        self.inactiveIntervalCaptureEnabled = inactiveIntervalCaptureEnabled
+        self.inactiveCaptureThresholdSeconds = inactiveCaptureThresholdSeconds
+        self.inactiveCaptureProbeIntervalSeconds = inactiveCaptureProbeIntervalSeconds
         self.maxResolution = maxResolution
         self.excludedAppBundleIDs = excludedAppBundleIDs
         self.excludePrivateWindows = excludePrivateWindows
@@ -198,6 +220,9 @@ public struct CaptureConfig: Codable, Sendable {
         adaptiveCaptureEnabled: Bool? = nil,
         deduplicationThreshold: Double? = nil,
         keepFramesOnMouseMovement: Bool? = nil,
+        inactiveIntervalCaptureEnabled: Bool? = nil,
+        inactiveCaptureThresholdSeconds: Double? = nil,
+        inactiveCaptureProbeIntervalSeconds: Double? = nil,
         maxResolution: Resolution? = nil,
         excludedAppBundleIDs: Set<String>? = nil,
         excludePrivateWindows: Bool? = nil,
@@ -214,6 +239,9 @@ public struct CaptureConfig: Codable, Sendable {
             adaptiveCaptureEnabled: adaptiveCaptureEnabled ?? self.adaptiveCaptureEnabled,
             deduplicationThreshold: deduplicationThreshold ?? self.deduplicationThreshold,
             keepFramesOnMouseMovement: keepFramesOnMouseMovement ?? self.keepFramesOnMouseMovement,
+            inactiveIntervalCaptureEnabled: inactiveIntervalCaptureEnabled ?? self.inactiveIntervalCaptureEnabled,
+            inactiveCaptureThresholdSeconds: inactiveCaptureThresholdSeconds ?? self.inactiveCaptureThresholdSeconds,
+            inactiveCaptureProbeIntervalSeconds: inactiveCaptureProbeIntervalSeconds ?? self.inactiveCaptureProbeIntervalSeconds,
             maxResolution: maxResolution ?? self.maxResolution,
             excludedAppBundleIDs: excludedAppBundleIDs ?? self.excludedAppBundleIDs,
             excludePrivateWindows: excludePrivateWindows ?? self.excludePrivateWindows,

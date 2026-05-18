@@ -70,6 +70,9 @@ enum SettingsDefaults {
     static let deleteDuplicateFrames = true
     static let deduplicationThreshold: Double = CaptureConfig.defaultDeduplicationThreshold
     static let keepFramesOnMouseMovement = true
+    static let inactiveIntervalCaptureEnabled = true
+    static let inactiveCaptureThresholdSeconds: Double = 300
+    static let inactiveCaptureProbeIntervalSeconds: Double = 30
     static let captureOnWindowChange = true
     static let captureOnMouseClick = false
     static let collectInPageURLsExperimental = false
@@ -81,9 +84,23 @@ enum SettingsDefaults {
 
     static let dailyJournalEnabled = false
     static let dailyJournalFolderPath = DailyJournalConfiguration.defaultJournalFolderPath()
-    static let dailyJournalOllamaBaseURL = "http://localhost:11434"
-    static let dailyJournalOllamaModel = "gemma4:e2b"
+    static let dailyJournalOllamaBaseURL = DailyJournalConfiguration.defaultOllamaBaseURLString
+    static let dailyJournalOllamaModel = DailyJournalConfiguration.defaultOllamaModel
     static let dailyJournalCadenceSeconds: Double = 3_600
+
+    static let voiceEnabled = false
+    static let voiceToggleMode: VoiceToggleMode = .holdToTalk
+    static let voiceOutputMode: VoiceOutputMode = .clipboard
+    static let voiceShowFloatingOverlay = true
+    static let voiceCustomWordsRaw = """
+cloud AI => Claude AI
+research AI => LeSearch AI
+Le search AI => LeSearch AI
+Le Scout => LeScout
+are ya => Arya
+"""
+    static let voiceHistoryLimit: Int = 25
+    static let voiceUnloadModelAfterIdle = true
 
     static let excludedApps = ""
     static let excludePrivateWindows = false

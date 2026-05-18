@@ -112,9 +112,29 @@ GIT_COMMIT_FULL=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
 GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
 
-# Detect fork name from the origin remote (e.g. "aculich/retrace")
-REMOTE_URL=$(git remote get-url origin 2>/dev/null || true)
-FORK_NAME=$(printf "%s" "$REMOTE_URL" | sed -E 's#^(git@github\.com:|ssh://git@github\.com/|https://github\.com/)##; s#\.git$##')
+normalize_github_repo() {
+    printf "%s" "$1" | sed -E 's#^(git@github\.com:|ssh://git@github\.com/|https://github\.com/)##; s#\.git$##'
+}
+
+detect_fork_name() {
+    if [ -n "${RETRACE_FORK_NAME:-}" ]; then
+        normalize_github_repo "$RETRACE_FORK_NAME"
+        return
+    fi
+
+    local remote_url
+    for remote_name in agentfirst origin; do
+        remote_url=$(git remote get-url "$remote_name" 2>/dev/null || true)
+        if [ -n "$remote_url" ]; then
+            normalize_github_repo "$remote_url"
+            return
+        fi
+    done
+
+    printf "%s" "aryateja2106/retrace-agentfirst"
+}
+
+FORK_NAME=$(detect_fork_name)
 
 echo "🔨 Building $APP_NAME..."
 ./scripts/check_no_nanoseconds_sleep.sh

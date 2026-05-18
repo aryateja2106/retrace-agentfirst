@@ -36,6 +36,8 @@ It should help Arya inspect real work over time: focused human interaction, back
 - Settings: capture, storage, privacy, context/journals, power, tags, advanced tools.
 - CLI: bounded local context, journal, recording, storage, and Ollama commands.
 - Journals: markdown summaries generated from already persisted OCR context.
+- Voice: initial local dictation surface with editable overlay and settings; transcription backend integration is the next step when absent.
+- Obsidian/local notes: markdown-folder-first output that can be opened by Obsidian or any local editor, with CLI as an optional helper.
 - Feedback: local diagnostic export and optional submission.
 
 ## Human Time And Agent Time
@@ -60,6 +62,7 @@ Preferred integration layers:
 - `retrace://` deeplinks for UI navigation.
 - Raycast or native launcher scripts as thin wrappers over CLI/deeplinks.
 - Markdown journals and folders for portable output.
+- Obsidian-compatible folders as plain markdown destinations, not a required plugin or database integration.
 - Local model calls through explicit settings and dry-run paths.
 
 Avoid broad hidden APIs until repeated workflows prove they need them.
@@ -98,6 +101,12 @@ Avoid broad hidden APIs until repeated workflows prove they need them.
 - Improve project-level search and summaries.
 - Connect journals, comments, tags, app sessions, and screenshots into a resumable work narrative.
 - Keep exports portable as markdown and local files.
+
+### 6. Voice MVP
+
+- Start with local dictation UI: editable overlay, settings, and privacy boundaries.
+- Wire the actual transcription backend only after the surface and local-model configuration are explicit.
+- Keep generated voice notes portable as markdown when persisted.
 
 ## Regression Policy
 

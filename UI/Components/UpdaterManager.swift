@@ -328,7 +328,7 @@ public final class UpdaterManager: NSObject, ObservableObject {
            let feedURL = URL(string: configuredFeed) {
             return feedURL
         }
-        return URL(string: "https://retrace.to/appcast.xml")
+        return URL(string: "https://raw.githubusercontent.com/aryateja2106/retrace-agentfirst/main/appcast.xml")
     }
 
     private func loadCachedChangelogIfAvailable() {
